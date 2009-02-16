@@ -1,0 +1,5 @@
+0,0 skull_top
+1,0
+
+0,1 skull_base1
+1,1 skull_base2
