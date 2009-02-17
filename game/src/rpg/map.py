@@ -194,8 +194,8 @@ class MapTile:
         return None"""
         
     def __str__(self):
-        result = "<MapTile: \
-         [" + str(self.x) + "," + str(self.y) + "] \
+        result = "<MapTile:\
+         [" + str(self.x) + "," + str(self.y) + "]\
          tiles=" + str(len(self.tiles)) + "\
          levels=" + str(self.levels) + "\
          specialLevels=" + str(self.specialLevels) + "\
