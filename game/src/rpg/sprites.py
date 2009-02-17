@@ -294,11 +294,9 @@ class RpgSprites(pygame.sprite.Group):
         pygame.sprite.AbstractGroup.__init__(self)
         self.add(*sprites)
         
-    def zOrder(self, sprite, anotherSprite):
-        return sprite.z - anotherSprite.z
-    
     def sprites(self):
         # return the sprites sorted on their z field to ensure 
         # that they appear in the correct 'z' order
-        return sorted(self.spritedict.keys(), self.zOrder)
+        return sorted(self.spritedict.keys(),
+                      lambda sprite1, sprite2: sprite1.z - sprite2.z)
         

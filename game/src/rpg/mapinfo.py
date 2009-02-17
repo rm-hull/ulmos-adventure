@@ -24,9 +24,7 @@ def getNextMap(currentMapName, boundary, baseRect):
                 # print mapRange
                 testList = [i in mapRange for i in tileRange]
                 # print testList
-                if False in testList:
-                    pass
-                else:
+                if all(testList):
                     return boundaryInfo[mapTuple]
     return MAP_NOT_FOUND
 
