@@ -50,10 +50,10 @@ class PlayState:
         if keyPresses[K_RIGHT]:
             directionBits += RIGHT
         if directionBits > 0:
-            self.viewRect, boundary = self.player.move(directionBits)
+            boundary, self.viewRect = self.player.move(directionBits)
         if boundary > sprites.NO_BOUNDARY:
-            # initiate the change map routine
-            print "BOUNDARY %s" % boundary
+            # we've hit a boundary - change states to swap the map
+            print "boundary %s" % boundary
             return BoundaryState(self.player, self.rpgMap.name, boundary)
         # update
         screen.blit(self.rpgMap.getMapView(self.viewRect), ORIGIN)

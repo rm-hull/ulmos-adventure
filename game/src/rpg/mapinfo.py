@@ -6,7 +6,7 @@ MAP_NOT_FOUND = (None, 0)
 
 mapInfo = {}
 
-mapInfo["demo"] = {UP: {(0, 8): ("skulls", 4)}, 
+mapInfo["demo"] = {UP: {(0, 4): ("demo", 2), (4, 8): ("skulls", 4)}, 
                    DOWN: {(0, 8): ("demo", 0)},
                    LEFT: {(0, 8): ("demo", 0)},
                    RIGHT: {(0, 8): ("demo", 0)}}

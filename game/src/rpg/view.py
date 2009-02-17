@@ -23,25 +23,6 @@ DIRECTIONS = [UP, DOWN, LEFT, RIGHT]
 
 SPRITES_FOLDER = "sprites"
 
-def createMaskTile(originalImage = None):
-    dimensions = (TILE_SIZE, TILE_SIZE)
-    if originalImage == None:
-        return createRectangle(dimensions, TRANSPARENT_COLOUR)
-    else:        
-        # we don't use the normal transparent colour here because we're creating a
-        # transparent mask so we need to preserve the green pixels
-        maskImage = createRectangle(dimensions, RED)
-        maskImage.set_colorkey(RED, RLEACCEL)
-        for px in range(originalImage.get_width()):
-            for py in range(originalImage.get_height()):
-                point = (px, py)
-                # print "(%d, %d) : %s" % (px, py, originalImage.get_at((px, py)))
-                if originalImage.get_at(point) == TRANSPARENT_COLOUR_WITH_ALPHA:
-                    pass
-                else:
-                    maskImage.set_at(point, TRANSPARENT_COLOUR)
-        return maskImage
-            
 def loadScaledImage(imagePath, colourKey = None, scalar=SCALAR):
     img = loadImage(imagePath, colourKey)
     return scale(img, (img.get_width() * scalar, img.get_height() * scalar))
@@ -55,11 +36,8 @@ def createDuplicateSpriteImage(spriteImage):
     img.set_colorkey(TRANSPARENT_COLOUR, RLEACCEL)
     return img
 
-def createBaseRectImage(baseRect):
-    return createRectangle((baseRect.width, baseRect.height), RED)
-
 # process animation frames from the composite image
-def loadAnimationFrames(framesImage, numFrames=4):
+def processMovementFrames(framesImage, numFrames=4):
     # work out width + height
     framesRect = framesImage.get_rect()
     width = framesRect.width // numFrames
@@ -79,7 +57,7 @@ def loadAnimationFrames(framesImage, numFrames=4):
     return animationFrames
 
 # process animation frames from the composite image
-def loadStaticFrames(framesImage, numFrames=4):
+def processStaticFrames(framesImage, numFrames=4):
     framesRect = framesImage.get_rect()
     width = framesRect.width // numFrames
     height = framesRect.height
@@ -93,4 +71,7 @@ def loadStaticFrames(framesImage, numFrames=4):
         animationFrames[0] = frames
         animationFrames[1] = originalFrames
     return animationFrames
+
+def createBaseRectImage(baseRect):
+    return createRectangle((baseRect.width, baseRect.height), RED)
     

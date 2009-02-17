@@ -10,6 +10,17 @@ from view import UP, DOWN, LEFT, RIGHT, OFFSET, SCALAR, TILE_SIZE
 MOVE_UNIT = 1 * SCALAR
 NO_BOUNDARY = 0
 
+# valid movement combinations - movement is keyed on direction bits and is
+# stored as a tuple (px, py, direction) 
+MOVEMENT = {UP: (0, -MOVE_UNIT, UP),
+            DOWN: (0, MOVE_UNIT, DOWN),
+            LEFT: (-MOVE_UNIT, 0, LEFT),
+            RIGHT: (MOVE_UNIT, 0, RIGHT),
+            UP + LEFT: (-MOVE_UNIT, -MOVE_UNIT, UP),
+            UP + RIGHT: (MOVE_UNIT, -MOVE_UNIT, UP),
+            DOWN + LEFT: (-MOVE_UNIT, MOVE_UNIT, DOWN),
+            DOWN + RIGHT: (MOVE_UNIT, MOVE_UNIT, DOWN)}
+
 # we may need to specify these on a sprite by sprite basis 
 BASE_RECT_HEIGHT = 9 * SCALAR
 BASE_RECT_EXTEND = 1 * SCALAR
@@ -19,22 +30,11 @@ SPRITES_FOLDER = "sprites"
 # ====================
 # == MODULE METHODS ==
 # ====================
-        
+
 def getMovement(directionBits):
-    px, py, direction = 0, 0, 0
-    if directionBits & LEFT > 0:
-        direction = LEFT
-        px -= MOVE_UNIT
-    if directionBits & RIGHT > 0:
-        direction = RIGHT
-        px += MOVE_UNIT
-    if directionBits & UP > 0:
-        direction = UP
-        py -= MOVE_UNIT
-    if directionBits & DOWN > 0:
-        direction = DOWN
-        py += MOVE_UNIT
-    return px, py, direction
+    if directionBits in MOVEMENT:
+        return MOVEMENT[directionBits]
+    return None
 
 """
 Sprite that supports movement and being masked by tile images that are 'closer'
@@ -144,26 +144,27 @@ class Player(MaskSprite):
         return self.viewRect
     
     def move(self, directionBits):
-        px, py, direction = getMovement(directionBits)
-        boundary = self.getBoundary(px, py)
-        if boundary > NO_BOUNDARY:
-            # we've hit a boundary
-            return None, boundary
-        # we're within the boundary, but is it valid?
-        valid, level = self.rpgMap.isMoveValid(self.level, self.baseRect.move(px, py))
-        useCurrentView = False
-        if valid:
-            self.applyMovement(level, direction, px, py)
-        else:
-            useCurrentView = True
-            if self.direction != direction:
-                # we need to animate the sprite to show a change in direction
-                # but we set px and py to zero so it doesn't move anywhere
-                self.applyMovement(level, direction, 0, 0)
+        useCurrentView, boundary = True, NO_BOUNDARY
+        movement = getMovement(directionBits)
+        if movement:
+            px, py, direction = movement
+            boundary = self.getBoundary(px, py)
+            if boundary == NO_BOUNDARY:
+                # we're within the boundary, but is it valid?
+                valid, level = self.rpgMap.isMoveValid(self.level,
+                                                       self.baseRect.move(px, py))
+                if valid:
+                    self.applyMovement(level, direction, px, py)
+                    useCurrentView = False
+                else:
+                    if self.direction != direction:
+                        # we need to animate the sprite to show a change in direction
+                        # but we set px and py to zero so it doesn't move anywhere
+                        self.applyMovement(level, direction, 0, 0)
         # return
         if useCurrentView:
-            return self.viewRect, NO_BOUNDARY
-        return self.getViewRect(), NO_BOUNDARY,
+            return boundary, self.viewRect
+        return boundary, self.getViewRect()
     
     def applyMovement(self, level, direction, px, py):
         # change any fields required for animation
@@ -201,17 +202,25 @@ class Player(MaskSprite):
         lastImage.blit(self.animationFrames[self.imageInfo[0] + OFFSET][self.imageInfo[1]], (0, 0))
 
 class Ulmo(Player):
-    def __init__(self, rpgMap):            
-        imagePath = os.path.join(SPRITES_FOLDER, "ulmo-frames.png")
-        framesImage = view.loadScaledImage(imagePath, None, 2)
-        animationFrames = view.loadAnimationFrames(framesImage)
+    
+    framesImage = None
+    
+    def __init__(self, rpgMap):
+        if self.framesImage is None:          
+            imagePath = os.path.join(SPRITES_FOLDER, "ulmo-frames.png")
+            self.framesImage = view.loadScaledImage(imagePath, None, 2)
+        animationFrames = view.processMovementFrames(self.framesImage)
         Player.__init__(self, rpgMap, animationFrames, (1, 4))
         
 class Dude(Player):
+
+    framesImage = None
+    
     def __init__(self, rpgMap):    
-        imagePath = os.path.join(SPRITES_FOLDER, "dude.png")
-        framesImage = view.loadImage(imagePath, None)        
-        animationFrames = view.loadAnimationFrames(framesImage, 3)
+        if self.framesImage is None:          
+            imagePath = os.path.join(SPRITES_FOLDER, "dude.png")
+            self.framesImage = view.loadScaledImage(imagePath, None, 2)
+        animationFrames = view.processMovementFrames(framesImage, 3)
         Player.__init__(self, rpgMap, animationFrames)
 
 """
@@ -262,10 +271,14 @@ class Static(pygame.sprite.Sprite):
             self.remove(spriteGroup)
             
 class Flames(Static):
-    def __init__(self):    
-        imagePath = os.path.join(SPRITES_FOLDER, "flames.png")
-        framesImage = view.loadScaledImage(imagePath, None, 2)        
-        animationFrames = view.loadStaticFrames(framesImage)
+    
+    framesImage = None
+    
+    def __init__(self):
+        if self.framesImage is None:    
+            imagePath = os.path.join(SPRITES_FOLDER, "flames.png")
+            self.framesImage = view.loadScaledImage(imagePath, None, 2)        
+        animationFrames = view.processStaticFrames(self.framesImage)
         Static.__init__(self, animationFrames, (4, 2))
 
 """
