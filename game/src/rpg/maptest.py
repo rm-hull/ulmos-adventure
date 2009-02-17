@@ -2,8 +2,8 @@
 
 import unittest
 import pygame
-import view
 import parser
+import view
 
 from pygame.locals import Rect
 
@@ -200,3 +200,6 @@ class MovementValidTest(unittest.TestCase):
         baseRect = rect.move(0, 64)
         self.assertEqual(1, len(rpgMap.getRectTiles(baseRect)))
         self.assertEqual((False, 3), rpgMap.isMoveValid(3, baseRect))
+
+if __name__ == "__main__":
+    unittest.main()   

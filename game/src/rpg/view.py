@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
-from base.view import *
-
 from pygame.transform import scale
+
+from base import *
 
 SCALAR = 2
 

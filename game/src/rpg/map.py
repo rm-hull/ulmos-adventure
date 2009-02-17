@@ -1,7 +1,8 @@
 #! /usr/bin/env python
 
 from __future__ import with_statement
-from rpg.view import TILE_SIZE
+
+from view import TILE_SIZE
 
 import view
 
@@ -155,7 +156,6 @@ class MapTile:
                 tileImage.blit(image, (0, 0))
             return tileImage
         return self.tiles[0]
-        
     
     def getSpecialLevel(self, level):
         nearestLevel = None
