@@ -61,15 +61,11 @@ def processStaticFrames(framesImage, numFrames=4):
     framesRect = framesImage.get_rect()
     width = framesRect.width // numFrames
     height = framesRect.height
-    # map of image lists for animation
-    animationFrames = {}
-    frames, originalFrames = [], []
+    # map of images for animation
+    animationFrames = []
     for i in range(numFrames):
         img = framesImage.subsurface((i * width, 0), (width, height))
-        originalFrames.append(img)
-        frames.append(createDuplicateSpriteImage(img))
-        animationFrames[0] = frames
-        animationFrames[1] = originalFrames
+        animationFrames.append(createDuplicateSpriteImage(img))
     return animationFrames
 
 def createBaseRectImage(baseRect):

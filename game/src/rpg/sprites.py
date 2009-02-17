@@ -235,10 +235,10 @@ class Static(pygame.sprite.Sprite):
         self.frameSkip = 6
         self.frameCount = 0
         # init animation frames
-        self.numFrames = len(animationFrames[0])
+        self.numFrames = len(animationFrames)
         self.animationFrames = animationFrames     
         # essential sprite fields
-        self.image = animationFrames[0][self.animFrameCount]
+        self.image = animationFrames[self.animFrameCount]
         self.rect = self.image.get_rect()
         # other rectangles as required by the game engine
         self.mapRect = self.image.get_rect()
@@ -259,7 +259,7 @@ class Static(pygame.sprite.Sprite):
             self.frameCount += 1
             if (self.frameCount % self.frameSkip == 0):
                 self.animFrameCount = (self.animFrameCount + 1) % self.numFrames       
-            self.image = self.animationFrames[0][self.animFrameCount]
+            self.image = self.animationFrames[self.animFrameCount]
             # make self.rect relative to the view
             self.rect.topleft = (self.mapRect.left - viewRect.left,
                                  self.mapRect.top - viewRect.top)
