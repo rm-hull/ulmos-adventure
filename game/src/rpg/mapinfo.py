@@ -6,14 +6,12 @@ MAP_NOT_FOUND = (None, 0)
 
 mapInfo = {}
 
-upInfo = {(0, 8): ("skulls", 4)}
-downInfo = {(0, 8): ("demo", 0)}
-leftInfo = {(0, 8): ("demo", 0)}
-rightInfo = {(0, 8): ("demo", 0)}
-mapInfo["demo"] = {UP: upInfo, DOWN: downInfo, LEFT: leftInfo, RIGHT: rightInfo}
+mapInfo["demo"] = {UP: {(0, 8): ("skulls", 4)}, 
+                   DOWN: {(0, 8): ("demo", 0)},
+                   LEFT: {(0, 8): ("demo", 0)},
+                   RIGHT: {(0, 8): ("demo", 0)}}
 
-downInfo = {(4, 12): ("demo", -4)}
-mapInfo["skulls"] = {DOWN: downInfo}
+mapInfo["skulls"] = {DOWN: {(4, 12): ("demo", -4)}}
 
 def getNextMap(currentMapName, boundary, baseRect):
     if currentMapName in mapInfo:
