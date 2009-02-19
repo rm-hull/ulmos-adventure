@@ -17,16 +17,18 @@ def getGameSprites_Skulls():
     gameSprites.add(flames1, flames2, flames3, flames4)
     return gameSprites
 
-def getGameSprites_Islands():
+def getGameSprites_Dungeon():
     gameSprites = pygame.sprite.Group()
-    flames = sprites.Flames()
-    flames.setPosition(5, 8, 2)
-    gameSprites.add(flames)
+    flames1 = sprites.Flames()
+    flames1.setPosition(3, 11, 2)
+    flames2 = sprites.Flames()
+    flames2.setPosition(11, 5, 2)
+    gameSprites.add(flames1, flames2)
     return gameSprites
 
 spriteInfo = {}
 spriteInfo["skulls"] = getGameSprites_Skulls
-spriteInfo["islands"] = getGameSprites_Islands
+spriteInfo["dungeon"] = getGameSprites_Dungeon
 
 def getMapSprites(mapName):
     if mapName in spriteInfo:

@@ -45,15 +45,16 @@ class RpgMap:
         specialLevels = []
         # iterate through base tiles and gather information
         for tile in baseTiles:
-            if level in tile.levels:
-                sameLevelCount += 1
-            elif level in tile.specialLevels:
-                sameLevelCount += 1
-                specialLevels.append(level)                
-            else:
-                specialLevel = tile.getSpecialLevel(level)
-                if specialLevel:
-                    specialLevels.append(specialLevel)
+            if tile:
+                if level in tile.levels:
+                    sameLevelCount += 1
+                elif level in tile.specialLevels:
+                    sameLevelCount += 1
+                    specialLevels.append(level)                
+                else:
+                    specialLevel = tile.getSpecialLevel(level)
+                    if specialLevel:
+                        specialLevels.append(specialLevel)
         # test validity of the requested movement           
         if sameLevelCount == len(baseTiles):
             return True, level
