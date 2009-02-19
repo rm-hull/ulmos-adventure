@@ -19,12 +19,12 @@ screen = pygame.display.set_mode((256, 192))
 
 def startGame():
     # create the map
-    rpgMap = parser.loadRpgMap("demo")
-    # rpgMap = parser.loadRpgMap("islands")
+    # rpgMap = parser.loadRpgMap("demo")
+    rpgMap = parser.loadRpgMap("islands")
     # create the player sprite
     player = sprites.Ulmo(rpgMap)
-    player.setPosition(1, 0, 1)
-    # player.setPosition(13, 5, 2)
+    # player.setPosition(1, 0, 1)
+    player.setPosition(2, 11, 2)
     return PlayState(player, rpgMap)
 
 class PlayState:

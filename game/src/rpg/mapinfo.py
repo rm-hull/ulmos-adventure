@@ -11,7 +11,9 @@ mapInfo["demo"] = {UP: {(0, 4): ("demo", 2), (4, 8): ("dungeon", 0)},
                    LEFT: {(0, 8): ("demo", 0)},
                    RIGHT: {(0, 8): ("demo", 0)}}
 
-mapInfo["dungeon"] = {DOWN: {(0, 8): ("demo", 0)}} 
+mapInfo["islands"] = {UP: {(8, 16): ("dungeon", -7)}} 
+
+mapInfo["dungeon"] = {DOWN: {(0, 8): ("islands", 7)}} 
 
 mapInfo["skulls"] = {DOWN: {(4, 12): ("demo", -4)}}
 
