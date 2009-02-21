@@ -189,16 +189,19 @@ public class RpgMap {
 			    			tileSets.put(tileSetName, tileSet);
 			    		}		    			
 		    		}
-		    		Tile tile = tileConversion.convertTile(tileSet.getTile(tileBits[1]));
-		    		if (tileBits.length > 2) {
-		    			// contains a mask level
-		    			try {
-			    			mapTile.addTile(tile, tileBits[2]);
-		    			}
-		    			catch (NumberFormatException e) { ; }
-		    		}
-		    		else {
-			    		mapTile.addTile(tile);		    			
+		    		Tile tempTile = tileSet.getTile(tileBits[1]);
+		    		if (tempTile != null) {
+			    		Tile tile = tileConversion.convertTile(tempTile);
+			    		if (tileBits.length > 2) {
+			    			// contains a mask level
+			    			try {
+				    			mapTile.addTile(tile, tileBits[2]);
+			    			}
+			    			catch (NumberFormatException e) { ; }
+			    		}
+			    		else {
+				    		mapTile.addTile(tile);		    			
+			    		}		    			
 		    		}
 	    		}
     		}

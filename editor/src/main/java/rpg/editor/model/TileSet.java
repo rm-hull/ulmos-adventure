@@ -203,8 +203,12 @@ public class TileSet {
 	}
 	
 	public Tile getTile(String tileName) {
-		Point tilePoint = namePointMappings.get(tileName);
-		return getTile(tilePoint);
+		if (namePointMappings.containsKey(tileName)) {
+			Point tilePoint = namePointMappings.get(tileName);
+			return getTile(tilePoint);
+		}
+		System.out.println("tile not found: " + name + ":" + tileName);
+		return null;
 	}
 	
 	private Image getTileImage(int x, int y) {
