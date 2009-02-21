@@ -118,7 +118,9 @@ class TileSet:
         self.tiles = tiles
 
     def getTile(self, name):
-        return self.tiles[name]
+        if name in self.tiles:
+            return self.tiles[name]
+        return None
     
 """
 Represents a single tile on an RpgMap.
