@@ -45,7 +45,7 @@ class RpgMap:
     Each tile has 0 or more levels that determine if a sprite can move onto them.
     At its most basic, if the sprite is at level 1 they will be blocked if they
     attempt to move onto a level 2 tile. However, things get more interesting if
-    steps are involved. For examples, consider the following representation of a
+    steps are involved. For example, consider the following representation of a
     two-level map with steps linking the two levels:
     
     [2]  [S2]  [2]  <- level 2
