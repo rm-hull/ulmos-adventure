@@ -44,9 +44,9 @@
 3,4 t3
 4,4 mrs
 5,4 mls
-6,4 al
-7,4 ac
-8,4 ar
+6,4
+7,4
+8,4
 
 0,5 tel
 1,5 ter
@@ -67,4 +67,14 @@
 6,6 light
 7,6 lhl
 8,6 rhl
+
+0,7 al
+1,7 ac
+2,7 ar
+3,7 arrs
+4,7 alls
+5,7 acrs
+6,7 acls
+7,7 acs
+8,7
 

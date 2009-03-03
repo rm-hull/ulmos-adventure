@@ -64,8 +64,7 @@ def createMapTiles(cols, rows, tileData):
                 else:
                     mapTile.addLevel(float(level))
         # tiles images
-        tileIndex = 0
-        for tiles in bits[startIndex:]:
+        for tileIndex, tiles in enumerate(bits[startIndex:]):
             tileBits = tiles.split(COLON)
             if len(tileBits) > 1:
                 tileSetName = tileBits[0]
@@ -85,7 +84,6 @@ def createMapTiles(cols, rows, tileData):
                         mapTile.addMask(tileIndex, int(maskLevel[1:]), False)
                     else:    
                         mapTile.addMask(tileIndex, int(maskLevel))
-                tileIndex += 1
         mapTiles[x][y] = mapTile
     return mapTiles
 

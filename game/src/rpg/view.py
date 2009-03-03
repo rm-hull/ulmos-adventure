@@ -23,7 +23,7 @@ DIRECTIONS = [UP, DOWN, LEFT, RIGHT]
 
 SPRITES_FOLDER = "sprites"
 
-def loadScaledImage(imagePath, colourKey = None, scalar=SCALAR):
+def loadScaledImage(imagePath, colourKey = None, scalar = SCALAR):
     img = loadImage(imagePath, colourKey)
     return scale(img, (img.get_width() * scalar, img.get_height() * scalar))
         
@@ -37,7 +37,7 @@ def createDuplicateSpriteImage(spriteImage):
     return img
 
 # process animation frames from the composite image
-def processMovementFrames(framesImage, numFrames=4):
+def processMovementFrames(framesImage, numFrames = 4):
     # work out width + height
     framesRect = framesImage.get_rect()
     width = framesRect.width // numFrames
@@ -57,7 +57,7 @@ def processMovementFrames(framesImage, numFrames=4):
     return animationFrames
 
 # process animation frames from the composite image
-def processStaticFrames(framesImage, numFrames=4):
+def processStaticFrames(framesImage, numFrames = 4):
     framesRect = framesImage.get_rect()
     width = framesRect.width // numFrames
     height = framesRect.height

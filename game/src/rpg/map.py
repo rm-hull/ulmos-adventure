@@ -39,6 +39,42 @@ class RpgMap:
     def getMapView(self, viewRect):
         return self.mapImage.subsurface(viewRect)
     
+    """
+    The map restricts movement via the following system.
+
+    Each tile has 0 or more levels that determine if a sprite can move onto them.
+    At its most basic, if the sprite is at level 1 they will be blocked if they
+    attempt to move onto a level 2 tile. However, things get more interesting if
+    steps are involved.  Consider the following representation of a two-level map
+    with steps linking the two levels:
+    
+    [2]  [S2]  [2]  <- level 2
+    [X] [S1.5] [X]  <- top of steps + wall on either side
+    [1] [S1.5] [1]  <- bottom of steps + level 1 on either side
+    [1]  [S1]  [1]  <- level 1
+    
+    Note that [X] represents a tile that is inaccessible, [1] and [2] are level 1
+    and 2 tiles and [S*] are 'specials'.  All this information can be viewed/edited
+    using the map editor.
+    
+    Movement is deemed to be valid if one of the following criteria is met - the
+    phrase 'base tiles' is used here to mean all tiles that are touched by the base
+    rect of the sprite:
+    
+    > All base tiles are at the same level as the sprite. Eg. [1] [1] would be ok,
+      [1] [S1] would be ok, [1] [S1.5] would not.
+        
+    > All base tiles are 'specials' and the difference between the min and max
+      level is less than one. In addition, the difference between all tile
+      levels and the sprite level must also be less than one. Eg. [S1] [S1.5]
+      would be ok, [S1.5] [S2] would be ok, [S1] [S2] would not.
+    
+    Note that base tiles can include anything from 1 to 4 tiles - I just used
+    two-tile examples above for the sake of brevity.
+    
+    If movement is valid, the sprite level is made equal to the maximum tile level
+    of the base tiles. This allows the sprite to move between one level and another.
+    """
     def isMoveValid(self, level, baseRect):
         baseTiles = self.getRectTiles(baseRect)
         sameLevelCount = 0
@@ -81,16 +117,6 @@ class RpgMap:
             if tileMasks:
                 masks[(tile.x, tile.y)] = tileMasks
         return masks
-    """def getMasks(self, level, spriteRect):
-        spriteTiles = self.getRectTiles(spriteRect)
-        baseY = (spriteRect.bottom - 1) // view.TILE_SIZE
-        # masks is a map of lists, keyed on the associated tile points
-        masks = {}
-        for tile in spriteTiles:
-            tileMasks = tile.getMasks(level, baseY)
-            if tileMasks is not None:
-                masks[(tile.x, tile.y)] = tileMasks
-        return masks"""
     
     def getRectTiles(self, rect):
         rectTiles = []
@@ -107,7 +133,6 @@ class RpgMap:
     def convertBottomRight(self, px, py):
         return min(self.cols - 1, px // TILE_SIZE), min(self.rows - 1, py // TILE_SIZE)
 
-       
 """
 A repository of named tile images.  Instances of this class are created and used
 whenever a new map is loaded from disk.
@@ -145,8 +170,6 @@ class MapTile:
         
     def addMask(self, tileIndex, level, flat = True):
         self.masks.append(MaskInfo(tileIndex, level, flat, self.y))
-    """def addMask(self, level, tileIndex):
-        self.masks.append((level, tileIndex))"""
         
     def createTileImage(self):
         if len(self.tiles) == 0:
@@ -184,17 +207,6 @@ class MapTile:
         if len(masks) > 0:
             return masks
         return None
-    """def getMasks(self, level, maxY):
-        if len(self.masks) == 0:
-            return None
-        masks = []
-        for mask in self.masks:
-            levelDifference = mask[0] - level
-            if levelDifference > 0 and maxY <= self.y + levelDifference:
-                masks.append(self.tiles[mask[1]])
-        if len(masks) > 0:
-            return masks
-        return None"""
         
     def __str__(self):
         result = "<MapTile:\
