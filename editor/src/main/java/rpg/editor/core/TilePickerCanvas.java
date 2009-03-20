@@ -1,4 +1,4 @@
-package rpg.editor.components;
+package rpg.editor.core;
 
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;

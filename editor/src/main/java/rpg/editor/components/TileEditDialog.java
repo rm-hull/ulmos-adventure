@@ -15,6 +15,11 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 
 import rpg.editor.Constants;
+import rpg.editor.core.DisplayHelper;
+import rpg.editor.core.TileConversion;
+import rpg.editor.core.TileEditor;
+import rpg.editor.core.TileEditorFactory;
+import rpg.editor.core.TileSelectionStub;
 import rpg.editor.model.MapTile;
 import rpg.editor.model.TileSet;
 

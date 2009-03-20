@@ -15,8 +15,8 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.FileDialog;
 
 import rpg.editor.Constants;
-import rpg.editor.components.DisplayHelper;
-import rpg.editor.components.ViewSize;
+import rpg.editor.core.DisplayHelper;
+import rpg.editor.core.ViewSize;
 
 /**
  * Represents a set of tiles, including functionality to load a tile set from disk.

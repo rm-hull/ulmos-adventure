@@ -1,38 +1,30 @@
-package rpg.editor.components;
+package rpg.editor.core;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
 
 import rpg.editor.model.Tile;
-import rpg.editor.model.TileSet;
 
-/**
- * Functional TileSelection stub so that we can run the TilePicker and MapEditor
- * components in isolation. 
- * @author seldred
- */
-public class TileSelectionStub implements TileSelection, TileConversion {
+public class SharedTileSelection implements TileSelection, TileConversion {
 
 	private Tile tile;
 
 	// == SINGLETON ==
 	
-	private static TileSelectionStub instance = new TileSelectionStub();
+	private static SharedTileSelection instance = new SharedTileSelection();
 	
-	private TileSelectionStub() {
-		TileSet tileSet = TileSet.loadTileSet("grass");
-		tile = convertTile(tileSet.getTile("tr2"));
+	private SharedTileSelection() {
 	}
-	
-	public static TileSelectionStub getInstance() {
+
+	public static SharedTileSelection getInstance() {
 		return instance;
 	}
 
 	// ===============
 
 	public void tileSelected(Tile tile) {
-		System.out.println("tile selected: " + tile.getName());
+		this.tile = convertTile(tile);
 	}
 	
 	public Tile convertTile(Tile tile) {
@@ -41,12 +33,15 @@ public class TileSelectionStub implements TileSelection, TileConversion {
 		imageData.transparentPixel = paletteData.getPixel(ImageHelper.TRANSPARENT_COLOUR);
 		return new Tile(tile.getName(), new Image(DisplayHelper.getDisplay(), imageData));		
 	}
-		
+	
 	public Tile getSelectedTile() {
 		return tile;
 	}
 
 	public boolean isTileSelected() {
+		if (tile == null) {
+			return false;
+		}
 		return true;
 	}
 }

@@ -17,11 +17,11 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 
-import rpg.editor.components.DisplayHelper;
 import rpg.editor.components.MapEditor;
 import rpg.editor.components.RecentTiles;
 import rpg.editor.components.TilePicker;
-import rpg.editor.components.WarningDialog;
+import rpg.editor.core.DisplayHelper;
+import rpg.editor.core.WarningDialog;
 import rpg.editor.model.RpgMap;
 import rpg.editor.model.TileSet;
 

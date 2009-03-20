@@ -20,11 +20,11 @@ import org.eclipse.swt.graphics.RGB;
 import org.eclipse.swt.widgets.FileDialog;
 
 import rpg.editor.Constants;
-import rpg.editor.components.DisplayHelper;
-import rpg.editor.components.NewMapDialog;
-import rpg.editor.components.SharedTileSelection;
-import rpg.editor.components.TileConversion;
-import rpg.editor.components.ViewSize;
+import rpg.editor.core.DisplayHelper;
+import rpg.editor.core.NewMapDialog;
+import rpg.editor.core.SharedTileSelection;
+import rpg.editor.core.TileConversion;
+import rpg.editor.core.ViewSize;
 
 /**
  * Represents the map data as required by the game engine, including functionality

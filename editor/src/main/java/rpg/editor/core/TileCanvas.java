@@ -1,4 +1,4 @@
-package rpg.editor.components;
+package rpg.editor.core;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
@@ -21,14 +21,13 @@ public abstract class TileCanvas extends Canvas {
 	
 	protected static final Point NO_SELECTION = new Point(-1, -1);
 	
-	protected ViewSize viewSize = ViewSize.MEDIUM;
-	
     protected Point highlightTile = NO_SELECTION;
     protected Point selectedTile = NO_SELECTION;
 
     protected Point topLeft = new Point(0, 0);
     
-	protected Image tileImage;
+	public ViewSize viewSize = ViewSize.MEDIUM;	
+	public Image tileImage;
 	
 	public TileCanvas(Composite parent) {
 		this(parent, SWT.NONE);

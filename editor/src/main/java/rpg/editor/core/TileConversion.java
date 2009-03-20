@@ -1,4 +1,4 @@
-package rpg.editor.components;
+package rpg.editor.core;
 
 import rpg.editor.model.Tile;
 

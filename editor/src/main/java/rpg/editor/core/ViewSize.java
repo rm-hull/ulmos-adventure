@@ -1,4 +1,4 @@
-package rpg.editor.components;
+package rpg.editor.core;
 
 public enum ViewSize {
 	

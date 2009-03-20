@@ -15,6 +15,10 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
 import rpg.editor.Constants;
+import rpg.editor.core.DisplayHelper;
+import rpg.editor.core.SharedTileSelection;
+import rpg.editor.core.TilePickerCanvas;
+import rpg.editor.core.TileSelection;
 import rpg.editor.model.Tile;
 
 /**
@@ -66,18 +70,9 @@ public class RecentTiles extends Composite implements TileSelection {
 	}
 	
 	public void tileSelected(Tile tile) {
-		// add to the list of tiles
-		tiles.add(tile);
-		if (tiles.size() > MAX_TILES) {
-			// tiles.remove(0).dispose();
-			tiles.remove(0);
-		}
-		tilePickerCanvas.selectedTile = new Point(tiles.size() - 1, 0);
-		// update other components
-		tileSelection.tileSelected(tile);
-		tilePickerCanvas.updateTileImage();	
+		tilePickerCanvas.tileSelected(tile);
 	}
-	
+
 	private class MyTilePickerCanvas extends TilePickerCanvas {
 
 		public MyTilePickerCanvas(Composite parent) {
@@ -121,6 +116,19 @@ public class RecentTiles extends Composite implements TileSelection {
 			canvasHolder.setMinSize(rect.width, rect.height);
 			redraw();
 		}
+		
+		public void tileSelected(Tile tile) {
+			// pass through to tile selection
+			tileSelection.tileSelected(tile);
+			// add to the list of tiles
+			tiles.add(tile);
+			if (tiles.size() > MAX_TILES) {
+				tiles.remove(0);
+			}
+			// update tile image
+			selectedTile = new Point(tiles.size() - 1, 0);
+			updateTileImage();
+		}		
 	}
 
 	public Tile getSelectedTile() {

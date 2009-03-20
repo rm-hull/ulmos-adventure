@@ -25,6 +25,17 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 
 import rpg.editor.Constants;
+import rpg.editor.core.DisplayHelper;
+import rpg.editor.core.ImageHelper;
+import rpg.editor.core.SharedTileSelection;
+import rpg.editor.core.TileCanvas;
+import rpg.editor.core.TileEditor;
+import rpg.editor.core.TileEditorFactory;
+import rpg.editor.core.TileImagesEditor;
+import rpg.editor.core.TileLevelsEditor;
+import rpg.editor.core.TileMasksEditor;
+import rpg.editor.core.TileSelection;
+import rpg.editor.core.TileSelectionStub;
 import rpg.editor.model.MapTile;
 import rpg.editor.model.RpgMap;
 import rpg.editor.model.Tile;

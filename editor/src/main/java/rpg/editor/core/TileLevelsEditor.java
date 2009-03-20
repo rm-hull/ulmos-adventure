@@ -1,4 +1,4 @@
-package rpg.editor.components;
+package rpg.editor.core;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;

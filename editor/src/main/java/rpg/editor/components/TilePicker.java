@@ -17,6 +17,12 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 
 import rpg.editor.Constants;
+import rpg.editor.core.DisplayHelper;
+import rpg.editor.core.ImageHelper;
+import rpg.editor.core.TilePickerCanvas;
+import rpg.editor.core.TileSelection;
+import rpg.editor.core.TileSelectionStub;
+import rpg.editor.core.ViewSize;
 import rpg.editor.model.Tile;
 import rpg.editor.model.TileSet;
 

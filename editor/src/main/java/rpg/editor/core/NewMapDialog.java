@@ -1,6 +1,7 @@
-package rpg.editor.components;
+package rpg.editor.core;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -13,37 +14,58 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Spinner;
 
 import rpg.editor.Constants;
 
-public class WarningDialog extends Dialog {
+public class NewMapDialog extends Dialog {
 	
-	private boolean response = false;
+	private static final int DEFAULT_WIDTH = 16;
+	private static final int DEFAULT_HEIGHT = 16;
 	
-	public WarningDialog(Shell parent, int style) {
+	private Point mapSize;
+	
+	public NewMapDialog(Shell parent, int style) {
 		super(parent, style);
 	}
 	
-	public WarningDialog(Shell parent) {
+	public NewMapDialog(Shell parent) {
 		this(parent, SWT.NONE);
 	}
 	
-	public boolean getResponse(String warning) {
+	public Point getSize() {
+		return getSize(DEFAULT_WIDTH, DEFAULT_HEIGHT);
+	}
+	
+	public Point getSize(int defaultWidth, int defaultHeight) {
 		Shell parent = getParent();
 		final Shell shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
-		shell.setText("Warning");
+		shell.setText("New Map");
 		GridLayout gridLayout = new GridLayout();
 		gridLayout.verticalSpacing = 12;
 		gridLayout.marginWidth = 20;
 		gridLayout.marginTop = 12;
 		shell.setLayout(gridLayout);
 		
-		// messages
-		if (warning != null) {
-			Label label = new Label(shell, SWT.CENTER);
-			label.setText(warning);
-			label.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
-		}
+		// width and height widgets
+		Label label = new Label(shell, SWT.CENTER);
+		label.setText("Enter new map size:");			
+		label.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, false, false));
+		Composite spinnerBox = new Composite(shell, SWT.NONE);
+		spinnerBox.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, false));
+		spinnerBox.setLayout(new GridLayout(2, false));
+		label = new Label(spinnerBox, SWT.CENTER);
+		label.setText("Width:");			
+		final Spinner widthInput = new Spinner(spinnerBox, SWT.NONE);
+		widthInput.setMaximum(64);
+		widthInput.setMinimum(8);
+		widthInput.setSelection(defaultWidth);
+		label = new Label(spinnerBox, SWT.CENTER);
+		label.setText("Height:");			
+		final Spinner heightInput = new Spinner(spinnerBox, SWT.NONE);
+		heightInput.setMaximum(64);
+		heightInput.setMinimum(8);
+		heightInput.setSelection(defaultHeight);
 		
 		// ok + cancel buttons
 		Composite buttonBar = new Composite(shell, SWT.NONE);
@@ -53,7 +75,7 @@ public class WarningDialog extends Dialog {
 		ok.setText(Constants.OK);
 		ok.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
-				response = true;
+				mapSize = new Point(widthInput.getSelection(), heightInput.getSelection());
 				shell.dispose();
 			}
 		});
@@ -80,6 +102,6 @@ public class WarningDialog extends Dialog {
 			if (!display.readAndDispatch()) display.sleep();
 		}
 		
-		return response;
+		return mapSize;
 	}
 }
