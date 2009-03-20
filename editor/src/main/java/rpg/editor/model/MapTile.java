@@ -97,29 +97,6 @@ public class MapTile {
 		tiles = newTiles;
 	}
 
-	/*public void editImages() {
-		if (tiles != null) {
-			TileEditorFactory editorFactory = new TileImagesEditorFactory();
-			TileEditDialog tileEditor = new TileEditDialog(DisplayHelper.getShell(), editorFactory);
-			tileEditor.editTile(this);			
-		}
-	}
-	
-	public void editLevels() {
-		TileEditorFactory editorFactory = new TileLevelsEditorFactory();
-		// need to set width and height on this one or it displays too small
-		TileEditDialog tileEditor = new TileEditDialog(DisplayHelper.getShell(), 240, 320, editorFactory);
-		tileEditor.editTile(this);			
-	}
-	
-	public void editMasks() {
-		if (tiles != null) {
-			TileEditorFactory editorFactory = new TileMasksEditorFactory();
-			TileEditDialog tileEditor = new TileEditDialog(DisplayHelper.getShell(), editorFactory);
-			tileEditor.editTile(this);			
-		}
-	}*/
-	
 	public void dispose() {
 		baseTile.dispose();
 		if (tiles != null) {

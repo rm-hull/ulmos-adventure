@@ -322,22 +322,6 @@ public class RpgMap {
 		updateTileImage(mapTile, tilePoint);    	
     }
     
-    /*public void editImages(Point tilePoint) {
-		MapTile mapTile = getMapTile(tilePoint);
-		mapTile.editImages();
-		updateTileImage(mapTile, tilePoint);
-    }
-    
-    public void editLevels(Point tilePoint) {
-		MapTile mapTile = getMapTile(tilePoint);
-		mapTile.editLevels();
-    }
-    
-    public void editMasks(Point tilePoint) {
-		MapTile mapTile = getMapTile(tilePoint);
-		mapTile.editMasks();    	
-    }*/
-    
 	public void updateTileImage(MapTile mapTile, Point tilePoint) {
 		int x = tilePoint.x * TILE_SIZE;
 		int y = tilePoint.y * TILE_SIZE;
