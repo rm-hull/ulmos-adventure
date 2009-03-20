@@ -59,7 +59,8 @@ public abstract class TileCanvas extends Canvas {
 						gc.drawImage(selected,
 								selectedTile.x * tileSize + topLeft.x,
 								selectedTile.y * tileSize + topLeft.y);
-					}					
+					}
+					gc.dispose();
 				}
 			}
 		});
@@ -67,7 +68,6 @@ public abstract class TileCanvas extends Canvas {
 		// ** mouse move listener **
 		addMouseMoveListener(new MouseMoveListener() {
 			public void mouseMove(MouseEvent e) {
-				try {
 				if (tileImage != null) {
 					Point previousHighlightTile = highlightTile;
 					Rectangle r = tileImage.getBounds();
@@ -76,7 +76,6 @@ public abstract class TileCanvas extends Canvas {
 						int tileX = (e.x - topLeft.x) / viewSize.getTileSize();
 						int tileY = (e.y - topLeft.y) / viewSize.getTileSize();
 						highlightTile = new Point(tileX, tileY);
-						// System.out.println(highlightTile);
 					}
 					else {
 						highlightTile = NO_SELECTION;
@@ -85,9 +84,6 @@ public abstract class TileCanvas extends Canvas {
 						redraw();
 						setLabelText();
 					}					
-				}
-				} catch (Exception ex) {
-					ex.printStackTrace();
 				}
 			}
 		});

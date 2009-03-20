@@ -5,16 +5,8 @@ import java.util.List;
 import java.util.ListIterator;
 
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Composite;
 
 import rpg.editor.Constants;
-import rpg.editor.components.DisplayHelper;
-import rpg.editor.components.TileEditDialog;
-import rpg.editor.components.TileEditor;
-import rpg.editor.components.TileEditorFactory;
-import rpg.editor.components.TileImagesEditor;
-import rpg.editor.components.TileLevelsEditor;
-import rpg.editor.components.TileMasksEditor;
 
 /**
  * Represents a tile in an RpgMap.  The relationship between the tiles is:
@@ -105,17 +97,9 @@ public class MapTile {
 		tiles = newTiles;
 	}
 
-	public void editImages() {
+	/*public void editImages() {
 		if (tiles != null) {
 			TileEditorFactory editorFactory = new TileImagesEditorFactory();
-			TileEditDialog tileEditor = new TileEditDialog(DisplayHelper.getShell(), editorFactory);
-			tileEditor.editTile(this);			
-		}
-	}
-	
-	public void editMasks() {
-		if (tiles != null) {
-			TileEditorFactory editorFactory = new TileMasksEditorFactory();
 			TileEditDialog tileEditor = new TileEditDialog(DisplayHelper.getShell(), editorFactory);
 			tileEditor.editTile(this);			
 		}
@@ -127,6 +111,14 @@ public class MapTile {
 		TileEditDialog tileEditor = new TileEditDialog(DisplayHelper.getShell(), 240, 320, editorFactory);
 		tileEditor.editTile(this);			
 	}
+	
+	public void editMasks() {
+		if (tiles != null) {
+			TileEditorFactory editorFactory = new TileMasksEditorFactory();
+			TileEditDialog tileEditor = new TileEditDialog(DisplayHelper.getShell(), editorFactory);
+			tileEditor.editTile(this);			
+		}
+	}*/
 	
 	public void dispose() {
 		baseTile.dispose();
@@ -204,27 +196,5 @@ public class MapTile {
 		}
 		buffer.append(Constants.CLOSE_SQ_BRACKET);
 		return buffer.toString();
-	}
-	
-	// =======================================
-	// == inner class tile editor factories ==
-	// =======================================
-	
-	public static class TileImagesEditorFactory implements TileEditorFactory {
-		public TileEditor newTileEditor(Composite myParent, MapTile mapTile) {
-			return new TileImagesEditor(myParent, mapTile);
-		}
-	}
-	
-	public static class TileLevelsEditorFactory implements TileEditorFactory {
-		public TileEditor newTileEditor(Composite myParent, MapTile mapTile) {
-			return new TileLevelsEditor(myParent, mapTile);
-		}
-	}
-	
-	public static class TileMasksEditorFactory implements TileEditorFactory {
-		public TileEditor newTileEditor(Composite myParent, MapTile mapTile) {
-			return new TileMasksEditor(myParent, mapTile);
-		}
-	}
+	}	
 }

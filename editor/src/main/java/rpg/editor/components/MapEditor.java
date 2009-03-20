@@ -213,24 +213,33 @@ public class MapEditor extends Composite {
 					setLabelText();
 				}
 			});
+			
 			// separator
 			new MenuItem(menu, SWT.SEPARATOR);
+			
 			// edit options
 			MenuItem editImages = new MenuItem(menu, SWT.PUSH);
 			editImages.setText(EDIT_IMAGES);
 			editImages.addListener(SWT.Selection, new Listener() {
 				public void handleEvent(Event event) {
-					map.editImages(highlightTile);
-					redraw();
+					MapTile mapTile = map.getMapTile(highlightTile);
+					TileEditorFactory editorFactory = new TileImagesEditorFactory();
+					TileEditDialog tileEditor = new TileEditDialog(DisplayHelper.getShell(), editorFactory);
+					tileEditor.editTile(mapTile);
 					setLabelText();
+					// update map image
+					map.updateTileImage(mapTile, highlightTile);
+					redraw();
 				}
 			});
 			MenuItem editLevels = new MenuItem(menu, SWT.PUSH);
 			editLevels.setText(EDIT_LEVELS);
 			editLevels.addListener(SWT.Selection, new Listener() {
 				public void handleEvent(Event event) {
-					map.editLevels(highlightTile);
-					// redraw();
+					MapTile mapTile = map.getMapTile(highlightTile);
+					TileEditorFactory editorFactory = new TileLevelsEditorFactory();
+					TileEditDialog tileEditor = new TileEditDialog(DisplayHelper.getShell(), editorFactory, 240, 320);
+					tileEditor.editTile(mapTile);
 					setLabelText();
 				}
 			});
@@ -238,8 +247,10 @@ public class MapEditor extends Composite {
 			editMasks.setText(EDIT_MASKS);
 			editMasks.addListener(SWT.Selection, new Listener() {
 				public void handleEvent(Event event) {
-					map.editMasks(highlightTile);
-					// redraw();
+					MapTile mapTile = map.getMapTile(highlightTile);
+					TileEditorFactory editorFactory = new TileMasksEditorFactory();
+					TileEditDialog tileEditor = new TileEditDialog(DisplayHelper.getShell(), editorFactory);
+					tileEditor.editTile(mapTile);
 					setLabelText();
 				}
 			});
@@ -282,6 +293,28 @@ public class MapEditor extends Composite {
 	
 	private enum EditMode {
 		ADD, INSERT, NONE;
+	}
+	
+	// =======================================
+	// == inner class tile editor factories ==
+	// =======================================
+	
+	public static class TileImagesEditorFactory implements TileEditorFactory {
+		public TileEditor newTileEditor(Composite myParent, MapTile mapTile) {
+			return new TileImagesEditor(myParent, mapTile);
+		}
+	}
+	
+	public static class TileLevelsEditorFactory implements TileEditorFactory {
+		public TileEditor newTileEditor(Composite myParent, MapTile mapTile) {
+			return new TileLevelsEditor(myParent, mapTile);
+		}
+	}
+	
+	public static class TileMasksEditorFactory implements TileEditorFactory {
+		public TileEditor newTileEditor(Composite myParent, MapTile mapTile) {
+			return new TileMasksEditor(myParent, mapTile);
+		}
 	}
 	
 	// =====================================================

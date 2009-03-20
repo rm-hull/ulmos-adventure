@@ -310,24 +310,6 @@ public class RpgMap {
 		updateTileImage(mapTile, tilePoint);
     }
     
-    public void editImages(Point tilePoint) {
-		MapTile mapTile = getMapTile(tilePoint);
-		mapTile.editImages();
-		updateTileImage(mapTile, tilePoint);
-    }
-    
-    public void editLevels(Point tilePoint) {
-		MapTile mapTile = getMapTile(tilePoint);
-		mapTile.editLevels();
-		// updateTileImage(mapTile, tilePoint);
-    }
-    
-    public void editMasks(Point tilePoint) {
-		MapTile mapTile = getMapTile(tilePoint);
-		mapTile.editMasks();    	
-		// updateTileImage(mapTile, tilePoint);
-    }
-    
     public void keepTop(Point tilePoint) {
 		MapTile mapTile = getMapTile(tilePoint);
 		mapTile.keepTopTile();
@@ -340,7 +322,23 @@ public class RpgMap {
 		updateTileImage(mapTile, tilePoint);    	
     }
     
-	private void updateTileImage(MapTile mapTile, Point tilePoint) {
+    /*public void editImages(Point tilePoint) {
+		MapTile mapTile = getMapTile(tilePoint);
+		mapTile.editImages();
+		updateTileImage(mapTile, tilePoint);
+    }
+    
+    public void editLevels(Point tilePoint) {
+		MapTile mapTile = getMapTile(tilePoint);
+		mapTile.editLevels();
+    }
+    
+    public void editMasks(Point tilePoint) {
+		MapTile mapTile = getMapTile(tilePoint);
+		mapTile.editMasks();    	
+    }*/
+    
+	public void updateTileImage(MapTile mapTile, Point tilePoint) {
 		int x = tilePoint.x * TILE_SIZE;
 		int y = tilePoint.y * TILE_SIZE;
 		GC gc = new GC(mapImage);

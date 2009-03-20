@@ -25,20 +25,20 @@ public class TileEditDialog extends Dialog {
 	private Point size = null;
 	
 	public TileEditDialog(Shell parent, TileEditorFactory editorFactory) {
-		this(parent, SWT.NONE, editorFactory);
+		this(parent, editorFactory, SWT.NONE);
 	}
 	
-	public TileEditDialog(Shell parent, int style, TileEditorFactory editorFactory) {
+	public TileEditDialog(Shell parent, TileEditorFactory editorFactory, int style) {
 		super(parent, style);
 		this.editorFactory = editorFactory;
 	}
 	
-	public TileEditDialog(Shell parent, int width, int height, TileEditorFactory editorFactory) {
-		this(parent, SWT.NONE, width, height, editorFactory);
+	public TileEditDialog(Shell parent, TileEditorFactory editorFactory, int width, int height) {
+		this(parent, editorFactory, width, height, SWT.NONE);
 	}
 	
-	public TileEditDialog(Shell parent, int style, int width, int height, TileEditorFactory editorFactory) {
-		this(parent, SWT.NONE, editorFactory);
+	public TileEditDialog(Shell parent, TileEditorFactory editorFactory, int width, int height, int style) {
+		this(parent, editorFactory, style);
 		size = new Point(width, height);
 	}
 	
@@ -110,9 +110,9 @@ public class TileEditDialog extends Dialog {
 		mapTile.addTile(tileConversion.convertTile(tileSet.getTile("l_supp")));
 		mapTile.setLevels(new String[] { "1", "S3", "2" });
 		
-		TileEditDialog tileEditor = new TileEditDialog(shell, new MapTile.TileImagesEditorFactory());
-		// TileEditDialog tileEditor = new TileEditDialog(shell, new MapTile.TileLevelsEditorFactory());
-		// TileEditDialog tileEditor = new TileEditDialog(shell, new MapTile.TileMasksEditorFactory());
+		TileEditDialog tileEditor = new TileEditDialog(shell, new MapEditor.TileImagesEditorFactory());
+		// TileEditDialog tileEditor = new TileEditDialog(shell, new MapEditor.TileLevelsEditorFactory());
+		// TileEditDialog tileEditor = new TileEditDialog(shell, new MapEditor.TileMasksEditorFactory());
 		tileEditor.editTile(mapTile);
 		System.out.println(mapTile);
 		

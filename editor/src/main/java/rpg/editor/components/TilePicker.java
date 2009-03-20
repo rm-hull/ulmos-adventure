@@ -163,7 +163,7 @@ public class TilePicker extends Composite {
 		
 		Display display = DisplayHelper.getDisplay();
 		Shell shell = DisplayHelper.getShell();
-		shell.setLayout(new GridLayout(2, false));
+		shell.setLayout(new GridLayout());
 		
 		TileSet tileSet = TileSet.loadTileSet();
 		TilePicker tilePicker = new TilePicker(shell, tileSet);
