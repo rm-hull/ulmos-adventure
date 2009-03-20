@@ -126,11 +126,11 @@
 6,7
 7,7
 8,7 dungeon:wtrcn
-9,7 [1] dungeon:n1 dungeon:wtr:2 dungeon:blb:2
+9,7 [1] dungeon:n1 dungeon:wtr:2
 10,7 [1] dungeon:n1
 11,7 [1] dungeon:os2
 12,7 [1] dungeon:n5
-13,7 [1] dungeon:n1 dungeon:wtl:2 dungeon:brb:2
+13,7 [1] dungeon:n1 dungeon:wtl:2
 14,7 dungeon:wtlcn
 15,7
 
@@ -145,7 +145,7 @@
 8,8 dungeon:wb4
 9,8 dungeon:n1 dungeon:wbr dungeon:tlb
 10,8 [1] dungeon:n1
-11,8 [1] dungeon:n1 dungeon:wtl:2 dungeon:brb:2
+11,8 [1] dungeon:n1 dungeon:wtl:2
 12,8 [1] dungeon:n1 dungeon:wt2:2
 13,8 dungeon:wtlcn
 14,8
@@ -226,7 +226,7 @@
 4,13 [1] dungeon:n1
 5,13 [1] dungeon:n1
 6,13 [1] dungeon:n6
-7,13 [1] dungeon:n1 dungeon:wtl:2 dungeon:brb:2
+7,13 [1] dungeon:n1 dungeon:wtl:2
 8,13 [1] dungeon:n1 dungeon:wt3:2
 9,13 [1] dungeon:n1 dungeon:wt3:2
 10,13 [1] dungeon:n1 dungeon:wt3:2
@@ -239,9 +239,9 @@
 0,14
 1,14 dungeon:wtrcn
 2,14 [1] dungeon:n1 dungeon:wt4:2
-3,14 [1] dungeon:n1 dungeon:wtr:2 dungeon:blb:2
+3,14 [1] dungeon:n1 dungeon:wtr:2
 4,14 [1] dungeon:n1
-5,14 [1] dungeon:n1 dungeon:wtl:2 dungeon:brb:2
+5,14 [1] dungeon:n1 dungeon:wtl:2
 6,14 [1] dungeon:n1 dungeon:wt3:2
 7,14 dungeon:wtlcn
 8,14
