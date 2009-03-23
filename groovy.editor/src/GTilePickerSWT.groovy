@@ -107,16 +107,15 @@ class GTilePickerCanvas extends TilePickerCanvas {
 	}
 
 	public void setLabelText() {
-		if (highlightTile.equals(NO_SELECTION)) {
-			tileLabel.text = Constants.NO_SELECTION_LABEL;
-		}
-		else {
+		def labelText = Constants.NO_SELECTION_LABEL
+		if (highlightTile) {
 			Tile tile = tileSet.getTile(highlightTile)
 			if (tile) {
-				tileLabel.setText(highlightTile.x + Constants.LABEL_COMMA + 						highlightTile.y + Constants.SEPARATOR + tile.getName())								}
-			else {
-				tileLabel.setText(Constants.NO_SELECTION_LABEL)				}
+				labelText = highlightTile.x + Constants.LABEL_COMMA + 
+						highlightTile.y + Constants.SEPARATOR + tile.getName()					
+			}
 		}
+		tileLabel.text = labelText
 	}
 }
 

@@ -94,6 +94,9 @@ class GMapEditorCanvas extends TileCanvas {
     def editMode = GEditMode.ADD
     def tileLabel
 	def map
+
+	def startTile
+	def dragTile
 	
 	def editImagesFactory = {parent, mapTile ->
 		return new TileImagesEditor(parent, mapTile);
@@ -117,7 +120,7 @@ class GMapEditorCanvas extends TileCanvas {
 		popupMenu.addMenuListener([
 		    menuShown : {
 				Set<String> toEnable = new HashSet<String>()
-				if (!highlightTile.equals(NO_SELECTION)) {
+				if (highlightTile) {
 					def mapTile = map.getMapTile(highlightTile)
 					int tileDepth = mapTile.tileDepth
 					if (tileDepth) {
@@ -139,35 +142,68 @@ class GMapEditorCanvas extends TileCanvas {
 		// mouse listener
 		addMouseListener([
 		    mouseDown : {
-				if (!highlightTile.equals(NO_SELECTION)) {
-					if (it.button == 1) {
-						if (tileSelection.tileSelected) {
-							Tile tile = tileSelection.getSelectedTile()
-							if (editMode == GEditMode.ADD) {
-								map.addTile(highlightTile, tile)
-							}
-							else if (editMode == GEditMode.INSERT) {
-								map.insertTile(highlightTile, tile)
-							}
-							redraw()
-							setLabelText()
-						}
-					}					
+				if (highlightTile && it.button == 1) {
+					startTile = highlightTile
 				}
 			},
-		    mouseUp : { },
+		    mouseUp : {
+				if ((highlightTile == startTile) && (it.button == 1)) {
+					if (tileSelection.tileSelected) {
+						Tile tile = tileSelection.getSelectedTile()
+						if (editMode == GEditMode.ADD) {
+							map.addTile(highlightTile, tile)
+						}
+						else if (editMode == GEditMode.INSERT) {
+							map.insertTile(highlightTile, tile)
+						}
+						redraw()
+						setLabelText()
+					}
+				}
+				startTile = null
+			},
 		    mouseDoubleClick : { }
-		] as MouseListener) 
+		] as MouseListener)
+		
+		// ** mouse move listener **
+		addMouseMoveListener({
+			if (tileImage != null) {
+				if (startTile) {
+					def previousDragTile = dragTile;
+					dragTile = determineCurrentTile(it);
+					if (dragTile != previousDragTile) {
+						// work out max x and y
+						def minX = Math.min(startTile.x, dragTile.x)
+						def minY = Math.min(startTile.y, dragTile.y)
+						def maxX = Math.max(startTile.x, dragTile.x)
+						def maxY = Math.max(startTile.y, dragTile.y)
+						def rows = maxY - minY + 1
+						def cols = maxX - minX + 1
+						ImageHelper.getSelectedImage(viewSize)
+						println "$startTile -> $dragTile"
+					}
+				}
+				else {
+					dragTile = null
+					Point previousHighlightTile = highlightTile;
+					highlightTile = determineCurrentTile(it);
+					if (highlightTile != previousHighlightTile) {
+						redraw();
+						setLabelText();
+					}					
+				}
+			}
+		} as MouseMoveListener)
 	}
 	
 	public void setLabelText() {
-		if (highlightTile.equals(NO_SELECTION)) {
-			tileLabel.setText(Constants.NO_SELECTION_LABEL)
-		}
-		else {
+		if (highlightTile) {
 			MapTile mapTile = map.getMapTile(highlightTile)			
 			tileLabel.text = highlightTile.x + Constants.LABEL_COMMA +
 					highlightTile.y + Constants.SEPARATOR + mapTile.getLabel();
+		}
+		else {
+			tileLabel.setText(Constants.NO_SELECTION_LABEL)
 		}
 	}
 	

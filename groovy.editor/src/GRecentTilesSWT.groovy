@@ -75,11 +75,11 @@ class GRecentTilesCanvas extends TilePickerCanvas {
 	}
 
 	public void setLabelText() {
-		if (highlightTile.equals(NO_SELECTION)) {
-			tileLabel.text = Constants.NO_SELECTION_LABEL
+		if (highlightTile) {
+			tileLabel.text = tiles.get(highlightTile.x).getName()
 		}
 		else {
-			tileLabel.text = tiles.get(highlightTile.x).getName()
+			tileLabel.text = Constants.NO_SELECTION_LABEL
 		}
 	}
 	
