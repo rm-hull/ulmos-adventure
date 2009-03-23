@@ -91,7 +91,7 @@ public class RecentTiles extends Composite implements TileSelection {
 
 		@Override
 		public void setLabelText() {
-			if (highlightTile.equals(NO_SELECTION)) {
+			if (highlightTile == null) {
 				tileLabel.setText(Constants.NO_SELECTION_LABEL);
 			}
 			else {

@@ -2,7 +2,6 @@ package rpg.editor.core;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
-import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -19,10 +18,11 @@ import org.eclipse.swt.widgets.Listener;
  */
 public abstract class TileCanvas extends Canvas {
 	
-	protected static final Point NO_SELECTION = new Point(-1, -1);
-	
-    protected Point highlightTile = NO_SELECTION;
-    protected Point selectedTile = NO_SELECTION;
+    protected Point highlightTile = null;
+    protected Point selectedTile = null;
+    
+    protected Rectangle highlightRectangle = null;
+    protected Rectangle selectedRectangle = null;
 
     protected Point topLeft = new Point(0, 0);
     
@@ -47,13 +47,13 @@ public abstract class TileCanvas extends Canvas {
 					GC gc = e.gc;
 					gc.drawImage(tileImage, topLeft.x, topLeft.y);
 					int tileSize = viewSize.getTileSize();
-					if (!highlightTile.equals(NO_SELECTION)) {
+					if (highlightTile != null) {
 						Image highlight = ImageHelper.getHighlightImage(viewSize);
 						gc.drawImage(highlight,
 								highlightTile.x * tileSize + topLeft.x,
 								highlightTile.y * tileSize + topLeft.y);
 					}
-					if (!selectedTile.equals(NO_SELECTION)) {
+					if (selectedTile != null) {
 						Image selected = ImageHelper.getSelectedImage(viewSize);
 						gc.drawImage(selected,
 								selectedTile.x * tileSize + topLeft.x,
@@ -63,29 +63,17 @@ public abstract class TileCanvas extends Canvas {
 				}
 			}
 		});
-		
-		// ** mouse move listener **
-		addMouseMoveListener(new MouseMoveListener() {
-			public void mouseMove(MouseEvent e) {
-				if (tileImage != null) {
-					Point previousHighlightTile = highlightTile;
-					Rectangle r = tileImage.getBounds();
-					if ((e.x > topLeft.x) && (e.x < topLeft.x + r.width)
-							&& (e.y > topLeft.y) && (e.y < topLeft.y + r.height)) {
-						int tileX = (e.x - topLeft.x) / viewSize.getTileSize();
-						int tileY = (e.y - topLeft.y) / viewSize.getTileSize();
-						highlightTile = new Point(tileX, tileY);
-					}
-					else {
-						highlightTile = NO_SELECTION;
-					}
-					if (!highlightTile.equals(previousHighlightTile)) {
-						redraw();
-						setLabelText();
-					}					
-				}
-			}
-		});
+	}
+	
+	protected Point determineCurrentTile(MouseEvent e) {
+		Rectangle r = tileImage.getBounds();
+		if ((e.x > topLeft.x) && (e.x < topLeft.x + r.width)
+				&& (e.y > topLeft.y) && (e.y < topLeft.y + r.height)) {
+			int tileX = (e.x - topLeft.x) / viewSize.getTileSize();
+			int tileY = (e.y - topLeft.y) / viewSize.getTileSize();
+			return new Point(tileX, tileY);
+		}
+		return null;
 	}
 	
 	public abstract void setLabelText();

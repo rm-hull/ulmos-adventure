@@ -9,6 +9,8 @@ import org.eclipse.swt.events.MenuAdapter;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseMoveListener;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -140,7 +142,7 @@ public class MapEditor extends Composite {
 				@Override
 				public void menuShown(MenuEvent e) {
 					Set<String> toEnable = new HashSet<String>();
-					if (!highlightTile.equals(NO_SELECTION)) {
+					if (highlightTile != null) {
 						MapTile mapTile = map.getMapTile(highlightTile);
 						int tileDepth = mapTile.getTileDepth();
 						if (tileDepth > 0) {
@@ -163,7 +165,7 @@ public class MapEditor extends Composite {
 				@Override
 				public void mouseDown(MouseEvent e) {
 					// try {
-					if (!highlightTile.equals(NO_SELECTION)) {
+					if (highlightTile != null) {
 						if (e.button == 1) {
 							if (tileSelection.isTileSelected()) {
 								Tile tile = tileSelection.getSelectedTile();
@@ -183,10 +185,24 @@ public class MapEditor extends Composite {
 					}*/
 				}
 			});
+
+			// ** mouse move listener **
+			addMouseMoveListener(new MouseMoveListener() {
+				public void mouseMove(MouseEvent e) {
+					if (tileImage != null) {
+						Point previousHighlightTile = highlightTile;
+						highlightTile = determineCurrentTile(e);
+						if ((highlightTile != null) && (!highlightTile.equals(previousHighlightTile))) {
+							redraw();
+							setLabelText();
+						}					
+					}
+				}
+			});
 		}
 		
 		public void setLabelText() {
-			if (highlightTile.equals(NO_SELECTION)) {
+			if (highlightTile == null) {
 				tileLabel.setText(Constants.NO_SELECTION_LABEL);
 			}
 			else {

@@ -2,6 +2,7 @@ package rpg.editor.core;
 
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.MouseMoveListener;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 
@@ -17,7 +18,7 @@ public abstract class TilePickerCanvas extends TileCanvas {
 		addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseDown(MouseEvent e) {
-				if (!highlightTile.equals(NO_SELECTION)) {
+				if (highlightTile != null) {
 					Point previousSelectedTile = selectedTile;
 					Point tempSelectedTile = highlightTile;
 					if (!tempSelectedTile.equals(previousSelectedTile) &&
@@ -25,6 +26,19 @@ public abstract class TilePickerCanvas extends TileCanvas {
 						selectedTile = tempSelectedTile;
 						redraw();
 						tileSelectedAction();
+					}					
+				}
+			}
+		});
+		
+		addMouseMoveListener(new MouseMoveListener() {
+			public void mouseMove(MouseEvent e) {
+				if (tileImage != null) {
+					Point previousHighlightTile = highlightTile;
+					highlightTile = determineCurrentTile(e);
+					if ((highlightTile != null) && (!highlightTile.equals(previousHighlightTile))) {
+						redraw();
+						setLabelText();
 					}					
 				}
 			}

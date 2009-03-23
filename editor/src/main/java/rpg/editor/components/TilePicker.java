@@ -118,19 +118,15 @@ public class TilePicker extends Composite {
 
 		@Override
 		public void setLabelText() {
-			if (highlightTile.equals(NO_SELECTION)) {
-				tileLabel.setText(Constants.NO_SELECTION_LABEL);
-			}
-			else {
+			String labelText = Constants.NO_SELECTION_LABEL;
+			if (highlightTile != null) {
 				Tile tile = tileSet.getTile(highlightTile);
-				if (tile == null) {
-					tileLabel.setText(Constants.NO_SELECTION_LABEL);					
-				}
-				else {
-					tileLabel.setText(highlightTile.x + Constants.LABEL_COMMA + 
-							highlightTile.y + Constants.SEPARATOR + tile.getName());					
+				if (tile != null) {
+					labelText = highlightTile.x + Constants.LABEL_COMMA + 
+							highlightTile.y + Constants.SEPARATOR + tile.getName();					
 				}
 			}
+			tileLabel.setText(labelText);
 		}
 	}
 	

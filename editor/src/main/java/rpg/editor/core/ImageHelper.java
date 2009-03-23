@@ -3,10 +3,13 @@ package rpg.editor.core;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 
 public class ImageHelper {
@@ -62,6 +65,21 @@ public class ImageHelper {
 
 	public static Image getSelectedImage(ViewSize viewSize) {
 		return selectedImages.get(viewSize);
+	}
+	
+	public static Image getSelectedImage(ViewSize viewSize, int rows, int cols) {
+		int tileSize = viewSize.getTileSize();
+		Rectangle rect = new Rectangle(0, 0, tileSize * cols, tileSize * rows);
+		Image image = new Image(DisplayHelper.getDisplay(), rect);
+	    GC gc = new GC(image);
+	    gc.setForeground(new Color(DisplayHelper.getDisplay(), SELECTED_COLOUR));
+	    gc.drawRectangle(rect);
+	    gc.dispose();
+	    if (viewSize == ViewSize.SMALL) {
+	    	return image;
+	    }
+		return new Image(DisplayHelper.getDisplay(),
+	    		image.getImageData().scaledTo(tileSize, tileSize));
 	}
 	
 	public static void dispose() {
