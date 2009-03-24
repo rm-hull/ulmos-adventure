@@ -297,13 +297,25 @@ public class RpgMap {
 		mapTile.addTile(tile);
 		updateTileImage(mapTile, tilePoint);    	
     }
-    
+
+    public void addTile(List<Point> tilePoints, Tile tile) {
+		for (Point tilePoint: tilePoints) {
+			addTile(tilePoint, tile);
+		}
+    }
+
     public void insertTile(Point tilePoint, Tile tile) {
 		MapTile mapTile = getMapTile(tilePoint);
 		mapTile.replaceTiles(tile);
 		updateTileImage(mapTile, tilePoint);    	
     }
     
+    public void insertTile(List<Point> tilePoints, Tile tile) {
+		for (Point tilePoint: tilePoints) {
+			insertTile(tilePoint, tile);
+		}
+    }
+
     public void sendToBack(Point tilePoint) {
 		MapTile mapTile = getMapTile(tilePoint);
 		mapTile.sendToBack();
@@ -321,18 +333,18 @@ public class RpgMap {
 		mapTile.clearTiles();
 		updateTileImage(mapTile, tilePoint);    	
     }
-    
+
 	public void updateTileImage(MapTile mapTile, Point tilePoint) {
+		GC gc = new GC(mapImage);
 		int x = tilePoint.x * TILE_SIZE;
 		int y = tilePoint.y * TILE_SIZE;
-		GC gc = new GC(mapImage);
 		gc.drawImage(mapTile.getBaseTile(), x, y);
 		List<MaskTile> tiles = mapTile.getTiles();
 		if (tiles != null) {
 			for (MaskTile tile: tiles) {
 				gc.drawImage(tile.getTile().getImage(), x, y);								
 			}			
-		}
+		}			
 		// must dispose the context or we get an error second time around
 		gc.dispose();						
 	}
