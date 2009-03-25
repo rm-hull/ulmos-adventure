@@ -130,13 +130,11 @@ folder.selectionBackground = new Color(display, TAB_COLOUR)
 recentTiles = new GRecentTiles(vForm, SWT.BORDER);
 recentTiles.layoutData = new GridData(SWT.FILL, SWT.FILL, true, true);
 
-int[] vWeights = [4, 1];
-vForm.weights = vWeights;
+vForm.weights = [4, 1] as int[];
 
 mapEditor = new GMapEditor(hForm, SWT.BORDER);
 
-int[] hWeights = [4, 6];
-hForm.weights = hWeights;
+hForm.weights = [4, 6] as int[];
 
 shell.setSize(1024, 640)
 shell.open()

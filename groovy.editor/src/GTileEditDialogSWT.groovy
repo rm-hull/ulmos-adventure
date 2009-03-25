@@ -29,8 +29,9 @@ public class GTileEditDialog extends Dialog {
 		size = new Point(width, height);
 	}
 	
-	public void editTile(mapTile) {
+	def editTile(mapTile) {
 		// setup
+		def applied = true
 		def parent = getParent();
 		def shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
 		shell.text = 'Tile Editor'
@@ -51,6 +52,7 @@ public class GTileEditDialog extends Dialog {
 		cancel.setText(Constants.CANCEL);
 		cancel.addListener(SWT.Selection, {
 			shell.dispose();
+			applied = false
 		} as Listener);
 		if (size == null) {
 			shell.pack();
@@ -72,6 +74,8 @@ public class GTileEditDialog extends Dialog {
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch()) display.sleep();
 		}
+		
+		return applied
 	}
 }
 

@@ -35,12 +35,12 @@ public class GMapEditor extends Composite {
 	    def addButton = new Button(radioGroup, SWT.RADIO)
 	    addButton.text = 'Add'
 	    addButton.selection = true
-	    def insertButton = new Button(radioGroup, SWT.RADIO)
-	    insertButton.text = 'Insert'
-	    insertButton.selection = false
-	    def noneButton = new Button(radioGroup, SWT.RADIO)
-	    noneButton.text = 'None'
-	    noneButton.selection = false
+	    def replaceButton = new Button(radioGroup, SWT.RADIO)
+		replaceButton.text = 'Replace'
+		replaceButton.selection = false
+	    def editButton = new Button(radioGroup, SWT.RADIO)
+		editButton.text = 'Edit'
+		editButton.selection = false
 		
 		// canvas
 	    canvasHolder = new ScrolledComposite(this, SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER)
@@ -60,11 +60,11 @@ public class GMapEditor extends Composite {
 		addButton.addListener(SWT.Selection, {
 			mapEditorCanvas.editMode = GEditMode.ADD
 		} as Listener)
-		insertButton.addListener(SWT.Selection, {
-			mapEditorCanvas.editMode = GEditMode.INSERT
+		replaceButton.addListener(SWT.Selection, {
+			mapEditorCanvas.editMode = GEditMode.REPLACE
 		} as Listener)
-		noneButton.addListener(SWT.Selection, {
-			mapEditorCanvas.editMode = GEditMode.NONE
+		editButton.addListener(SWT.Selection, {
+			mapEditorCanvas.editMode = GEditMode.EDIT
 		} as Listener)
 	}
 	
@@ -96,7 +96,6 @@ class GMapEditorCanvas extends TileCanvas {
 	def map
 
 	def startTile
-	def dragTile
 	
 	def editImagesFactory = {parent, mapTile ->
 		return new TileImagesEditor(parent, mapTile);
@@ -119,75 +118,56 @@ class GMapEditorCanvas extends TileCanvas {
 		menu = popupMenu
 		popupMenu.addMenuListener([
 		    menuShown : {
-				Set<String> toEnable = new HashSet<String>()
-				if (highlightTile) {
-					def mapTile = map.getMapTile(highlightTile)
-					int tileDepth = mapTile.tileDepth
-					if (tileDepth) {
-						toEnable << CLEAR
-						toEnable << EDIT_IMAGES
-						toEnable << EDIT_LEVELS
-						toEnable << EDIT_MASKS
-						if (tileDepth > 1) {
-							toEnable << SEND_TO_BACK
-							toEnable << KEEP_TOP
-						}
-					}
-				}
-				enableMenuItems(popupMenu, toEnable)
+				preparePopupMenu(popupMenu)
 			},
 			menuHidden: { }
 		] as MenuListener)
 		
-		// mouse listener
+		// ** mouse listener **
 		addMouseListener([
 		    mouseDown : {
-				if (highlightTile && it.button == 1) {
+				if ((it.button == 1) && highlightTile) {
 					startTile = highlightTile
+					highlightRectangle = new Rectangle(highlightTile.x, highlightTile.y, 1, 1)
 				}
 			},
 		    mouseUp : {
-				if ((highlightTile == startTile) && (it.button == 1)) {
+				if ((it.button == 1) && highlightRectangle) {
+					startTile = null
 					if (tileSelection.tileSelected) {
 						Tile tile = tileSelection.getSelectedTile()
-						if (editMode == GEditMode.ADD) {
-							map.addTile(highlightTile, tile)
-						}
-						else if (editMode == GEditMode.INSERT) {
-							map.insertTile(highlightTile, tile)
+						if (editMode == GEditMode.ADD) {							map.addTile(determineTilePoints(), tile)						}
+						else if (editMode == GEditMode.REPLACE) {
+							map.insertTile(determineTilePoints(), tile)
 						}
 						redraw()
 						setLabelText()
-					}
+					}						
 				}
-				startTile = null
 			},
 		    mouseDoubleClick : { }
 		] as MouseListener)
 		
 		// ** mouse move listener **
 		addMouseMoveListener({
-			if (tileImage != null) {
+			if (tileImage) {
+				def previousHighlightTile = highlightTile;
+				highlightTile = determineTilePoint(it);
 				if (startTile) {
-					def previousDragTile = dragTile;
-					dragTile = determineCurrentTile(it);
-					if (dragTile != previousDragTile) {
-						// work out max x and y
-						def minX = Math.min(startTile.x, dragTile.x)
-						def minY = Math.min(startTile.y, dragTile.y)
-						def maxX = Math.max(startTile.x, dragTile.x)
-						def maxY = Math.max(startTile.y, dragTile.y)
-						def rows = maxY - minY + 1
-						def cols = maxX - minX + 1
-						ImageHelper.getSelectedImage(viewSize)
-						println "$startTile -> $dragTile"
+					// if we have a start tile then we know that the mouse button is
+					// down, ie. the user is changing the selected area on the map
+					if (highlightTile != previousHighlightTile) {
+						if (highlightTile) {
+							highlightRectangle = determineTileRectangle()
+							redraw();
+						}
+						setLabelText();
 					}
 				}
 				else {
-					dragTile = null
-					Point previousHighlightTile = highlightTile;
-					highlightTile = determineCurrentTile(it);
+					// otherwise they're just moving the mouse around the map
 					if (highlightTile != previousHighlightTile) {
+						highlightRectangle = null
 						redraw();
 						setLabelText();
 					}					
@@ -196,7 +176,7 @@ class GMapEditorCanvas extends TileCanvas {
 		} as MouseMoveListener)
 	}
 	
-	public void setLabelText() {
+	def void setLabelText() {
 		if (highlightTile) {
 			MapTile mapTile = map.getMapTile(highlightTile)			
 			tileLabel.text = highlightTile.x + Constants.LABEL_COMMA +
@@ -206,26 +186,77 @@ class GMapEditorCanvas extends TileCanvas {
 			tileLabel.setText(Constants.NO_SELECTION_LABEL)
 		}
 	}
+
+	def preparePopupMenu(popupMenu) {
+		def toEnable = [] as Set
+		if (highlightTile) {
+			if (!highlightRectangle) {
+				highlightRectangle = new Rectangle(highlightTile.x, highlightTile.y, 1, 1)
+			}
+			def tilePoints = determineTilePoints()
+			def selected = tilePoints.size()
+			tilePoints.each {
+				def mapTile = map.getMapTile(it)
+				int tileDepth = mapTile.tileDepth
+				if (tileDepth) {
+					toEnable << CLEAR
+					if (tileDepth > 1) {
+						toEnable << SEND_TO_BACK
+						toEnable << KEEP_TOP
+					}
+					// some options are only available on single tiles
+					if (selected == 1) {
+						toEnable << EDIT_IMAGES
+						toEnable << EDIT_MASKS
+					}
+				}
+				else if (mapTile.levels) {
+					toEnable << CLEAR					
+				}
+			}
+			toEnable << EDIT_LEVELS
+		}
+		enableMenuItems(popupMenu, toEnable)
+	}
 	
-	private void populatePopupMenu(menu) {
+	def determineTileRectangle() {
+		def minX = Math.min(startTile.x, highlightTile.x)
+		def minY = Math.min(startTile.y, highlightTile.y)
+		def maxX = Math.max(startTile.x, highlightTile.x)
+		def maxY = Math.max(startTile.y, highlightTile.y)
+		return new Rectangle(minX, minY, 
+				maxX - minX + 1, maxY - minY + 1)
+	}
+	
+    def determineTilePoints() {
+    	def tilePoints = new ArrayList<Point>();
+    	highlightRectangle.x.upto(highlightRectangle.x + highlightRectangle.width - 1) { x ->
+    		highlightRectangle.y.upto(highlightRectangle.y + highlightRectangle.height - 1) { y ->
+				tilePoints << new Point(x, y);
+    		}
+    	}
+    	return tilePoints;
+    }
+
+	def populatePopupMenu(menu) {
 		// dynamic options
 		MenuItem sendToBack = new MenuItem(menu, SWT.PUSH)
 		sendToBack.setText(SEND_TO_BACK)
 		sendToBack.addListener(SWT.Selection, {
-			map.sendToBack(highlightTile);
+			map.sendToBack(determineTilePoints());
 			redraw();
 		} as Listener)
 		MenuItem keepTop = new MenuItem(menu, SWT.PUSH)
 		keepTop.setText(KEEP_TOP)
 		keepTop.addListener(SWT.Selection, {
-			map.keepTop(highlightTile);
+			map.keepTop(determineTilePoints());
 			redraw()
 			setLabelText()
 		} as Listener)
 		MenuItem clear = new MenuItem(menu, SWT.PUSH)
 		clear.setText(CLEAR)
 		clear.addListener(SWT.Selection, {
-			map.clear(highlightTile)
+			map.clear(determineTilePoints())
 			redraw()
 			setLabelText()
 		} as Listener)
@@ -238,64 +269,69 @@ class GMapEditorCanvas extends TileCanvas {
 		editImages.setText(EDIT_IMAGES)
 		editImages.addListener(SWT.Selection, {
 			def mapTile = map.getMapTile(highlightTile)
-			def tileEditor = new GTileEditDialog(DisplayHelper.getShell(), editImagesFactory);
-			tileEditor.editTile(mapTile);
-			setLabelText()
-			// update the map image
-			map.updateTileImage(mapTile, highlightTile)
-			redraw()
+			def tileEditor = new GTileEditDialog(DisplayHelper.getShell(), editImagesFactory)
+			if (tileEditor.editTile(mapTile)) {
+				setLabelText()
+				// update the map image
+				map.updateTileImage(mapTile, highlightTile)
+				redraw()
+			}
 		} as Listener)
 		MenuItem editLevels = new MenuItem(menu, SWT.PUSH)
 		editLevels.setText(EDIT_LEVELS)
 		editLevels.addListener(SWT.Selection, {
 			def mapTile = map.getMapTile(highlightTile)
-			def tileEditor = new GTileEditDialog(DisplayHelper.getShell(), editLevelsFactory, 240, 320);
-			tileEditor.editTile(mapTile);
-			setLabelText()
+			def tileEditor = new GTileEditDialog(DisplayHelper.getShell(), editLevelsFactory, 240, 320)
+			if (tileEditor.editTile(mapTile)) {
+				// edit levels can be applied to a range of tiles
+				determineTilePoints().each {
+					map.getMapTile(it).setLevels(mapTile.getLevels())
+				}
+				setLabelText()				
+			}
 		} as Listener)
 		MenuItem editMasks = new MenuItem(menu, SWT.PUSH)
 		editMasks.setText(EDIT_MASKS)
 		editMasks.addListener(SWT.Selection, {
 			def mapTile = map.getMapTile(highlightTile)
-			def tileEditor = new GTileEditDialog(DisplayHelper.getShell(), editMasksFactory);
-			tileEditor.editTile(mapTile);
-			setLabelText()
+			def tileEditor = new GTileEditDialog(DisplayHelper.getShell(), editMasksFactory)
+			if (tileEditor.editTile(mapTile)) {
+				setLabelText()				
+			}
 		} as Listener)
 	}
 			
-	private void enableMenuItems(menu, toEnable) {
-		for (item in menu.items) {
-			if ((item.style == SWT.PUSH) && (item.text in toEnable)) {
-				item.enabled = true
+	def enableMenuItems(menu, toEnable) {
+		menu.items.each {
+			if ((it.style == SWT.PUSH) && (it.text in toEnable)) {
+				it.enabled = true
 			}
 			else {
-				item.enabled = false
+				it.enabled = false
 			}
 		}
 	}
 }
 
 enum GEditMode {
-	ADD, INSERT, NONE;
+	ADD, REPLACE, EDIT;
 }
 
 try {
-
-def display = DisplayHelper.getDisplay();
-def shell = DisplayHelper.getShell();
-shell.layout = new GridLayout();
-		
-def mapEditor = new GMapEditor(shell);
-mapEditor.mapEditorCanvas.tileSelection = TileSelectionStub.getInstance();
-def rpgMap = RpgMap.newRpgMap();
-mapEditor.setMap(rpgMap);
-		
-shell.setSize(600, 600);
-shell.open();
-while (!shell.disposed) {
-    if (!display.readAndDispatch()) shell.display.sleep()
-}
-
+	def display = DisplayHelper.getDisplay();
+	def shell = DisplayHelper.getShell();
+	shell.layout = new GridLayout();
+			
+	def mapEditor = new GMapEditor(shell);
+	mapEditor.mapEditorCanvas.tileSelection = TileSelectionStub.getInstance();
+	def rpgMap = RpgMap.newRpgMap();
+	mapEditor.setMap(rpgMap);
+			
+	shell.setSize(600, 600);
+	shell.open();
+	while (!shell.disposed) {
+	    if (!display.readAndDispatch()) shell.display.sleep()
+	}
 }
 catch (Exception e) {
 	e.printStackTrace()
