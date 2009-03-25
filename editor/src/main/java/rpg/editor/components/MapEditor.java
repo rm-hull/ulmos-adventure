@@ -191,7 +191,7 @@ public class MapEditor extends Composite {
 				public void mouseMove(MouseEvent e) {
 					if (tileImage != null) {
 						Point previousHighlightTile = highlightTile;
-						highlightTile = determineCurrentTile(e);
+						highlightTile = determineTilePoint(e);
 						if ((highlightTile != null) && (!highlightTile.equals(previousHighlightTile))) {
 							redraw();
 							setLabelText();

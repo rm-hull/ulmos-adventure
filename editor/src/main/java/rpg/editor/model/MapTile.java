@@ -84,6 +84,7 @@ public class MapTile {
 	
 	public void clearTiles() {
 		tiles = null;
+		levels = null;
 	}
 	
 	public void sendToBack() {

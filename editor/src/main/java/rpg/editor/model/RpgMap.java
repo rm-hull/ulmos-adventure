@@ -322,18 +322,36 @@ public class RpgMap {
 		updateTileImage(mapTile, tilePoint);
     }
     
+    public void sendToBack(List<Point> tilePoints) {
+		for (Point tilePoint: tilePoints) {
+			sendToBack(tilePoint);
+		}
+    }
+
     public void keepTop(Point tilePoint) {
 		MapTile mapTile = getMapTile(tilePoint);
 		mapTile.keepTopTile();
 		updateTileImage(mapTile, tilePoint);    	
     }
-    
+
+    public void keepTop(List<Point> tilePoints) {
+		for (Point tilePoint: tilePoints) {
+			keepTop(tilePoint);
+		}
+    }
+
     public void clear(Point tilePoint) {
 		MapTile mapTile = getMapTile(tilePoint);
 		mapTile.clearTiles();
 		updateTileImage(mapTile, tilePoint);    	
     }
 
+    public void clear(List<Point> tilePoints) {
+		for (Point tilePoint: tilePoints) {
+			clear(tilePoint);
+		}
+    }
+    
 	public void updateTileImage(MapTile mapTile, Point tilePoint) {
 		GC gc = new GC(mapImage);
 		int x = tilePoint.x * TILE_SIZE;

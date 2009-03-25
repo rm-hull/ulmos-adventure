@@ -88,7 +88,7 @@ public abstract class TileCanvas extends Canvas {
 		gc.drawRectangle(x + 1, y + 1, width - 2, height - 2);
 	}
 	
-	protected Point determineCurrentTile(MouseEvent e) {
+	protected Point determineTilePoint(MouseEvent e) {
 		Rectangle r = tileImage.getBounds();
 		if ((e.x > topLeft.x) && (e.x < topLeft.x + r.width)
 				&& (e.y > topLeft.y) && (e.y < topLeft.y + r.height)) {
