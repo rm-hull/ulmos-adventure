@@ -209,10 +209,14 @@ public class RpgMap {
     }
     
     private void initialiseMap(Point size) {
-    	// initialise the map tiles
+		// create an empty map image
     	this.size = size;
     	int rows = size.y, cols = size.x;
-		mapTiles = new MapTile[cols][rows];
+		mapImage = new Image(DisplayHelper.getDisplay(),
+				cols * TILE_SIZE, rows * TILE_SIZE);
+		
+		// now draw the tiles
+    	mapTiles = new MapTile[cols][rows];
 		Image[] baseTiles = new Image[2];
 		PaletteData paletteData = new PaletteData(new RGB[] { COLOUR_A });
 		ImageData imageData = new ImageData(TILE_SIZE, TILE_SIZE, 1, paletteData);
@@ -222,12 +226,12 @@ public class RpgMap {
 		baseTiles[1] = new Image(DisplayHelper.getDisplay(), imageData);
 		for (int y = 0; y < rows; y++) {
 			for (int x = 0; x < cols; x++) {
+				// MapTile mapTile = mapTiles[x][y];
 				mapTiles[x][y] = new MapTile(baseTiles[(x + y + 1) % 2]);
+				updateTileImage(mapTiles[x][y], new Point(x, y));
 			}
 		}
-
-		// create an empty map image with chess board pattern
-		paletteData = new PaletteData(new RGB[] { COLOUR_A, COLOUR_B });
+		/*paletteData = new PaletteData(new RGB[] { COLOUR_A, COLOUR_B });
 		imageData = new ImageData(cols, rows, 1, paletteData);
 		for (int x = 0; x < cols; x += 2) {
 			for (int y = 0; y < rows; y++) {
@@ -235,7 +239,7 @@ public class RpgMap {
 			}
 		}
 		mapImage = new Image(DisplayHelper.getDisplay(),
-	    		imageData.scaledTo(cols * TILE_SIZE, rows * TILE_SIZE));    	
+	    		imageData.scaledTo(cols * TILE_SIZE, rows * TILE_SIZE));*/    	
     }
 
     public void saveRpgMap() {

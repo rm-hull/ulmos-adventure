@@ -32,7 +32,8 @@ public abstract class TileCanvas extends Canvas {
 	public Image tileImage;
 	
 	public TileCanvas(Composite parent) {
-		this(parent, SWT.NONE);
+		// we need SWT.NO_BACKGROUND to prevent flicker
+		this(parent, SWT.NO_BACKGROUND);
 	}
 	
 	public TileCanvas(Composite parent, int style) {
@@ -41,13 +42,24 @@ public abstract class TileCanvas extends Canvas {
 		// ** paint listener **
 		addListener(SWT.Paint, new Listener() {
 			public void handleEvent (Event e) {
+
+				// create a new image for double buffering
+				Image bufferImage = new Image(DisplayHelper.getDisplay(), getBounds());
+				GC gc = new GC(bufferImage);
+				
+				// fill the background to remove the old image
+		        gc.setBackground(DisplayHelper.getDisplay().getSystemColor(SWT.COLOR_WIDGET_BACKGROUND));
+		        gc.fillRectangle(getBounds());
+		        
+		        // draw tileImage
 				if (tileImage != null) {
 					Point point = getSize();
 					Rectangle rect = tileImage.getBounds();
 					topLeft.x = point.x > rect.width ? (point.x - rect.width) / 2 : 0;
 					topLeft.y = point.y > rect.height ? (point.y - rect.height) / 2 : 0;
-					GC gc = e.gc;
+			        // draw tileImage
 					gc.drawImage(tileImage, topLeft.x, topLeft.y);
+					// draw any other artefacts
 					int tileSize = viewSize.getTileSize();
 					if (highlightRectangle != null) {
 						drawRectangle(gc, highlightRectangle,
@@ -65,8 +77,14 @@ public abstract class TileCanvas extends Canvas {
 						drawImage(gc, ImageHelper.getSelectedImage(viewSize),
 								selectedTile, tileSize);
 					}
-					gc.dispose();
 				}
+				
+				// draw the buffer to the canvas and dispose
+				gc.dispose();
+				gc = e.gc;
+				gc.drawImage(bufferImage, 0, 0);
+				bufferImage.dispose();					
+				gc.dispose();
 			}
 		});
 	}
