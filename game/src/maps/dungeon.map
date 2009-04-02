@@ -94,7 +94,7 @@
 8,5 dungeon:n1 dungeon:wr1 dungeon:lb
 9,5 [1] dungeon:n6 objects:skull_base1 dungeon:n6
 10,5 [1] dungeon:n1
-11,5 [1] dungeon:n1 objects:skull_top
+11,5 [1] dungeon:n1 objects:skull_top:2
 12,5 [1] dungeon:n5
 13,5 dungeon:dark dungeon:mlrs
 14,5 dungeon:dark dungeon:wl2
@@ -188,7 +188,7 @@
 0,11
 1,11 dungeon:n1 dungeon:wr1 dungeon:lb
 2,11 [1] dungeon:n4
-3,11 [1] dungeon:n1 objects:skull_top
+3,11 [1] dungeon:n1 objects:skull_top:2
 4,11 [1] dungeon:nls
 5,11 [1] dungeon:nrs
 6,11 [1] dungeon:n4
