@@ -9,8 +9,8 @@
 	<name>editor</name>
 	
     <properties>
-        <platform>macosx</platform>
-        <!-- <platform>gtk</platform> -->
+        <!-- <platform>macosx</platform> -->
+        <platform>gtk</platform>
         <!-- <platform>win32</platform> -->
     </properties>
 
