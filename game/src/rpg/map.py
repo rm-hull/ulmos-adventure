@@ -75,12 +75,12 @@ class RpgMap:
     If movement is valid, the sprite level is made equal to the maximum tile level
     of the base tiles. This allows the sprite to move between one level and another.
     """
-    def isMoveValid(self, level, baseRect):
-        baseTiles = self.getRectTiles(baseRect)
+    def isSpanValid(self, level, spanTiles):
+        # baseTiles = self.getRectTiles(baseRect)
         sameLevelCount = 0
         specialLevels = []
         # iterate through base tiles and gather information
-        for tile in baseTiles:
+        for tile in spanTiles:
             if tile:
                 if level in tile.levels:
                     sameLevelCount += 1
@@ -92,9 +92,9 @@ class RpgMap:
                     if specialLevel:
                         specialLevels.append(specialLevel)
         # test validity of the requested movement           
-        if sameLevelCount == len(baseTiles):
+        if sameLevelCount == len(spanTiles):
             return True, level
-        elif len(specialLevels) == len(baseTiles):
+        elif len(specialLevels) == len(spanTiles):
             minLevel, maxLevel = UPPER_LIMIT, LOWER_LIMIT
             for level in specialLevels:
                 minLevel = min(level, minLevel)
@@ -103,14 +103,37 @@ class RpgMap:
                 return True, maxLevel
         return False, level
                     
+    def isMoveValid(self, level, baseRect):
+        return self.isSpanValid(level, self.getBaseRectTiles(baseRect))
+    
+    def isStripeValid(self, level, baseRect, stripes, min, max):
+        if len(stripes) < 2:
+            return False, 0
+        sortedKeys = sorted(stripes.keys())
+        minDiff = abs(sortedKeys[0] * TILE_SIZE - min)
+        maxDiff = abs((sortedKeys[-1] + 1) * TILE_SIZE - max)
+        if minDiff < maxDiff:
+            stripe = stripes[sortedKeys[0]]
+            valid, level = self.isSpanValid(level, stripe)
+            return valid, -1
+        stripe = stripes[sortedKeys[-1]]
+        valid, level = self.isSpanValid(level, stripe)
+        return valid, 1
+        
+    def isVerticalValid(self, level, baseRect):
+        return self.isStripeValid(level, baseRect, self.verticals,
+                                  baseRect.left, baseRect.right)
+
+    def isHorizontalValid(self, level, baseRect):
+        return self.isStripeValid(level, baseRect, self.horizontals,
+                                  baseRect.top, baseRect.bottom)
+
     """
     The given spriteInfo must contain mapRect, level and z attributes.  Typically this
     object will be the sprite itself, but for ease of unit testing it can be anything.
     """
     def getMasks(self, spriteInfo):
-        spriteTiles = self.getRectTiles(spriteInfo.mapRect)
-        # baseY = (spriteRect.bottom - 1) // view.TILE_SIZE
-        # masks is a map of lists, keyed on the associated tile points
+        spriteTiles = self.getSpanTiles(spriteInfo.mapRect)
         masks = {}
         for tile in spriteTiles:
             tileMasks = tile.getMasks(spriteInfo.level, spriteInfo.z)
@@ -118,15 +141,36 @@ class RpgMap:
                 masks[(tile.x, tile.y)] = tileMasks
         return masks
     
-    def getRectTiles(self, rect):
+    """
+    Returns all the tiles that are touched by the given rectangle.
+    """
+    def getSpanTiles(self, rect):
         rectTiles = []
         x1, y1 = self.convertTopLeft(rect.left, rect.top)
         x2, y2 = self.convertBottomRight(rect.right - 1, rect.bottom - 1)
-        for x in range (x1, x2 + 1):
-            for y in range (y1, y2 + 1):
-                rectTiles.append(self.mapTiles[x][y])
+        for x in range(x1, x2 + 1):
+            rectTiles += self.mapTiles[x][y1:y2 + 1]
         return rectTiles
-
+    
+    """
+    Returns all the tiles that are touched by the given rectangle.  As a side-effect,
+    this method also caches the 'verticals' + 'horizontals' - the same tiles, but
+    divided into columns + rows.  This makes it much easier to check for valid shuffles
+    if the requested movement is invalid.
+    """
+    def getBaseRectTiles(self, rect):
+        rectTiles = []
+        x1, y1 = self.convertTopLeft(rect.left, rect.top)
+        x2, y2 = self.convertBottomRight(rect.right - 1, rect.bottom - 1)
+        self.verticals = {}
+        for x in range(x1, x2 + 1):
+            self.verticals[x] = self.mapTiles[x][y1:y2 + 1]
+            rectTiles += self.verticals[x]
+        self.horizontals = {}
+        for y in range(y1, y2 + 1):
+            self.horizontals[y] = [self.mapTiles[x][y] for x in range(x1, x2 + 1)]
+        return rectTiles
+        
     def convertTopLeft(self, px, py):
         return max(0, px // TILE_SIZE), max(0, py // TILE_SIZE)
         

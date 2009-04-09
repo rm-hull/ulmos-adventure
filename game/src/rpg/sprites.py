@@ -151,13 +151,25 @@ class Player(MaskSprite):
             boundary = self.getBoundary(px, py)
             if boundary == NO_BOUNDARY:
                 # we're within the boundary, but is it valid?
-                valid, level = self.rpgMap.isMoveValid(self.level,
-                                                       self.baseRect.move(px, py))
+                newBaseRect = self.baseRect.move(px, py)
+                valid, level = self.rpgMap.isMoveValid(self.level, newBaseRect)
                 if valid:
                     self.applyMovement(level, direction, px, py)
                     useCurrentView = False
                 else:
-                    if self.direction != direction:
+                    if px == 0:
+                        # we're dealing with vertical movement - can we shuffle horizontally?
+                        valid, shuffle = self.rpgMap.isVerticalValid(self.level, newBaseRect)
+                        if valid:
+                            self.applyMovement(level, direction, px + shuffle * MOVE_UNIT, 0)
+                            useCurrentView = False
+                    if py == 0:
+                        # we're dealing with horizontal movement - can we shuffle vertically?
+                        valid, shuffle = self.rpgMap.isHorizontalValid(self.level, newBaseRect)
+                        if valid:
+                            self.applyMovement(level, direction, 0, py + shuffle * MOVE_UNIT)
+                            useCurrentView = False
+                    if not valid and self.direction != direction:
                         # we need to animate the sprite to show a change in direction
                         # but we set px and py to zero so it doesn't move anywhere
                         self.applyMovement(level, direction, 0, 0)
