@@ -159,13 +159,13 @@ class Player(MaskSprite):
                 else:
                     if px == 0:
                         # we're dealing with vertical movement - can we shuffle horizontally?
-                        valid, shuffle = self.rpgMap.isVerticalValid(self.level, newBaseRect)
+                        valid, level, shuffle = self.rpgMap.isVerticalValid(self.level, newBaseRect)
                         if valid:
                             self.applyMovement(level, direction, px + shuffle * MOVE_UNIT, 0)
                             useCurrentView = False
                     if py == 0:
                         # we're dealing with horizontal movement - can we shuffle vertically?
-                        valid, shuffle = self.rpgMap.isHorizontalValid(self.level, newBaseRect)
+                        valid, level, shuffle = self.rpgMap.isHorizontalValid(self.level, newBaseRect)
                         if valid:
                             self.applyMovement(level, direction, 0, py + shuffle * MOVE_UNIT)
                             useCurrentView = False

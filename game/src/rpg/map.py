@@ -4,10 +4,15 @@ from __future__ import with_statement
 
 from view import TILE_SIZE
 
+import time
 import view
 
+FLOAT_TEST = '.5'
+
 UPPER_LIMIT = 32
-LOWER_LIMIT = -31
+
+MIN_SHUFFLE = (0, -1, -1, 1)
+MAX_SHUFFLE = (-1, 1, 0, -1)
 
 """
 Encapsulates the logic required for the main map.  You should not instantiate
@@ -95,11 +100,12 @@ class RpgMap:
         if sameLevelCount == len(spanTiles):
             return True, level
         elif len(specialLevels) == len(spanTiles):
-            minLevel, maxLevel = UPPER_LIMIT, LOWER_LIMIT
-            for level in specialLevels:
-                minLevel = min(level, minLevel)
-                maxLevel = max(level, maxLevel)
+            minLevel = min(specialLevels)
+            maxLevel = max(specialLevels)
             if maxLevel - minLevel < 1:
+                # quick check to ensure we return a whole number if possible
+                if FLOAT_TEST in str(maxLevel):
+                    return True, minLevel
                 return True, maxLevel
         return False, level
                     
@@ -108,18 +114,24 @@ class RpgMap:
     
     def isStripeValid(self, level, baseRect, stripes, min, max):
         if len(stripes) < 2:
-            return False, 0
+            return False, level, 0
         sortedKeys = sorted(stripes.keys())
         minDiff = abs(sortedKeys[0] * TILE_SIZE - min)
         maxDiff = abs((sortedKeys[-1] + 1) * TILE_SIZE - max)
         if minDiff < maxDiff:
-            stripe = stripes[sortedKeys[0]]
-            valid, level = self.isSpanValid(level, stripe)
-            return valid, -1
-        stripe = stripes[sortedKeys[-1]]
-        valid, level = self.isSpanValid(level, stripe)
-        return valid, 1
+            return self.isShuffleValid(stripes, sortedKeys, level, MIN_SHUFFLE)
+        return self.isShuffleValid(stripes, sortedKeys, level, MAX_SHUFFLE)
         
+    def isShuffleValid(self, stripes, sortedKeys, level, shuffle):
+        index1, shuffle1, index2, shuffle2 = shuffle
+        stripe = stripes[sortedKeys[index1]]
+        valid, level = self.isSpanValid(level, stripe)
+        if valid:
+            return valid, level, shuffle1
+        stripe = stripes[sortedKeys[index2]]
+        valid, level = self.isSpanValid(level, stripe)
+        return valid, level, shuffle2
+                
     def isVerticalValid(self, level, baseRect):
         return self.isStripeValid(level, baseRect, self.verticals,
                                   baseRect.left, baseRect.right)
