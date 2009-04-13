@@ -91,8 +91,10 @@ class MaskSprite(pygame.sprite.Sprite):
                 py = tilePoint[1] * view.TILE_SIZE - self.mapRect.top
                 [self.image.blit(mask, (px, py)) for mask in masks[tilePoint]]
     
-    # Override this method - this needs to repair the previous image used by the
-    # sprite since we have just drawn a piece of the background over it.    
+    """
+    Override this method - this needs to repair the previous image used by the
+    sprite since we have just drawn a piece of the background over it.
+    """
     def repairImage(self):
         pass
 
@@ -115,10 +117,13 @@ class Player(MaskSprite):
         # essential sprite fields
         self.imageInfo = (self.direction, self.animFrameCount)
         self.image = animationFrames[self.direction][self.animFrameCount]
+        self.movement = None
     
-    # The view rect is entirely determined by what the main sprite is doing.
-    # Sometimes we move the view, sometimes we move the sprite - it just depends
-    # where the main sprite is on the map
+    """
+    The view rect is entirely determined by what the main sprite is doing.  Sometimes
+    we move the view, sometimes we move the sprite - it just depends where the main
+    sprite is on the map.
+    """
     def getViewRect(self):
         # centre self.rect in the view
         px, py = (self.viewRect.width - self.rect.width) // 2, (self.viewRect.height - self.rect.height) // 2
@@ -147,36 +152,64 @@ class Player(MaskSprite):
         useCurrentView, boundary = True, NO_BOUNDARY
         movement = getMovement(directionBits)
         if movement:
-            px, py, direction = movement
-            boundary = self.getBoundary(px, py)
-            if boundary == NO_BOUNDARY:
-                # we're within the boundary, but is it valid?
-                newBaseRect = self.baseRect.move(px, py)
-                valid, level = self.rpgMap.isMoveValid(self.level, newBaseRect)
-                if valid:
-                    self.applyMovement(level, direction, px, py)
-                    useCurrentView = False
-                else:
-                    if px == 0:
-                        # we're dealing with vertical movement - can we shuffle horizontally?
-                        valid, level, shuffle = self.rpgMap.isVerticalValid(self.level, newBaseRect)
-                        if valid:
-                            self.applyMovement(level, direction, px + shuffle * MOVE_UNIT, 0)
-                            useCurrentView = False
-                    if py == 0:
-                        # we're dealing with horizontal movement - can we shuffle vertically?
-                        valid, level, shuffle = self.rpgMap.isHorizontalValid(self.level, newBaseRect)
-                        if valid:
-                            self.applyMovement(level, direction, 0, py + shuffle * MOVE_UNIT)
-                            useCurrentView = False
-                    if not valid and self.direction != direction:
-                        # we need to animate the sprite to show a change in direction
-                        # but we set px and py to zero so it doesn't move anywhere
-                        self.applyMovement(level, direction, 0, 0)
+            # check for deferred movement first
+            if movement == self.movement:
+                level, direction, px, py = self.deferredMovement
+                useCurrentView = self.wrapMovement(level, direction, px, py)
+            else:
+                # normal movement
+                px, py, direction = movement
+                boundary = self.getBoundary(px, py)
+                if boundary == NO_BOUNDARY:
+                    # we're within the boundary, but is it valid?
+                    newBaseRect = self.baseRect.move(px, py)
+                    valid, level = self.rpgMap.isMoveValid(self.level, newBaseRect)
+                    if valid:
+                        useCurrentView = self.wrapMovement(level, direction, px, py)
+                    else:
+                        valid = self.shuffle(newBaseRect, movement)
+                        if not valid and self.direction != direction:
+                            # we need to animate the sprite to show a change in direction
+                            # but we set px and py to zero so it doesn't move anywhere
+                            self.applyMovement(level, direction, 0, 0)
         # return
         if useCurrentView:
             return boundary, self.viewRect
         return boundary, self.getViewRect()
+
+    def shuffle(self, newBaseRect, movement):
+        valid = False
+        px, py, direction = movement
+        # check if we can shuffle horizontally
+        if px == 0:
+            valid, level, shuffle = self.rpgMap.isVerticalValid(self.level, newBaseRect)
+            if valid:
+                self.movement = movement
+                self.deferMovement(level, direction, px + shuffle * MOVE_UNIT, 0)
+        # check if we can shuffle vertically
+        if py == 0:
+            valid, level, shuffle = self.rpgMap.isHorizontalValid(self.level, newBaseRect)
+            if valid:
+                self.movement = movement
+                self.deferMovement(level, direction, 0, py + shuffle * MOVE_UNIT)
+        return valid
+    
+    """
+    Calls applyMovement and performs some additional operations.
+    """      
+    def wrapMovement(self, level, direction, px, py):
+        self.applyMovement(level, direction, px, py)
+        self.movement = None
+        return False
+    
+    """
+    Stores the deferred movement and calls applyMovement with px, py = 0 for a
+    'running on the spot' effect.
+    """
+    def deferMovement(self, level, direction, px, py):
+        # store the deferred movement 
+        self.deferredMovement = (level, direction, px, py)
+        self.applyMovement(level, direction, 0, 0)
     
     def applyMovement(self, level, direction, px, py):
         # change any fields required for animation
@@ -190,7 +223,7 @@ class Player(MaskSprite):
         self.doMove(px, py)
         # keep this information for next time
         self.imageInfo = (self.direction, self.animFrameCount)
-    
+        
     def getBoundary(self, px, py):
         testMapRect = self.mapRect.move(px, py)
         if self.rpgMap.mapRect.contains(testMapRect):
