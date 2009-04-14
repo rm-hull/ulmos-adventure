@@ -273,6 +273,11 @@ class Player(MaskSprite):
         direction, animFrameCount = self.imageInfo
         lastImage = self.animationFrames[direction][animFrameCount]
         lastImage.blit(self.animationFrames[direction + OFFSET][animFrameCount], (0, 0))
+        
+    def processCollisions(self, sprites):
+        for sprite in sprites:
+            if hasattr(sprite, "baseRect") and self.baseRect.colliderect(sprite.baseRect):
+                print 'collision detected!'
 
 class Ulmo(Player):
     
@@ -354,6 +359,19 @@ class Flames(Static):
         animationFrames = view.processStaticFrames(self.framesImage)
         Static.__init__(self, animationFrames, (4, 2))
 
+class Coin(Static):
+
+    framesImage = None
+    
+    def __init__(self):
+        if self.framesImage is None:    
+            imagePath = os.path.join(SPRITES_FOLDER, "flames.png")
+            self.framesImage = view.loadScaledImage(imagePath, None, 2)        
+        animationFrames = view.processStaticFrames(self.framesImage)
+        Static.__init__(self, animationFrames, (4, 2))
+        baseTop = self.mapRect.bottom + BASE_RECT_EXTEND - BASE_RECT_HEIGHT - 1
+        self.baseRect = Rect(0, baseTop, self.mapRect.width, BASE_RECT_HEIGHT)
+    
 """
 Sprite group that ensures pseudo z ordering for the sprites.  This works
 because internally AbstractGroup calls self.sprites() to get a list of sprites
