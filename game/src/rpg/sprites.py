@@ -148,6 +148,14 @@ class Player(MaskSprite):
         self.viewRect.move_ip(-px, -py)
         return self.viewRect
     
+    """
+    Moves the player / view rect.  The control flow is as follows:
+    > Check for deferred movement and apply if necessary.
+    > Otherwise, check the requested movement falls within the boundary.
+    > If it does, attempt to apply the requested movement.
+    > If not valid, attempt to shuffle the player.
+    > If still not valid, check for a change in direction.
+    """
     def move(self, directionBits):
         useCurrentView, boundary = True, NO_BOUNDARY
         movement = getMovement(directionBits)
@@ -168,15 +176,18 @@ class Player(MaskSprite):
                         useCurrentView = self.wrapMovement(level, direction, px, py)
                     else:
                         valid = self.shuffle(newBaseRect, movement)
-                        if not valid and self.direction != direction:
-                            # we need to animate the sprite to show a change in direction
-                            # but we set px and py to zero so it doesn't move anywhere
-                            self.applyMovement(level, direction, 0, 0)
+                        self.changeDirection(level, direction, valid)
         # return
         if useCurrentView:
             return boundary, self.viewRect
         return boundary, self.getViewRect()
-
+    
+    """
+    Shuffles the player.  Eg. if the player is attempting to move up, but is
+    blocked, we will 'shuffle' the player left/right if there is valid movement
+    available to the left/right.  This helps to align the player with steps,
+    archways, etc.
+    """
     def shuffle(self, newBaseRect, movement):
         valid = False
         px, py, direction = movement
@@ -195,6 +206,15 @@ class Player(MaskSprite):
         return valid
     
     """
+    Applies a stationary change in direction if movement is not valid.
+    """
+    def changeDirection(self, level, direction, valid):
+        if not valid and self.direction != direction:
+            # we need to animate the sprite to show a change in direction
+            # but we set px and py to zero so it doesn't move anywhere
+            self.applyMovement(level, direction, 0, 0)
+    
+    """
     Calls applyMovement and performs some additional operations.
     """      
     def wrapMovement(self, level, direction, px, py):
@@ -211,6 +231,9 @@ class Player(MaskSprite):
         self.deferredMovement = (level, direction, px, py)
         self.applyMovement(level, direction, 0, 0)
     
+    """
+    Applies valid movement.
+    """
     def applyMovement(self, level, direction, px, py):
         # change any fields required for animation
         self.level = level
@@ -223,7 +246,11 @@ class Player(MaskSprite):
         self.doMove(px, py)
         # keep this information for next time
         self.imageInfo = (self.direction, self.animFrameCount)
-        
+    
+    """
+    Checks the requested movement falls within the map boundary.  If not, returns
+    the boundary edge that has been breached. 
+    """ 
     def getBoundary(self, px, py):
         testMapRect = self.mapRect.move(px, py)
         if self.rpgMap.mapRect.contains(testMapRect):
@@ -243,8 +270,9 @@ class Player(MaskSprite):
             
     # overidden  
     def repairImage(self):
-        lastImage = self.animationFrames[self.imageInfo[0]][self.imageInfo[1]]
-        lastImage.blit(self.animationFrames[self.imageInfo[0] + OFFSET][self.imageInfo[1]], (0, 0))
+        direction, animFrameCount = self.imageInfo
+        lastImage = self.animationFrames[direction][animFrameCount]
+        lastImage.blit(self.animationFrames[direction + OFFSET][animFrameCount], (0, 0))
 
 class Ulmo(Player):
     
