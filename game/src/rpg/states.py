@@ -60,6 +60,10 @@ class PlayState:
         # if the sprite being updated is visible in the view it will be added to
         # the visibleSprites group as a side-effect 
         self.gameSprites.update(self.viewRect, self.visibleSprites)
+        toRemove = self.player.processCollisions(self.visibleSprites.sprites())
+        if len(toRemove) > 0:
+            self.gameSprites.remove(toRemove)
+            self.visibleSprites.remove(toRemove)
         self.visibleSprites.draw(screen)
         pygame.display.flip()
         

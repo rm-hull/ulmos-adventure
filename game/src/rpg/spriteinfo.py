@@ -32,7 +32,11 @@ def getGameSprites_Islands():
     flames1.setPosition(10, 1, 2)
     flames2 = sprites.Flames()
     flames2.setPosition(12, 1, 2)
-    gameSprites.add(flames1, flames2)
+    coin1 = sprites.Coin()
+    coin1.setPosition(2, 10, 2)
+    coin2 = sprites.Coin()
+    coin2.setPosition(10, 9, 3)
+    gameSprites.add(flames1, flames2, coin1, coin2)
     return gameSprites
 
 spriteInfo = {}

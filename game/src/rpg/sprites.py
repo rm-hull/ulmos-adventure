@@ -27,6 +27,8 @@ BASE_RECT_EXTEND = 1 * SCALAR
 
 SPRITES_FOLDER = "sprites"
 
+EMPTY_LIST = []
+
 # ====================
 # == MODULE METHODS ==
 # ====================
@@ -118,6 +120,7 @@ class Player(MaskSprite):
         self.imageInfo = (self.direction, self.animFrameCount)
         self.image = animationFrames[self.direction][self.animFrameCount]
         self.movement = None
+        self.coinCount = 0
     
     """
     The view rect is entirely determined by what the main sprite is doing.  Sometimes
@@ -267,18 +270,30 @@ class Player(MaskSprite):
         elif testMapRect.bottom > rpgMapRect.bottom:
             boundary = DOWN
         return boundary
-            
+
+    def processCollisions(self, sprites):
+        # if there are less than two sprites
+        if len(sprites) < 2:
+            return EMPTY_LIST
+        toRemove = []
+        for sprite in sprites:
+            if sprite != self and sprite.level == self.level:
+                # they're on the same level, but do their base rects intersect?
+                if hasattr(sprite, "baseRect") and self.baseRect.colliderect(sprite.baseRect):
+                    if sprite.processCollision(self):
+                        toRemove.append(sprite)
+        return toRemove
+                    
+    def incrementCoinCount(self, n):
+        self.coinCount += n
+        print self.coinCount
+              
     # overidden  
     def repairImage(self):
         direction, animFrameCount = self.imageInfo
         lastImage = self.animationFrames[direction][animFrameCount]
         lastImage.blit(self.animationFrames[direction + OFFSET][animFrameCount], (0, 0))
         
-    def processCollisions(self, sprites):
-        for sprite in sprites:
-            if hasattr(sprite, "baseRect") and self.baseRect.colliderect(sprite.baseRect):
-                print 'collision detected!'
-
 class Ulmo(Player):
     
     framesImage = None
@@ -304,7 +319,7 @@ class Dude(Player):
 """
 Defines a sprite that doesn't move independently, although it does move with the view.
 """
-class Static(pygame.sprite.Sprite):
+class StaticSprite(pygame.sprite.Sprite):
     
     def __init__(self, animationFrames, position = (0, 0)):
         pygame.sprite.Sprite.__init__(self)
@@ -325,12 +340,16 @@ class Static(pygame.sprite.Sprite):
         self.active = False
 
     def setPosition(self, x, y, level):
+        self.resetPosition(x * view.TILE_SIZE + self.position[0],
+                           y * view.TILE_SIZE + self.position[1],
+                           level)
+        
+    def resetPosition(self, px = 0, py = 0, level = None):
         self.level = level
-        self.mapRect.topleft = (x * view.TILE_SIZE + self.position[0],
-                                y * view.TILE_SIZE + self.position[1])
+        self.mapRect.move_ip(px, py)
         # pseudo z order that is used to test if one sprite is behind another
         self.z = int(self.mapRect.bottom + self.level * TILE_SIZE)
-
+        
     def update(self, viewRect, spriteGroup):
         if self.mapRect.colliderect(viewRect):
             # some part of this sprite is in the current view
@@ -348,7 +367,7 @@ class Static(pygame.sprite.Sprite):
             self.active = False
             self.remove(spriteGroup)
             
-class Flames(Static):
+class Flames(StaticSprite):
     
     framesImage = None
     
@@ -357,21 +376,29 @@ class Flames(Static):
             imagePath = os.path.join(SPRITES_FOLDER, "flames.png")
             self.framesImage = view.loadScaledImage(imagePath, None, 2)        
         animationFrames = view.processStaticFrames(self.framesImage)
-        Static.__init__(self, animationFrames, (4, 2))
+        StaticSprite.__init__(self, animationFrames, (4, 2))
 
-class Coin(Static):
+class Coin(StaticSprite):
 
     framesImage = None
     
     def __init__(self):
         if self.framesImage is None:    
-            imagePath = os.path.join(SPRITES_FOLDER, "flames.png")
+            imagePath = os.path.join(SPRITES_FOLDER, "coin2.png")
             self.framesImage = view.loadScaledImage(imagePath, None, 2)        
         animationFrames = view.processStaticFrames(self.framesImage)
-        Static.__init__(self, animationFrames, (4, 2))
+        StaticSprite.__init__(self, animationFrames, (2, 2))
         baseTop = self.mapRect.bottom + BASE_RECT_EXTEND - BASE_RECT_HEIGHT - 1
         self.baseRect = Rect(0, baseTop, self.mapRect.width, BASE_RECT_HEIGHT)
-    
+        print self.baseRect
+        
+    def resetPosition(self, px = 0, py = 0, level = None):
+        StaticSprite.resetPosition(self, px, py, level)
+        self.baseRect.move_ip(px, py)
+        
+    def processCollision(self, player):
+        player.incrementCoinCount(1)
+        return True
 """
 Sprite group that ensures pseudo z ordering for the sprites.  This works
 because internally AbstractGroup calls self.sprites() to get a list of sprites
