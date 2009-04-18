@@ -61,9 +61,7 @@ class MaskSprite(pygame.sprite.Sprite):
         # main rect
         self.rect = self.image.get_rect()
         # other rectangles as required by the game engine
-        self.mapRect = self.image.get_rect()
-        baseTop = self.mapRect.bottom + BASE_RECT_EXTEND - BASE_RECT_HEIGHT - 1
-        self.baseRect = Rect(0, baseTop, self.mapRect.width, BASE_RECT_HEIGHT)
+        self.initRectangles()
         # view rect is the scrolling window onto the map
         self.viewRect = Rect((0, 0), pygame.display.get_surface().get_size())
         # if required, move to the requested position
@@ -71,6 +69,16 @@ class MaskSprite(pygame.sprite.Sprite):
             self.level = level
         if px > 0 or py > 0:
             self.doMove(px, py)
+            
+    def initRectangles(self):
+        self.mapRect = self.image.get_rect()
+        myBaseRectWidth = self.mapRect.width 
+        if hasattr(self, "baseRectWidth"):
+            myBaseRectWidth = self.baseRectWidth
+            print 'hello'
+        baseRectTop = self.mapRect.bottom + BASE_RECT_EXTEND - BASE_RECT_HEIGHT - 1
+        baseRectLeft = (self.mapRect.width - myBaseRectWidth) / 2
+        self.baseRect = Rect(baseRectLeft, baseRectTop, myBaseRectWidth, BASE_RECT_HEIGHT)
 
     def doMove(self, px, py):
         self.mapRect.move_ip(px, py)
@@ -301,7 +309,7 @@ class Ulmo(Player):
     def __init__(self, rpgMap):
         if self.framesImage is None:          
             imagePath = os.path.join(SPRITES_FOLDER, "ulmo-frames.png")
-            self.framesImage = view.loadScaledImage(imagePath, None, 2)
+            self.framesImage = view.loadScaledImage(imagePath, None)
         animationFrames = view.processMovementFrames(self.framesImage)
         Player.__init__(self, rpgMap, animationFrames, (1, 4))
         
@@ -312,7 +320,7 @@ class Dude(Player):
     def __init__(self, rpgMap):    
         if self.framesImage is None:          
             imagePath = os.path.join(SPRITES_FOLDER, "dude.png")
-            self.framesImage = view.loadScaledImage(imagePath, None, 2)
+            self.framesImage = view.loadScaledImage(imagePath, None)
         animationFrames = view.processMovementFrames(framesImage, 3)
         Player.__init__(self, rpgMap, animationFrames)
 
@@ -374,23 +382,25 @@ class Flames(StaticSprite):
     def __init__(self):
         if self.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "flames.png")
-            self.framesImage = view.loadScaledImage(imagePath, None, 2)        
+            self.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(self.framesImage)
         StaticSprite.__init__(self, animationFrames, (4, 2))
 
 class Coin(StaticSprite):
-
+    
+    baseRectWidth = 12 * SCALAR
+    
     framesImage = None
     
     def __init__(self):
         if self.framesImage is None:    
-            imagePath = os.path.join(SPRITES_FOLDER, "coin2.png")
-            self.framesImage = view.loadScaledImage(imagePath, None, 2)        
+            imagePath = os.path.join(SPRITES_FOLDER, "coin.png")
+            self.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(self.framesImage)
         StaticSprite.__init__(self, animationFrames, (2, 2))
-        baseTop = self.mapRect.bottom + BASE_RECT_EXTEND - BASE_RECT_HEIGHT - 1
-        self.baseRect = Rect(0, baseTop, self.mapRect.width, BASE_RECT_HEIGHT)
-        print self.baseRect
+        baseRectTop = self.mapRect.bottom + BASE_RECT_EXTEND - BASE_RECT_HEIGHT - 1
+        baseRectLeft = (self.mapRect.width - self.baseRectWidth) / 2
+        self.baseRect = Rect(baseRectLeft, baseRectTop, self.baseRectWidth, BASE_RECT_HEIGHT)
         
     def resetPosition(self, px = 0, py = 0, level = None):
         StaticSprite.resetPosition(self, px, py, level)
