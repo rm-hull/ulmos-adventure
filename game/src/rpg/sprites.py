@@ -39,52 +39,70 @@ def getMovement(directionBits):
     return None
 
 """
-Sprite that supports movement and being masked by tile images that are 'closer'
-to the viewer than the sprite.
+Base sprite class.
 """
-class MaskSprite(pygame.sprite.Sprite):
-    
-    def __init__(self, rpgMap, position = (0, 0)):
+class RpgSprite(pygame.sprite.Sprite):
+
+    def __init__(self, frameSkip, position = (0, 0)):
         # pygame.sprite.Sprite.__init__(self, self.containers)
         pygame.sprite.Sprite.__init__(self)
-        # properties common to all MaskSprites
-        self.rpgMap = rpgMap
-        self.masked = False
+        # properties common to all RpgSprites
         self.position = [i * SCALAR for i in position]
+        self.frameSkip = frameSkip
+        self.animFrameCount = 0
+        self.frameCount = 0
+        # indicates if this sprite is currently visible
+        self.active = False
 
     def setPosition(self, x, y, level):
         self.resetPosition(x * view.TILE_SIZE + self.position[0],
                            y * view.TILE_SIZE + self.position[1],
                            level)
-        
+
     def resetPosition(self, px = 0, py = 0, level = None):
         # main rect
         self.rect = self.image.get_rect()
         # other rectangles as required by the game engine
-        self.initRectangles()
-        # view rect is the scrolling window onto the map
-        self.viewRect = Rect((0, 0), pygame.display.get_surface().get_size())
+        self.mapRect = self.image.get_rect()
+        self.initBaseRect()
         # if required, move to the requested position
         if level:
             self.level = level
         if px > 0 or py > 0:
             self.doMove(px, py)
-            
-    def initRectangles(self):
-        self.mapRect = self.image.get_rect()
-        myBaseRectWidth = self.mapRect.width 
-        if hasattr(self, "baseRectWidth"):
-            myBaseRectWidth = self.baseRectWidth
-            print 'hello'
-        baseRectTop = self.mapRect.bottom + BASE_RECT_EXTEND - BASE_RECT_HEIGHT - 1
-        baseRectLeft = (self.mapRect.width - myBaseRectWidth) / 2
-        self.baseRect = Rect(baseRectLeft, baseRectTop, myBaseRectWidth, BASE_RECT_HEIGHT)
-
+        
     def doMove(self, px, py):
         self.mapRect.move_ip(px, py)
         self.baseRect.move_ip(px, py)
         # pseudo z order that is used to test if one sprite is behind another
         self.z = int(self.mapRect.bottom + self.level * TILE_SIZE)
+
+    def initBaseRect(self):
+        myBaseRectWidth = self.mapRect.width 
+        if hasattr(self, "baseRectWidth"):
+            myBaseRectWidth = self.baseRectWidth
+        myBaseRectHeight = BASE_RECT_HEIGHT
+        if hasattr(self, "baseRectHeight"):
+            myBaseRectHeight = self.baseRectHeight
+        baseRectTop = self.mapRect.bottom + BASE_RECT_EXTEND - myBaseRectHeight - 1
+        baseRectLeft = (self.mapRect.width - myBaseRectWidth) / 2
+        self.baseRect = Rect(baseRectLeft, baseRectTop, myBaseRectWidth, myBaseRectHeight)
+
+"""
+Sprite that supports being masked by tile images that are 'closer' to the viewer
+than the sprite.
+"""
+class MaskSprite(RpgSprite):
+    
+    def __init__(self, rpgMap, frameSkip, position = (0, 0)):
+        # pygame.sprite.Sprite.__init__(self, self.containers)
+        RpgSprite.__init__(self, frameSkip, position)
+        # properties common to all MaskSprites
+        self.rpgMap = rpgMap
+        self.masked = False
+
+    def doMove(self, px, py):
+        RpgSprite.doMove(self, px, py)
         self.applyMasks()
         
     def applyMasks(self):
@@ -115,18 +133,17 @@ extending MaskSprite, but all animation functionality is encapsulated here.
 class Player(MaskSprite):
     
     def __init__(self, rpgMap, animationFrames, position = (0, 0)):
-        MaskSprite.__init__(self, rpgMap, position)
-        self.animFrameCount = 1
+        MaskSprite.__init__(self, rpgMap, 6, position)
+        # view rect is the scrolling window onto the map
+        self.viewRect = Rect((0, 0), pygame.display.get_surface().get_size())
+        # animation frames
         self.direction = DOWN
-        # tweak these for animation variation
-        self.frameSkip = 6
-        self.frameCount = 0
-        # init animation frames
-        self.numFrames = len(animationFrames[self.direction])
         self.animationFrames = animationFrames     
-        # essential sprite fields
+        self.numFrames = len(animationFrames[self.direction])
+        # additional animation properties
         self.imageInfo = (self.direction, self.animFrameCount)
         self.image = animationFrames[self.direction][self.animFrameCount]
+        # sprite state
         self.movement = None
         self.coinCount = 0
     
@@ -140,7 +157,6 @@ class Player(MaskSprite):
         px, py = (self.viewRect.width - self.rect.width) // 2, (self.viewRect.height - self.rect.height) // 2
         self.rect.topleft = (px, py)
         self.viewRect.topleft = (self.mapRect.left - px, self.mapRect.top - py)
-        # mapImage = self.rpgMap.mapImage
         rpgMapRect = self.rpgMap.mapRect
         if rpgMapRect.contains(self.viewRect):
             return self.viewRect
@@ -278,7 +294,10 @@ class Player(MaskSprite):
         elif testMapRect.bottom > rpgMapRect.bottom:
             boundary = DOWN
         return boundary
-
+    
+    """
+    Processes collisions with other sprites in the given sprite collection.
+    """
     def processCollisions(self, sprites):
         # if there are less than two sprites
         if len(sprites) < 2:
@@ -287,21 +306,21 @@ class Player(MaskSprite):
         for sprite in sprites:
             if sprite != self and sprite.level == self.level:
                 # they're on the same level, but do their base rects intersect?
-                if hasattr(sprite, "baseRect") and self.baseRect.colliderect(sprite.baseRect):
+                if hasattr(sprite, "processCollision") and self.baseRect.colliderect(sprite.baseRect):
                     if sprite.processCollision(self):
                         toRemove.append(sprite)
         return toRemove
                     
-    def incrementCoinCount(self, n):
-        self.coinCount += n
-        print self.coinCount
-              
     # overidden  
     def repairImage(self):
         direction, animFrameCount = self.imageInfo
         lastImage = self.animationFrames[direction][animFrameCount]
         lastImage.blit(self.animationFrames[direction + OFFSET][animFrameCount], (0, 0))
-        
+
+    def incrementCoinCount(self, n):
+        self.coinCount += n
+        print self.coinCount
+    
 class Ulmo(Player):
     
     framesImage = None
@@ -313,51 +332,19 @@ class Ulmo(Player):
         animationFrames = view.processMovementFrames(self.framesImage)
         Player.__init__(self, rpgMap, animationFrames, (1, 4))
         
-class Dude(Player):
-
-    framesImage = None
-    
-    def __init__(self, rpgMap):    
-        if self.framesImage is None:          
-            imagePath = os.path.join(SPRITES_FOLDER, "dude.png")
-            self.framesImage = view.loadScaledImage(imagePath, None)
-        animationFrames = view.processMovementFrames(framesImage, 3)
-        Player.__init__(self, rpgMap, animationFrames)
-
 """
 Defines a sprite that doesn't move independently, although it does move with the view.
 """
-class StaticSprite(pygame.sprite.Sprite):
+class StaticSprite(RpgSprite):
     
-    def __init__(self, animationFrames, position = (0, 0)):
-        pygame.sprite.Sprite.__init__(self)
-        self.animFrameCount = 0
-        # tweak these for animation variation
-        self.frameSkip = 6
-        self.frameCount = 0
-        # init animation frames
-        self.numFrames = len(animationFrames)
+    def __init__(self, animationFrames, frameSkip, position = (0, 0)):
+        RpgSprite.__init__(self, frameSkip, position)
+        # animation frames
         self.animationFrames = animationFrames     
-        # essential sprite fields
+        self.numFrames = len(animationFrames)
+        # additional animation properties
         self.image = animationFrames[self.animFrameCount]
-        self.rect = self.image.get_rect()
-        # other rectangles as required by the game engine
-        self.mapRect = self.image.get_rect()
-        self.position = [i * SCALAR for i in position]
-        # indicates if this sprite is currently visible
-        self.active = False
 
-    def setPosition(self, x, y, level):
-        self.resetPosition(x * view.TILE_SIZE + self.position[0],
-                           y * view.TILE_SIZE + self.position[1],
-                           level)
-        
-    def resetPosition(self, px = 0, py = 0, level = None):
-        self.level = level
-        self.mapRect.move_ip(px, py)
-        # pseudo z order that is used to test if one sprite is behind another
-        self.z = int(self.mapRect.bottom + self.level * TILE_SIZE)
-        
     def update(self, viewRect, spriteGroup):
         if self.mapRect.colliderect(viewRect):
             # some part of this sprite is in the current view
@@ -384,12 +371,11 @@ class Flames(StaticSprite):
             imagePath = os.path.join(SPRITES_FOLDER, "flames.png")
             self.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(self.framesImage)
-        StaticSprite.__init__(self, animationFrames, (4, 2))
+        StaticSprite.__init__(self, animationFrames, 6, (4, 2))
 
 class Coin(StaticSprite):
     
-    baseRectWidth = 12 * SCALAR
-    
+    baseRectWidth = 8 * SCALAR    
     framesImage = None
     
     def __init__(self):
@@ -397,18 +383,12 @@ class Coin(StaticSprite):
             imagePath = os.path.join(SPRITES_FOLDER, "coin.png")
             self.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(self.framesImage)
-        StaticSprite.__init__(self, animationFrames, (2, 2))
-        baseRectTop = self.mapRect.bottom + BASE_RECT_EXTEND - BASE_RECT_HEIGHT - 1
-        baseRectLeft = (self.mapRect.width - self.baseRectWidth) / 2
-        self.baseRect = Rect(baseRectLeft, baseRectTop, self.baseRectWidth, BASE_RECT_HEIGHT)
-        
-    def resetPosition(self, px = 0, py = 0, level = None):
-        StaticSprite.resetPosition(self, px, py, level)
-        self.baseRect.move_ip(px, py)
+        StaticSprite.__init__(self, animationFrames, 6, (2, 2))
         
     def processCollision(self, player):
         player.incrementCoinCount(1)
         return True
+
 """
 Sprite group that ensures pseudo z ordering for the sprites.  This works
 because internally AbstractGroup calls self.sprites() to get a list of sprites
