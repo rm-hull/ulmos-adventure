@@ -11,15 +11,15 @@ MOVE_UNIT = 1 * SCALAR
 NO_BOUNDARY = 0
 
 # valid movement combinations - movement is keyed on direction bits and is
-# stored as a tuple (px, py, direction) 
-MOVEMENT = {UP: (0, -MOVE_UNIT, UP),
-            DOWN: (0, MOVE_UNIT, DOWN),
-            LEFT: (-MOVE_UNIT, 0, LEFT),
-            RIGHT: (MOVE_UNIT, 0, RIGHT),
-            UP + LEFT: (-MOVE_UNIT, -MOVE_UNIT, UP),
-            UP + RIGHT: (MOVE_UNIT, -MOVE_UNIT, UP),
-            DOWN + LEFT: (-MOVE_UNIT, MOVE_UNIT, DOWN),
-            DOWN + RIGHT: (MOVE_UNIT, MOVE_UNIT, DOWN)}
+# stored as a tuple (px, py, direction, diagonal) 
+MOVEMENT = {UP: (0, -MOVE_UNIT, UP, False),
+            DOWN: (0, MOVE_UNIT, DOWN, False),
+            LEFT: (-MOVE_UNIT, 0, LEFT, False),
+            RIGHT: (MOVE_UNIT, 0, RIGHT, False),
+            UP + LEFT: (-MOVE_UNIT, -MOVE_UNIT, UP, True),
+            UP + RIGHT: (MOVE_UNIT, -MOVE_UNIT, UP, True),
+            DOWN + LEFT: (-MOVE_UNIT, MOVE_UNIT, DOWN, True),
+            DOWN + RIGHT: (MOVE_UNIT, MOVE_UNIT, DOWN, True)}
 
 # we may need to specify these on a sprite by sprite basis 
 BASE_RECT_HEIGHT = 9 * SCALAR
@@ -193,16 +193,20 @@ class Player(MaskSprite):
                 useCurrentView = self.wrapMovement(level, direction, px, py)
             else:
                 # normal movement
-                px, py, direction = movement
+                px, py, direction, diagonal = movement
                 boundary = self.getBoundary(px, py)
                 if boundary == NO_BOUNDARY:
                     # we're within the boundary, but is it valid?
                     newBaseRect = self.baseRect.move(px, py)
                     valid, level = self.rpgMap.isMoveValid(self.level, newBaseRect)
                     if valid:
+                        #if diagonal:
+                        #    self.movement = movement
+                        #    self.deferMovement(level, direction, px, py)
+                        #else:
                         useCurrentView = self.wrapMovement(level, direction, px, py)
                     else:
-                        valid = self.shuffle(newBaseRect, movement)
+                        valid = self.shuffle(movement, newBaseRect)
                         self.changeDirection(level, direction, valid)
         # return
         if useCurrentView:
@@ -215,21 +219,34 @@ class Player(MaskSprite):
     available to the left/right.  This helps to align the player with steps,
     archways, etc.
     """
-    def shuffle(self, newBaseRect, movement):
+    def shuffle(self, movement, newBaseRect):
         valid = False
-        px, py, direction = movement
-        # check if we can shuffle horizontally
-        if px == 0:
-            valid, level, shuffle = self.rpgMap.isVerticalValid(self.level, newBaseRect)
+        px, py, direction, diagonal = movement
+        if diagonal:
+            xBaseRect = self.baseRect.move(px, 0)
+            valid, level = self.rpgMap.isMoveValid(self.level, xBaseRect)
             if valid:
                 self.movement = movement
-                self.deferMovement(level, direction, px + shuffle * MOVE_UNIT, 0)
-        # check if we can shuffle vertically
-        if py == 0:
-            valid, level, shuffle = self.rpgMap.isHorizontalValid(self.level, newBaseRect)
-            if valid:
-                self.movement = movement
-                self.deferMovement(level, direction, 0, py + shuffle * MOVE_UNIT)
+                self.deferMovement(level, direction, px, 0)
+            else:
+                yBaseRect = self.baseRect.move(0, py)
+                valid, level = self.rpgMap.isMoveValid(self.level, yBaseRect)                
+                if valid:
+                    self.movement = movement
+                    self.deferMovement(level, direction, 0, py)
+        else:
+            if px == 0:
+                # check if we can shuffle horizontally
+                valid, level, shuffle = self.rpgMap.isVerticalValid(self.level, newBaseRect)
+                if valid:
+                    self.movement = movement
+                    self.deferMovement(level, direction, px + shuffle * MOVE_UNIT, 0)
+            else:
+                # check if we can shuffle vertically
+                valid, level, shuffle = self.rpgMap.isHorizontalValid(self.level, newBaseRect)
+                if valid:
+                    self.movement = movement
+                    self.deferMovement(level, direction, 0, py + shuffle * MOVE_UNIT)
         return valid
     
     """

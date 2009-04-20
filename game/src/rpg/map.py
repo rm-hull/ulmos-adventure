@@ -112,7 +112,7 @@ class RpgMap:
     def isMoveValid(self, level, baseRect):
         return self.isSpanValid(level, self.getBaseRectTiles(baseRect))
     
-    def isStripeValid(self, level, baseRect, stripes, min, max):
+    def isStripeValid(self, level, stripes, min, max):
         if len(stripes) < 2:
             return False, level, 0
         sortedKeys = sorted(stripes.keys())
@@ -133,11 +133,11 @@ class RpgMap:
         return valid, level, shuffle2
                 
     def isVerticalValid(self, level, baseRect):
-        return self.isStripeValid(level, baseRect, self.verticals,
+        return self.isStripeValid(level, self.verticals,
                                   baseRect.left, baseRect.right)
 
     def isHorizontalValid(self, level, baseRect):
-        return self.isStripeValid(level, baseRect, self.horizontals,
+        return self.isStripeValid(level, self.horizontals,
                                   baseRect.top, baseRect.bottom)
 
     """
