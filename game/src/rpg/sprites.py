@@ -206,7 +206,10 @@ class Player(MaskSprite):
                         #else:
                         useCurrentView = self.wrapMovement(level, direction, px, py)
                     else:
-                        valid = self.shuffle(movement, newBaseRect)
+                        if diagonal:
+                            valid = self.slide(movement)
+                        else:
+                            valid = self.shuffle(movement)
                         self.changeDirection(level, direction, valid)
         # return
         if useCurrentView:
@@ -214,39 +217,45 @@ class Player(MaskSprite):
         return boundary, self.getViewRect()
     
     """
+    Slides the player.
+    """
+    def slide(self, movement):
+        px, py, direction, diagonal = movement
+        # check if we can slide horizontally
+        xBaseRect = self.baseRect.move(px, 0)
+        valid, level = self.rpgMap.isMoveValid(self.level, xBaseRect)
+        if valid:
+            self.movement = movement
+            self.deferMovement(level, direction, px, 0)
+            return valid
+        # check if we can slide vertically
+        yBaseRect = self.baseRect.move(0, py)
+        valid, level = self.rpgMap.isMoveValid(self.level, yBaseRect)                
+        if valid:
+            self.movement = movement
+            self.deferMovement(level, direction, 0, py)
+        return valid
+        
+    """
     Shuffles the player.  Eg. if the player is attempting to move up, but is
     blocked, we will 'shuffle' the player left/right if there is valid movement
     available to the left/right.  This helps to align the player with steps,
     archways, etc.
     """
-    def shuffle(self, movement, newBaseRect):
-        valid = False
+    def shuffle(self, movement):
         px, py, direction, diagonal = movement
-        if diagonal:
-            xBaseRect = self.baseRect.move(px, 0)
-            valid, level = self.rpgMap.isMoveValid(self.level, xBaseRect)
+        # check if we can shuffle horizontally
+        if px == 0:
+            valid, level, shuffle = self.rpgMap.isVerticalValid(self.level, self.baseRect)
             if valid:
                 self.movement = movement
-                self.deferMovement(level, direction, px, 0)
-            else:
-                yBaseRect = self.baseRect.move(0, py)
-                valid, level = self.rpgMap.isMoveValid(self.level, yBaseRect)                
-                if valid:
-                    self.movement = movement
-                    self.deferMovement(level, direction, 0, py)
-        else:
-            if px == 0:
-                # check if we can shuffle horizontally
-                valid, level, shuffle = self.rpgMap.isVerticalValid(self.level, newBaseRect)
-                if valid:
-                    self.movement = movement
-                    self.deferMovement(level, direction, px + shuffle * MOVE_UNIT, 0)
-            else:
-                # check if we can shuffle vertically
-                valid, level, shuffle = self.rpgMap.isHorizontalValid(self.level, newBaseRect)
-                if valid:
-                    self.movement = movement
-                    self.deferMovement(level, direction, 0, py + shuffle * MOVE_UNIT)
+                self.deferMovement(level, direction, px + shuffle * MOVE_UNIT, 0)
+            return valid
+        # check if we can shuffle vertically
+        valid, level, shuffle = self.rpgMap.isHorizontalValid(self.level, self.baseRect)
+        if valid:
+            self.movement = movement
+            self.deferMovement(level, direction, 0, py + shuffle * MOVE_UNIT)
         return valid
     
     """
