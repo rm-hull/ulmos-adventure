@@ -99,9 +99,18 @@
 
 0,11 vdark
 1,11 sarch
-2,11
-3,11
-4,11
-5,11
+2,11 treels1
+3,11 treers1
+4,11 treelds1
+5,11 treerds1
 6,11
 7,11
+
+0,12
+1,12
+2,12 treels2
+3,12 treers2
+4,12 treelds2
+5,12 treerds2
+6,12
+7,12

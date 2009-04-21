@@ -1,5 +1,14 @@
-0,0 skull_top
-1,0
+0,0 tree_tl
+1,0 tree_tr
+2,0 skull_top
+3,0
 
-0,1 skull_base1
-1,1 skull_base2
+0,1 tree_ml
+1,1 tree_mr
+2,1 skull_base1
+3,1 skull_base2
+
+0,2 tree_bl1
+1,2 tree_br1
+2,2 tree_bl2
+3,2 tree_br2
