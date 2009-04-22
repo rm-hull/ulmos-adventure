@@ -54,8 +54,8 @@
 2,3
 3,3 grass:n1
 4,3 grass:n1
-5,3 grass:n1 objects:tree_tl
-6,3 grass:n1 objects:tree_tr
+5,3 grass:n1 objects:tree_tl2
+6,3 grass:n1 objects:tree_tr2
 7,3 grass:n1
 8,3 grass:n1
 9,3
@@ -71,9 +71,9 @@
 2,4
 3,4 grass:n1
 4,4 grass:n1
-5,4 grass:n1 objects:tree_ml
-6,4 grass:n1 objects:tree_mr objects:tree_tl
-7,4 grass:n1 objects:tree_tr
+5,4 grass:n1 objects:tree_ml2
+6,4 grass:n1 objects:tree_mr2 objects:tree_tl1
+7,4 grass:n1 objects:tree_tr1
 8,4 grass:n1
 9,4
 10,4
@@ -87,10 +87,10 @@
 1,5
 2,5
 3,5 grass:n1
-4,5 grass:n1 objects:tree_tl
-5,5 grass:n1 grass:treelds1 objects:tree_bl2 objects:tree_tr
-6,5 grass:n1 grass:treerds1 objects:tree_br2 objects:tree_ml
-7,5 grass:n1 objects:tree_mr
+4,5 grass:n1 objects:tree_tl1
+5,5 grass:n1 grass:treelds1 objects:tree_bl2 objects:tree_tr1
+6,5 grass:n1 grass:treerds1 objects:tree_br2 objects:tree_ml1
+7,5 grass:n1 objects:tree_mr1
 8,5 grass:n1
 9,5
 10,5
@@ -104,8 +104,8 @@
 1,6
 2,6
 3,6 grass:n1
-4,6 grass:n1 objects:tree_bl1 objects:tree_ml
-5,6 grass:n1 grass:treelds2 objects:tree_br1 objects:tree_mr
+4,6 grass:n1 objects:tree_bl1 objects:tree_ml1
+5,6 grass:n1 grass:treelds2 objects:tree_br1 objects:tree_mr1
 6,6 grass:treerds2 grass:treels1 objects:tree_bl2
 7,6 grass:n1 grass:treers1 objects:tree_br2
 8,6 grass:n1
