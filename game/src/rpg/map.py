@@ -6,6 +6,7 @@ from view import TILE_SIZE
 
 import time
 import view
+import eventinfo
 
 FLOAT_TEST = '.5'
 
@@ -26,6 +27,7 @@ class RpgMap:
         self.mapTiles = mapTiles
         self.cols = len(self.mapTiles)
         self.rows = len(self.mapTiles[0])
+        self.eventTriggers = eventinfo.getEventTriggers(name)
         self.initialiseMapImage()
 
     def initialiseMapImage(self):

@@ -322,10 +322,20 @@ class Player(MaskSprite):
         return boundary
     
     """
+    Processes events triggered via event tiles.
+    """
+    def processEvents(self):
+        if self.level in self.rpgMap.eventTriggers:
+            for eventTile in self.rpgMap.eventTriggers[self.level]:
+                if self.baseRect.colliderect(eventTile.rect):
+                    return eventTile
+        return None
+    
+    """
     Processes collisions with other sprites in the given sprite collection.
     """
     def processCollisions(self, sprites):
-        # if there are less than two sprites
+        # if there are less than two sprites then self is the only sprite
         if len(sprites) < 2:
             return EMPTY_LIST
         toRemove = []

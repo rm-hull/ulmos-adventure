@@ -40,10 +40,10 @@ class PlayState:
         self.gameSprites = spriteinfo.getMapSprites(rpgMap.name)
              
     def execute(self, keyPresses):
-        # are we standing on a special tile?
-        special = self.player.checkSpecials()
-        if special > sprites.NO_SPECIAL:
-            print "special %s" % special
+        # have we triggered any events?
+        event = self.player.processEvents()
+        if event:
+            print "special %s" % event
         # have we collided with any sprites?
         toRemove = self.player.processCollisions(self.visibleSprites.sprites())
         if len(toRemove) > 0:
