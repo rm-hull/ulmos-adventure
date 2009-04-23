@@ -3,12 +3,27 @@
 import os
 import pygame
 import view
+import eventinfo
 
 from pygame.locals import Rect
 from view import UP, DOWN, LEFT, RIGHT, OFFSET, SCALAR, TILE_SIZE
 
 MOVE_UNIT = 1 * SCALAR
 NO_BOUNDARY = 0
+
+# we may need to specify these on a sprite by sprite basis 
+BASE_RECT_HEIGHT = 9 * SCALAR
+BASE_RECT_EXTEND = 1 * SCALAR
+
+SPRITES_FOLDER = "sprites"
+
+EMPTY_LIST = []
+
+DUMMY_EVENT = eventinfo.DummyEvent()
+
+# ====================
+# == MODULE METHODS ==
+# ====================
 
 # valid movement combinations - movement is keyed on direction bits and is
 # stored as a tuple (px, py, direction, diagonal) 
@@ -20,18 +35,6 @@ MOVEMENT = {UP: (0, -MOVE_UNIT, UP, False),
             UP + RIGHT: (MOVE_UNIT, -MOVE_UNIT, UP, True),
             DOWN + LEFT: (-MOVE_UNIT, MOVE_UNIT, DOWN, True),
             DOWN + RIGHT: (MOVE_UNIT, MOVE_UNIT, DOWN, True)}
-
-# we may need to specify these on a sprite by sprite basis 
-BASE_RECT_HEIGHT = 9 * SCALAR
-BASE_RECT_EXTEND = 1 * SCALAR
-
-SPRITES_FOLDER = "sprites"
-
-EMPTY_LIST = []
-
-# ====================
-# == MODULE METHODS ==
-# ====================
 
 def getMovement(directionBits):
     if directionBits in MOVEMENT:
@@ -194,8 +197,8 @@ class Player(MaskSprite):
             else:
                 # normal movement
                 px, py, direction, diagonal = movement
-                boundary = self.getBoundary(px, py)
-                if boundary == NO_BOUNDARY:
+                boundary = self.getBoundaryEvent(px, py)
+                if not boundary:
                     # we're within the boundary, but is it valid?
                     newBaseRect = self.baseRect.move(px, py)
                     valid, level = self.rpgMap.isMoveValid(self.level, newBaseRect)
@@ -306,11 +309,21 @@ class Player(MaskSprite):
     Checks the requested movement falls within the map boundary.  If not, returns
     the boundary edge that has been breached. 
     """ 
-    def getBoundary(self, px, py):
+    def getBoundaryEvent(self, px, py):
         testMapRect = self.mapRect.move(px, py)
         if self.rpgMap.mapRect.contains(testMapRect):
             # we're within the boundary
-            return NO_BOUNDARY
+            return None
+        boundary = self.getBoundary(testMapRect)
+        if boundary in self.rpgMap.boundaryTriggers:
+            tileRange = self.getTileRange(boundary)
+            for trigger in self.rpgMap.boundaryTriggers[boundary]:
+                testList = [i in trigger.range for i in tileRange]
+                if all(testList):
+                    return trigger.event
+        return DUMMY_EVENT
+    
+    def getBoundary(self, testMapRect):
         boundary = NO_BOUNDARY
         rpgMapRect = self.rpgMap.mapRect
         if testMapRect.left < 0:
@@ -322,15 +335,26 @@ class Player(MaskSprite):
         elif testMapRect.bottom > rpgMapRect.bottom:
             boundary = DOWN
         return boundary
+
+    def getTileRange(self, boundary):
+        x1, y1 = self.convertPixelPoint(self.baseRect.left, self.baseRect.top)
+        x2, y2 = self.convertPixelPoint(self.baseRect.right, self.baseRect.bottom)
+        print "(%s, %s) -> (%s, %s)" % (x1, y1, x2, y2)
+        if boundary == UP or boundary == DOWN:
+            return range(x1, x2 + 1)
+        return range(y1, y2 + 1)
     
+    def convertPixelPoint(self, px, py):
+        return px // TILE_SIZE, py // TILE_SIZE
+            
     """
     Processes events triggered via event tiles.
     """
     def processEvents(self):
-        if self.level in self.rpgMap.eventTriggers:
-            for eventTile in self.rpgMap.eventTriggers[self.level]:
-                if self.baseRect.colliderect(eventTile.rect):
-                    return eventTile
+        if self.level in self.rpgMap.tileTriggers:
+            for trigger in self.rpgMap.tileTriggers[self.level]:
+                if self.baseRect.colliderect(trigger.rect):
+                    return trigger.event
         return None
     
     """

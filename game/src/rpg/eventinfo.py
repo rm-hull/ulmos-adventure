@@ -1,48 +1,100 @@
 #! /usr/bin/env python
 
 from pygame.locals import Rect
-from view import TILE_SIZE
+from view import UP, DOWN, LEFT, RIGHT, TILE_SIZE
 
-DEFAULT_EVENT = 0
+TILE_TRIGGER = 1
+BOUNDARY_TRIGGER = 2
+
+DUMMY_EVENT = 0
 TRANSITION_EVENT = 1
+BOUNDARY_EVENT = 2
 
-def getEventTriggers_Dungeon():
-    return []
+EMPTY_LIST = []
+
+def getTriggers_Dungeon():
+    triggers = []
+    event = BoundaryEvent(DOWN, "islands", 7)
+    triggers.append(BoundaryTrigger(event, DOWN, 0, 7))
+    return triggers
     
-def getEventTriggers_Islands():
-    mapEventTriggers = {}
-    eventTriggers = []
-    eventTrigger = TransitionEventTrigger(5, 12)
-    eventTrigger.setTransition("dungeon", 10, 6, 1)
-    eventTriggers.append(eventTrigger)
-    mapEventTriggers[2] = eventTriggers
-    return mapEventTriggers
+def getTriggers_Islands():
+    triggers = []
+    event = TransitionEvent("dungeon", 10, 6, 1)
+    triggers.append(TileTrigger(event, 5, 12, 2))
+    event = TransitionEvent("dungeon", 10, 10, 1)
+    triggers.append(TileTrigger(event, 2, 9, 2))
+    event = BoundaryEvent(UP, "dungeon", -7)
+    triggers.append(BoundaryTrigger(event, UP, 8, 15))
+    return triggers
 
 eventInfo = {}
 # eventInfo["skulls"] = getEventTriggers_Skulls
-eventInfo["dungeon"] = getEventTriggers_Dungeon
-eventInfo["islands"] = getEventTriggers_Islands
-    
-def getEventTriggers(mapName):
+eventInfo["dungeon"] = getTriggers_Dungeon
+eventInfo["islands"] = getTriggers_Islands
+
+def getTriggers(mapName):    
     if mapName in eventInfo:
-        eventMethod = eventInfo[mapName]
-        return eventMethod()
-    return {}
+        getTriggers = eventInfo[mapName]
+        return getTriggers()
+    return EMPTY_LIST
+
+def getTileTriggers(mapName):
+    tileTriggers = {}
+    for trigger in getTriggers(mapName):
+        if trigger.type == TILE_TRIGGER:
+            if trigger.level in tileTriggers:
+                tileTriggers[trigger.level].append(trigger)
+            else:
+                tileTriggers[trigger.level] = [trigger]
+    return tileTriggers
+
+def getBoundaryTriggers(mapName):
+    boundaryTriggers = {}
+    for trigger in getTriggers(mapName):
+        if trigger.type == BOUNDARY_TRIGGER:
+            if trigger.boundary in boundaryTriggers:
+                boundaryTriggers[trigger.boundary].append(trigger)
+            else:
+                boundaryTriggers[trigger.boundary] = [trigger]
+    return boundaryTriggers
 
 class EventTrigger:
-    
-    def __init__(self, x, y):
+    def __init__(self, event, type):
+        self.event = event
+        self.type = type
+
+class TileTrigger(EventTrigger):
+    def __init__(self, event, x, y, level):
+        EventTrigger.__init__(self, event, TILE_TRIGGER)
         self.rect = Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
-        self.type = DEFAULT_EVENT
+        self.level = level
         
-class TransitionEventTrigger(EventTrigger):
-    
-    def __init__(self, x, y):
-        EventTrigger.__init__(self, x, y)
-        self.type = TRANSITION_EVENT
-        
-    def setTransition(self, mapName, x, y, level):
+class BoundaryTrigger(EventTrigger):
+    def __init__(self, event, boundary, min, max):
+        EventTrigger.__init__(self, event, BOUNDARY_TRIGGER)
+        self.boundary = boundary
+        self.range = range(min, max + 1)
+
+class Event:
+    def __init__(self, type):
+        self.type = type
+
+class DummyEvent(Event):
+    def __init__(self):
+        Event.__init__(self, DUMMY_EVENT)
+            
+class TransitionEvent(Event):
+    def __init__(self, mapName, x, y, level):
+        Event.__init__(self, TRANSITION_EVENT)
         self.mapName = mapName
         self.mapPosition = (x, y)
         self.mapLevel = level
-        
+
+class BoundaryEvent(Event):
+    def __init__(self, boundary, mapName, modifier):
+        Event.__init__(self, BOUNDARY_EVENT)
+        self.boundary = boundary
+        self.mapName = mapName
+        self.modifier = modifier
+   

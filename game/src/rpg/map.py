@@ -27,7 +27,8 @@ class RpgMap:
         self.mapTiles = mapTiles
         self.cols = len(self.mapTiles)
         self.rows = len(self.mapTiles[0])
-        self.eventTriggers = eventinfo.getEventTriggers(name)
+        self.tileTriggers = eventinfo.getTileTriggers(name)
+        self.boundaryTriggers = eventinfo.getBoundaryTriggers(name)
         self.initialiseMapImage()
 
     def initialiseMapImage(self):

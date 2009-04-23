@@ -3,13 +3,13 @@
 from pygame.locals import *
 
 from view import NONE, UP, DOWN, LEFT, RIGHT, SCALAR, TILE_SIZE
+from eventinfo import DUMMY_EVENT
 
 import pygame
 import parser
 import sprites
 import view
-import mapinfo
-import eventinfo
+# import eventinfo
 import spriteinfo
 
 ORIGIN = (0, 0)
@@ -68,10 +68,8 @@ class PlayState:
         
     def handleEvents(self):
         event = self.player.processEvents()
-        if event:
-            print "event: %s" % event
-            if event.type == eventinfo.TRANSITION_EVENT:
-                return TransitionState(self.player, event)
+        if event and event.type > DUMMY_EVENT:
+            return TransitionState(self.player, event)
         return None
         
     def handleSpriteCollisions(self):
@@ -83,11 +81,11 @@ class PlayState:
     
     def handleMovement(self, directionBits):
         if directionBits > 0:
-            boundary, self.viewRect = self.player.move(directionBits)
-            if boundary > sprites.NO_BOUNDARY:
+            boundaryEvent, self.viewRect = self.player.move(directionBits)
+            if boundaryEvent and boundaryEvent.type > DUMMY_EVENT:
                 # we've hit a boundary - change states to swap the map
-                print "boundary %s" % boundary
-                return BoundaryState(self.player, self.rpgMap.name, boundary)
+                print "boundary %s" % boundaryEvent
+                return BoundaryState(self.player, boundaryEvent)
         return None
     
     def drawMapView(self, surface, increment = 1):
@@ -137,21 +135,21 @@ class TransitionState:
 
 class BoundaryState:
     
-    def __init__(self, player, mapName, boundary):
+    def __init__(self, player, boundaryEvent):
         self.player = player
-        self.mapName = mapName
-        self.boundary = boundary
+        self.mapName = boundaryEvent.mapName
+        self.boundary = boundaryEvent.boundary
+        self.modifier = boundaryEvent.modifier
         self.ticks = 0
              
     def execute(self, keyPresses):
         self.ticks += 1
         if self.ticks > 0:
             # load another map
-            nextMapName, modifier = mapinfo.getNextMap(self.mapName, self.boundary, self.player.baseRect)
-            nextRpgMap = parser.loadRpgMap(nextMapName)
+            nextRpgMap = parser.loadRpgMap(self.mapName)
             self.player.rpgMap = nextRpgMap
             # set the new position
-            self.setPlayerPosition(nextRpgMap.mapRect, modifier)
+            self.setPlayerPosition(nextRpgMap.mapRect, self.modifier)
             # return the play state
             return PlayState(self.player, nextRpgMap)
         
