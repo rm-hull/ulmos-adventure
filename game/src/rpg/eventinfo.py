@@ -12,8 +12,8 @@ def getEventTriggers_Dungeon():
 def getEventTriggers_Islands():
     mapEventTriggers = {}
     eventTriggers = []
-    eventTrigger = TransitionEventTrigger(2, 9)
-    eventTrigger.setTransition("dungeon", 10, 12)
+    eventTrigger = TransitionEventTrigger(5, 12)
+    eventTrigger.setTransition("dungeon", 10, 6, 1)
     eventTriggers.append(eventTrigger)
     mapEventTriggers[2] = eventTriggers
     return mapEventTriggers
@@ -41,7 +41,8 @@ class TransitionEventTrigger(EventTrigger):
         EventTrigger.__init__(self, x, y)
         self.type = TRANSITION_EVENT
         
-    def setTransition(self, mapName, x, y):
+    def setTransition(self, mapName, x, y, level):
         self.mapName = mapName
         self.mapPosition = (x, y)
+        self.mapLevel = level
         

@@ -2,20 +2,22 @@
 
 from pygame.locals import *
 
-from view import UP, DOWN, LEFT, RIGHT, SCALAR
-from rpg.view import TILE_SIZE
+from view import NONE, UP, DOWN, LEFT, RIGHT, SCALAR, TILE_SIZE
 
 import pygame
-import rpg.parser as parser
-import rpg.sprites as sprites
-import rpg.mapinfo as mapinfo
-import rpg.spriteinfo as spriteinfo
+import parser
+import sprites
+import view
+import mapinfo
+import eventinfo
+import spriteinfo
 
 ORIGIN = (0, 0)
+DIMENSIONS = (256, 192)
 
 # initialise
 pygame.init()
-screen = pygame.display.set_mode((256, 192))
+screen = pygame.display.set_mode(DIMENSIONS)
 
 def startGame():
     # create the map
@@ -41,15 +43,12 @@ class PlayState:
              
     def execute(self, keyPresses):
         # have we triggered any events?
-        event = self.player.processEvents()
-        if event:
-            print "special %s" % event
-        # have we collided with any sprites?
-        toRemove = self.player.processCollisions(self.visibleSprites.sprites())
-        if len(toRemove) > 0:
-            self.gameSprites.remove(toRemove)
-            self.visibleSprites.remove(toRemove)            
-        directionBits, boundary = 0, sprites.NO_BOUNDARY
+        eventState = self.handleEvents()
+        if eventState:
+            return eventState
+        # have we collided with any sprites
+        self.handleSpriteCollisions()
+        directionBits = NONE
         if keyPresses[K_UP]:
             directionBits += UP
         if keyPresses[K_DOWN]:
@@ -58,20 +57,84 @@ class PlayState:
             directionBits += LEFT
         if keyPresses[K_RIGHT]:
             directionBits += RIGHT
+        # handle movement + check for boundaries
+        boundaryState = self.handleMovement(directionBits)
+        if boundaryState:
+            return boundaryState
+        # draw the map view to the screen
+        self.drawMapView(screen)
+        pygame.display.flip()
+        return None
+        
+    def handleEvents(self):
+        event = self.player.processEvents()
+        if event:
+            print "event: %s" % event
+            if event.type == eventinfo.TRANSITION_EVENT:
+                return TransitionState(self.player, event)
+        return None
+        
+    def handleSpriteCollisions(self):
+        # have we collided with any sprites?
+        toRemove = self.player.processCollisions(self.visibleSprites.sprites())
+        if len(toRemove) > 0:
+            self.gameSprites.remove(toRemove)
+            self.visibleSprites.remove(toRemove)
+    
+    def handleMovement(self, directionBits):
         if directionBits > 0:
             boundary, self.viewRect = self.player.move(directionBits)
-        if boundary > sprites.NO_BOUNDARY:
-            # we've hit a boundary - change states to swap the map
-            print "boundary %s" % boundary
-            return BoundaryState(self.player, self.rpgMap.name, boundary)
-        # update
-        screen.blit(self.rpgMap.getMapView(self.viewRect), ORIGIN)
+            if boundary > sprites.NO_BOUNDARY:
+                # we've hit a boundary - change states to swap the map
+                print "boundary %s" % boundary
+                return BoundaryState(self.player, self.rpgMap.name, boundary)
+        return None
+    
+    def drawMapView(self, surface, increment = 1):
+        surface.blit(self.rpgMap.getMapView(self.viewRect), ORIGIN)
         # if the sprite being updated is visible in the view it will be added to
         # the visibleSprites group as a side-effect 
-        self.gameSprites.update(self.viewRect, self.visibleSprites)
-        self.visibleSprites.draw(screen)
-        pygame.display.flip()
-        
+        self.gameSprites.update(self.viewRect, self.visibleSprites, increment)
+        self.visibleSprites.draw(surface)
+                        
+class TransitionState:
+    
+    def __init__(self, player, transitionEvent):
+        self.player = player
+        self.mapName = transitionEvent.mapName
+        self.mapPosition = transitionEvent.mapPosition
+        self.mapLevel = transitionEvent.mapLevel
+        self.nextImage = None
+        self.nextState = None
+        self.ticks = 0
+             
+    def execute(self, keyPresses):
+        if self.ticks < 32:
+            multiplier = self.ticks + 1
+            borderView = view.createBorderView(screen, multiplier * 4, multiplier * 3)
+            screen.blit(borderView, ORIGIN)
+            pygame.display.flip()
+        elif self.ticks == 32:
+            # load another map
+            nextRpgMap = parser.loadRpgMap(self.mapName)
+            self.player.rpgMap = nextRpgMap
+            # set the new position
+            self.player.setPosition(self.mapPosition[0], self.mapPosition[1], self.mapLevel)
+            # create play state
+            self.nextState = PlayState(self.player, nextRpgMap)
+            # extract the next image from the state
+            self.nextImage = view.createRectangle(DIMENSIONS)
+            self.nextState.drawMapView(self.nextImage, 0)            
+        elif self.ticks < 64:
+            multiplier = 64 - self.ticks
+            borderView = view.createBorderView(self.nextImage, multiplier * 4, multiplier * 3)
+            screen.blit(borderView, ORIGIN)
+            pygame.display.flip()
+        else:
+            return self.nextState
+        self.ticks += 1
+        return None
+
 class BoundaryState:
     
     def __init__(self, player, mapName, boundary):

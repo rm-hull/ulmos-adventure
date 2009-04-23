@@ -217,7 +217,9 @@ class Player(MaskSprite):
         return boundary, self.getViewRect()
     
     """
-    Slides the player.
+    Slides the player. If the player is attempting to move diagonally, but is
+    blocked, the vertical or horizontal component of their movement may still
+    be valid.
     """
     def slide(self, movement):
         px, py, direction, diagonal = movement
@@ -381,13 +383,16 @@ class StaticSprite(RpgSprite):
         # additional animation properties
         self.image = animationFrames[self.animFrameCount]
 
-    def update(self, viewRect, spriteGroup):
+    def update(self, viewRect, spriteGroup, increment = 1):
         if self.mapRect.colliderect(viewRect):
             # some part of this sprite is in the current view
-            self.frameCount += 1
-            if (self.frameCount % self.frameSkip == 0):
-                self.animFrameCount = (self.animFrameCount + 1) % self.numFrames       
-            self.image = self.animationFrames[self.animFrameCount]
+            if increment:
+                self.frameCount += increment
+                if (self.frameCount % self.frameSkip == 0):
+                    self.animFrameCount = (self.animFrameCount + 1) % self.numFrames       
+                    self.image = self.animationFrames[self.animFrameCount]
+            else:
+                print "** INCREMENT 0! **"
             # make self.rect relative to the view
             self.rect.topleft = (self.mapRect.left - viewRect.left,
                                  self.mapRect.top - viewRect.top)

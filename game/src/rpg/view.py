@@ -12,6 +12,7 @@ TILE_SIZE = 16 * SCALAR
 TRANSPARENT_COLOUR = GREEN
 TRANSPARENT_COLOUR_WITH_ALPHA = (0, 255, 0, 255)
 
+NONE = 0
 UP = 1
 DOWN = 2
 LEFT = 4
@@ -36,6 +37,14 @@ def createDuplicateSpriteImage(spriteImage):
     img.set_colorkey(TRANSPARENT_COLOUR, RLEACCEL)
     return img
 
+def createBorderView(screen, borderWidth, borderHeight, borderColour = None):
+    width, height = screen.get_width(), screen.get_height()
+    img = createRectangle((width, height), borderColour)
+    extract = screen.subsurface((borderWidth, borderHeight),
+                               (width - borderWidth * 2, height - borderHeight * 2))
+    img.blit(extract, (borderWidth, borderHeight))
+    return img
+    
 # process animation frames from the composite image
 def processMovementFrames(framesImage, numFrames = 4):
     # work out width + height
