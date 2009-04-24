@@ -307,7 +307,7 @@ class Player(MaskSprite):
     
     """
     Checks the requested movement falls within the map boundary.  If not, returns
-    the boundary edge that has been breached. 
+    a boundary event containing information on the breach. 
     """ 
     def getBoundaryEvent(self, px, py):
         testMapRect = self.mapRect.move(px, py)
@@ -323,6 +323,9 @@ class Player(MaskSprite):
                     return trigger.event
         return DUMMY_EVENT
     
+    """
+    Returns the boundary that has been breached.
+    """
     def getBoundary(self, testMapRect):
         boundary = NO_BOUNDARY
         rpgMapRect = self.rpgMap.mapRect
@@ -338,7 +341,7 @@ class Player(MaskSprite):
 
     def getTileRange(self, boundary):
         x1, y1 = self.convertPixelPoint(self.baseRect.left, self.baseRect.top)
-        x2, y2 = self.convertPixelPoint(self.baseRect.right, self.baseRect.bottom)
+        x2, y2 = self.convertPixelPoint(self.baseRect.right - 1, self.baseRect.bottom - 1)
         print "(%s, %s) -> (%s, %s)" % (x1, y1, x2, y2)
         if boundary == UP or boundary == DOWN:
             return range(x1, x2 + 1)
@@ -415,8 +418,6 @@ class StaticSprite(RpgSprite):
                 if (self.frameCount % self.frameSkip == 0):
                     self.animFrameCount = (self.animFrameCount + 1) % self.numFrames       
                     self.image = self.animationFrames[self.animFrameCount]
-            else:
-                print "** INCREMENT 0! **"
             # make self.rect relative to the view
             self.rect.topleft = (self.mapRect.left - viewRect.left,
                                  self.mapRect.top - viewRect.top)

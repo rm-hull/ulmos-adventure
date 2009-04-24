@@ -40,8 +40,10 @@ def createDuplicateSpriteImage(spriteImage):
 def createBorderView(screen, borderWidth, borderHeight, borderColour = None):
     width, height = screen.get_width(), screen.get_height()
     img = createRectangle((width, height), borderColour)
-    extract = screen.subsurface((borderWidth, borderHeight),
-                               (width - borderWidth * 2, height - borderHeight * 2))
+    extract = screen.subsurface(borderWidth,
+                                borderHeight,
+                                width - borderWidth * 2,
+                                height - borderHeight * 2)
     img.blit(extract, (borderWidth, borderHeight))
     return img
     
@@ -57,7 +59,7 @@ def processMovementFrames(framesImage, numFrames = 4):
         frames, originalFrames = [], []
         rowOffsetY = row * height
         for i in range(numFrames):
-            img = framesImage.subsurface((i * width, rowOffsetY), (width, height))
+            img = framesImage.subsurface(i * width, rowOffsetY, width, height)
             originalFrames.append(img)
             frames.append(createDuplicateSpriteImage(img))
         direction = DIRECTIONS[row]
