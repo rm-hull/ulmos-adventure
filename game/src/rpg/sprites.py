@@ -305,6 +305,10 @@ class Player(MaskSprite):
         # keep this information for next time
         self.imageInfo = (self.direction, self.animFrameCount)
     
+    def setDirection(self, direction):
+        self.direction = direction
+        self.image = self.animationFrames[self.direction][self.animFrameCount]
+        
     """
     Checks the requested movement falls within the map boundary.  If not, returns
     a boundary event containing information on the breach. 

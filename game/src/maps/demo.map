@@ -23,7 +23,7 @@
 4,2 [1] grass:n1
 5,2 [1] grass:n1
 6,2 [1] grass:n1
-7,2 [1] grass:n1
+7,2 [1] grass:n1 grass:tl2:3
 
 0,3 grass:n1
 1,3 [1] grass:n1
@@ -32,7 +32,7 @@
 4,3 [1,3] grass:n1 wood:hbr3:3
 5,3 [1,3] grass:n1 wood:hbr2:3
 6,3 [1,3] grass:n1 wood:hbr3:3
-7,3 grass:n1
+7,3 grass:n1 grass:lb
 
 0,4 grass:n1
 1,4 [1,2] grass:n1 grass:t3:2
@@ -41,7 +41,7 @@
 4,4 [1] grass:n1 wood:post_top:2
 5,4 [1] grass:n1 wood:l_supp:2
 6,4 [1] grass:n1 wood:r_supp:2
-7,4 grass:n1
+7,4 grass:n1 earth:tl
 
 0,5 grass:n1
 1,5 grass:dark earth:mer
@@ -50,7 +50,7 @@
 4,5 grass:n1 grass:os1 wood:post_base
 5,5 [1] grass:n1
 6,5 [1] grass:n1 grass:tc:2
-7,5 grass:n1
+7,5 grass:n1 earth:bl
 
 0,6 grass:n1
 1,6 [1] grass:ms

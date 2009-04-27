@@ -28,7 +28,8 @@ def getTriggers_Demo():
     
 def getTriggers_Skulls():
     triggers = []
-    event = BoundaryEvent(DOWN, "demo", -4)
+    event = TransitionEvent("demo", 2, 0, 1)
+    # event = BoundaryEvent(DOWN, "demo", -4)
     triggers.append(BoundaryTrigger(event, DOWN, 0, 8))
     return triggers
     
@@ -48,11 +49,29 @@ def getTriggers_Dungeon():
     triggers.append(BoundaryTrigger(event, DOWN, 0, 7))
     return triggers
 
+def getTriggers_Start():
+    triggers = []
+    event = BoundaryEvent(RIGHT, "bridge", 0)
+    triggers.append(BoundaryTrigger(event, RIGHT, 11, 12))
+    return triggers
+
+def getTriggers_Bridge():
+    triggers = []
+    event = BoundaryEvent(LEFT, "start", 0)
+    triggers.append(BoundaryTrigger(event, LEFT, 11, 12))
+    event = TransitionEvent("bridge", 3, 2, 3, DOWN)
+    triggers.append(TileTrigger(event, 7, 7, 1))
+    event = TransitionEvent("bridge", 7, 7, 1, DOWN)
+    triggers.append(TileTrigger(event, 3, 2, 3))
+    return triggers
+
 eventInfo = {}
 eventInfo["demo"] = getTriggers_Demo
 eventInfo["skulls"] = getTriggers_Skulls
 eventInfo["dungeon"] = getTriggers_Dungeon
 eventInfo["islands"] = getTriggers_Islands
+eventInfo["start"] = getTriggers_Start
+eventInfo["bridge"] = getTriggers_Bridge
 
 def getTriggers(mapName):    
     if mapName in eventInfo:
@@ -106,11 +125,12 @@ class DummyEvent(Event):
         Event.__init__(self, DUMMY_EVENT)
             
 class TransitionEvent(Event):
-    def __init__(self, mapName, x, y, level):
+    def __init__(self, mapName, x, y, level, direction = None):
         Event.__init__(self, TRANSITION_EVENT)
         self.mapName = mapName
         self.mapPosition = (x, y)
         self.mapLevel = level
+        self.direction = direction
 
 class BoundaryEvent(Event):
     def __init__(self, boundary, mapName, modifier):
