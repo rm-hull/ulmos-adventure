@@ -39,10 +39,28 @@ def getGameSprites_Islands():
     gameSprites.add(flames1, flames2, coin1, coin2)
     return gameSprites
 
+def getGameSprites_Start():
+    gameSprites = pygame.sprite.Group()
+    coin = sprites.Coin()
+    coin.setPosition(7, 4, 2)
+    gameSprites.add(coin)
+    return gameSprites
+
+def getGameSprites_Bridge():
+    gameSprites = pygame.sprite.Group()
+    coin1 = sprites.Coin()
+    coin1.setPosition(8, 5, 3)
+    coin2 = sprites.Coin()
+    coin2.setPosition(14, 5, 3)
+    gameSprites.add(coin1, coin2)
+    return gameSprites
+
 spriteInfo = {}
 spriteInfo["skulls"] = getGameSprites_Skulls
 spriteInfo["dungeon"] = getGameSprites_Dungeon
 spriteInfo["islands"] = getGameSprites_Islands
+spriteInfo["start"] = getGameSprites_Start
+spriteInfo["bridge"] = getGameSprites_Bridge
 
 def getMapSprites(mapName):
     if mapName in spriteInfo:

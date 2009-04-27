@@ -15,8 +15,8 @@ import spriteinfo
 ORIGIN = (0, 0)
 #WIDTH = 256
 #HEIGHT = 192
-WIDTH = 512
-HEIGHT = 384
+WIDTH = 384
+HEIGHT = 256
 X_MULT = WIDTH // 64
 Y_MULT = HEIGHT // 64
 DIMENSIONS = (WIDTH, HEIGHT)
@@ -43,12 +43,11 @@ screen = pygame.display.set_mode(DIMENSIONS)
 def startGame():
     # create the map
     rpgMap = parser.loadRpgMap("start")
-    # rpgMap = parser.loadRpgMap("islands")
     # create the player sprite
     player = sprites.Ulmo(rpgMap)
+    # set the start position
     player.setPosition(9, 6, 2)
-    # player.setPosition(2, 11, 2)
-    # player.setPosition(12, 3, 1)
+    # return the play state
     return PlayState(player)
 
 class PlayState:
@@ -236,9 +235,6 @@ class BoundaryState:
         self.player.resetPosition(px, py)
 
 class ShowPlayerState:
-    
-    # number of frames required to bring the player into view
-    tickTargets = {UP: 24, DOWN: 24, LEFT: 14, RIGHT: 14}
     
     def __init__(self, player, boundary, nextState, tickTargets = TICK_TARGETS):
         self.player = player
