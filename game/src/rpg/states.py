@@ -13,10 +13,12 @@ import view
 import spriteinfo
 
 ORIGIN = (0, 0)
-WIDTH = 256
-HEIGHT = 192
-#WIDTH = 512
-#HEIGHT = 384
+#WIDTH = 256
+#HEIGHT = 192
+WIDTH = 512
+HEIGHT = 384
+X_MULT = WIDTH // 64
+Y_MULT = HEIGHT // 64
 DIMENSIONS = (WIDTH, HEIGHT)
 
 # number of frames required to bring the player into view
@@ -140,7 +142,7 @@ class TransitionState:
              
     def execute(self, keyPresses):
         if self.ticks < 32:
-            xBorder, yBorder = (self.ticks + 1) * 4, (self.ticks + 1) * 3
+            xBorder, yBorder = (self.ticks + 1) * X_MULT, (self.ticks + 1) * Y_MULT
             screen.blit(self.blackRect, ORIGIN)
             extract = self.screenImage.subsurface(xBorder, yBorder,
                                                   WIDTH - xBorder * 2,
@@ -162,7 +164,7 @@ class TransitionState:
             # extract the next image from the state
             self.nextState.drawMapView(self.screenImage, 0)           
         elif self.ticks < 64:
-            xBorder, yBorder = (64 - self.ticks) * 4, (64 - self.ticks) * 3
+            xBorder, yBorder = (64 - self.ticks) * X_MULT, (64 - self.ticks) * Y_MULT
             extract = self.screenImage.subsurface(xBorder, yBorder,
                                                   WIDTH - xBorder * 2,
                                                   HEIGHT - yBorder * 2)
@@ -198,7 +200,7 @@ class BoundaryState:
             # extract the next image from the state
             self.nextState.drawMapView(self.nextImage, 0)
         elif self.ticks < 32:
-            xSlice, ySlice = self.ticks * 8, self.ticks * 6
+            xSlice, ySlice = self.ticks * X_MULT * 2, self.ticks * Y_MULT * 2
             if self.boundary == UP:
                 screen.blit(self.oldImage.subsurface(0, 0, WIDTH, HEIGHT - ySlice), (0, ySlice))
                 screen.blit(self.nextImage.subsurface(0, HEIGHT - ySlice, WIDTH, ySlice), ORIGIN)                
