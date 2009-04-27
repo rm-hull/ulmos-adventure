@@ -305,9 +305,11 @@ class Player(MaskSprite):
         # keep this information for next time
         self.imageInfo = (self.direction, self.animFrameCount)
     
+    """
+    Required for state transitions.
+    """
     def setDirection(self, direction):
-        self.direction = direction
-        self.image = self.animationFrames[self.direction][self.animFrameCount]
+        self.applyMovement(self.level, direction, 0, 0)
         
     """
     Checks the requested movement falls within the map boundary.  If not, returns

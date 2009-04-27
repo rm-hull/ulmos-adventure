@@ -7,8 +7,8 @@
 6,0 grass:n1 objects:tree_mr1 objects:tree_tl1
 7,0 grass:light grass:treerds1 objects:tree_br2 objects:tree_tr1
 8,0 grass:light objects:tree_ml1
-9,0 grass:n1 objects:tree_mr1 objects:tree_tl1
-10,0 grass:n1 objects:tree_ml1 objects:tree_tr1
+9,0 grass:n1 objects:tree_mr1 objects:tree_tl2
+10,0 grass:n1 objects:tree_ml1 objects:tree_tr2
 11,0 grass:light objects:tree_mr1
 12,0 grass:light grass:l2
 13,0 grass:n1
@@ -24,8 +24,8 @@
 6,1 grass:n1 objects:tree_ml1 objects:tree_tr2
 7,1 grass:light objects:tree_mr1
 8,1 grass:light grass:treelds1 objects:tree_bl2 objects:tree_tl1
-9,1 grass:n1 objects:tree_ml1 objects:tree_tr1
-10,1 grass:treelds1 objects:tree_bl2 objects:tree_mr1
+9,1 grass:n1 objects:tree_ml2 objects:tree_tr1
+10,1 grass:treelds1 objects:tree_bl2 objects:tree_mr1 objects:tree_mr2
 11,1 grass:light grass:treerds1 objects:tree_br2
 12,1 grass:light grass:l2
 13,1 grass:n1
@@ -55,7 +55,7 @@
 3,3 water:dark grass:l2
 4,3 grass:n1 objects:tree_ml1
 5,3 grass:n1 grass:treels1 objects:tree_bl2 objects:tree_mr1
-6,3 grass:n1 grass:treers1 grass:treels2 objects:tree_br2
+6,3 grass:n1 grass:treels2 grass:treers1 objects:tree_br2
 7,3 [2] grass:n1 grass:treers2
 8,3 grass:n1 grass:treels1 objects:tree_bl2
 9,3 grass:n1 grass:treers1 grass:treelds2 objects:tree_br2
@@ -71,7 +71,7 @@
 2,4 water:w2
 3,4 water:dark grass:l1
 4,4 grass:n1 grass:treels1 objects:tree_bl1
-5,4 grass:n1 grass:treers1 grass:treels2 objects:tree_br1
+5,4 grass:n1 grass:treels2 grass:treers1 objects:tree_br1
 6,4 [2] grass:n1 grass:treers2
 7,4 [2] grass:n1
 8,4 [2] grass:n1 grass:treels2
@@ -87,7 +87,7 @@
 1,5 water:w2
 2,5 water:w2
 3,5 earth:tlrs
-4,5 [2] earth:dark grass:lj grass:treels2
+4,5 [2] earth:dark grass:lj
 5,5 [2] grass:n1 grass:treers2
 6,5 [2] grass:n1
 7,5 [2] grass:n1

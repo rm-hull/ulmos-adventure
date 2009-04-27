@@ -13,7 +13,15 @@ import view
 import spriteinfo
 
 ORIGIN = (0, 0)
-DIMENSIONS = (256, 192)
+WIDTH = 256
+HEIGHT = 192
+#WIDTH = 512
+#HEIGHT = 384
+DIMENSIONS = (WIDTH, HEIGHT)
+
+# number of frames required to bring the player into view
+# from an off-screen position
+TICK_TARGETS = {UP: 24, DOWN: 24, LEFT: 14, RIGHT: 14}
 
 # initialise
 pygame.init()
@@ -120,18 +128,24 @@ class PlayState:
                         
 class TransitionState:
     
+    tickTargets = {UP: 16, DOWN: 16, LEFT: 16, RIGHT: 16}
+    
     def __init__(self, player, transitionEvent):
         self.player = player
         self.event = transitionEvent
-        self.nextImage = view.createRectangle(DIMENSIONS)
+        self.screenImage = screen.copy()
+        self.blackRect = view.createRectangle(DIMENSIONS)
         self.nextState = None
         self.ticks = 0
              
     def execute(self, keyPresses):
         if self.ticks < 32:
-            multiplier = self.ticks + 1
-            borderView = view.createBorderView(screen, multiplier * 4, multiplier * 3)
-            screen.blit(borderView, ORIGIN)
+            xBorder, yBorder = (self.ticks + 1) * 4, (self.ticks + 1) * 3
+            screen.blit(self.blackRect, ORIGIN)
+            extract = self.screenImage.subsurface(xBorder, yBorder,
+                                                  WIDTH - xBorder * 2,
+                                                  HEIGHT - yBorder * 2)
+            screen.blit(extract, (xBorder, yBorder))
             pygame.display.flip()
         elif self.ticks == 32:
             # load another map
@@ -146,14 +160,17 @@ class TransitionState:
             # create play state
             self.nextState = PlayState(self.player)
             # extract the next image from the state
-            self.nextState.drawMapView(self.nextImage, 0)            
+            self.nextState.drawMapView(self.screenImage, 0)           
         elif self.ticks < 64:
-            multiplier = 64 - self.ticks
-            borderView = view.createBorderView(self.nextImage, multiplier * 4, multiplier * 3)
-            screen.blit(borderView, ORIGIN)
+            xBorder, yBorder = (64 - self.ticks) * 4, (64 - self.ticks) * 3
+            extract = self.screenImage.subsurface(xBorder, yBorder,
+                                                  WIDTH - xBorder * 2,
+                                                  HEIGHT - yBorder * 2)
+            screen.blit(extract, (xBorder, yBorder))
             pygame.display.flip()
         else:
-            return self.nextState
+            return ShowPlayerState(self.player, self.player.direction, self.nextState, self.tickTargets)
+            # return self.nextState
         self.ticks += 1
         return None
 
@@ -181,20 +198,19 @@ class BoundaryState:
             # extract the next image from the state
             self.nextState.drawMapView(self.nextImage, 0)
         elif self.ticks < 32:
-            width, height = DIMENSIONS[0], DIMENSIONS[1]
             xSlice, ySlice = self.ticks * 8, self.ticks * 6
             if self.boundary == UP:
-                screen.blit(self.oldImage.subsurface(0, 0, width, height - ySlice), (0, ySlice))
-                screen.blit(self.nextImage.subsurface(0, height - ySlice, width, ySlice), ORIGIN)                
+                screen.blit(self.oldImage.subsurface(0, 0, WIDTH, HEIGHT - ySlice), (0, ySlice))
+                screen.blit(self.nextImage.subsurface(0, HEIGHT - ySlice, WIDTH, ySlice), ORIGIN)                
             elif self.boundary == DOWN:
-                screen.blit(self.oldImage.subsurface(0, ySlice, width, height - ySlice), ORIGIN)
-                screen.blit(self.nextImage.subsurface(0, 0, width, ySlice), (0, height - ySlice))                
+                screen.blit(self.oldImage.subsurface(0, ySlice, WIDTH, HEIGHT - ySlice), ORIGIN)
+                screen.blit(self.nextImage.subsurface(0, 0, WIDTH, ySlice), (0, HEIGHT - ySlice))                
             elif self.boundary == LEFT:
-                screen.blit(self.oldImage.subsurface(0, 0, width - xSlice, height), (xSlice, 0))
-                screen.blit(self.nextImage.subsurface(width - xSlice, 0, xSlice, height), ORIGIN)                
+                screen.blit(self.oldImage.subsurface(0, 0, WIDTH - xSlice, HEIGHT), (xSlice, 0))
+                screen.blit(self.nextImage.subsurface(WIDTH - xSlice, 0, xSlice, HEIGHT), ORIGIN)                
             else: # self.boundary == RIGHT
-                screen.blit(self.oldImage.subsurface(xSlice, 0, width - xSlice, height), ORIGIN)
-                screen.blit(self.nextImage.subsurface(0, 0, xSlice, height), (width - xSlice, 0))                
+                screen.blit(self.oldImage.subsurface(xSlice, 0, WIDTH - xSlice, HEIGHT), ORIGIN)
+                screen.blit(self.nextImage.subsurface(0, 0, xSlice, HEIGHT), (WIDTH - xSlice, 0))                
             pygame.display.flip()
         else:
             return ShowPlayerState(self.player, self.boundary, self.nextState)
@@ -205,14 +221,6 @@ class BoundaryState:
     def setPlayerPosition(self, mapRect, modifier):
         playerRect = self.player.mapRect
         px, py = [i + modifier * TILE_SIZE for i in playerRect.topleft]
-        """if self.boundary == UP:
-            py = mapRect.bottom - playerRect.height - 1 * SCALAR
-        elif self.boundary == DOWN:
-            py = 1 * SCALAR
-        elif self.boundary == LEFT:
-            px = mapRect.right - playerRect.width - 1 * SCALAR
-        else: # self.boundary == RIGHT
-            px = 1 * SCALAR"""
         # we position the player just off the screen and then use the ShowPlayer
         # state to bring the player into view                 
         if self.boundary == UP:
@@ -230,10 +238,11 @@ class ShowPlayerState:
     # number of frames required to bring the player into view
     tickTargets = {UP: 24, DOWN: 24, LEFT: 14, RIGHT: 14}
     
-    def __init__(self, player, boundary, nextState):
+    def __init__(self, player, boundary, nextState, tickTargets = TICK_TARGETS):
         self.player = player
         self.boundary = boundary
         self.nextState = nextState
+        self.tickTargets = tickTargets
         self.ticks = 0
         
     def execute(self, keyPresses):

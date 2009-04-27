@@ -117,7 +117,7 @@
 14,6 [3] grass:n1
 15,6 [3] grass:n1
 
-0,7 earth:trls
+0,7 earth:tr
 1,7 grass:dark earth:bls objects:tree_ml2
 2,7 grass:dark earth:b2 objects:tree_mr2
 3,7 earth:b3 objects:tree_tl1
@@ -134,7 +134,7 @@
 14,7 [3] earth:dark grass:lj
 15,7 [3] grass:n1
 
-0,8 earth:rls
+0,8 earth:r
 1,8 grass:ms grass:treels1 objects:tree_bl2
 2,8 grass:ms grass:treers1 objects:tree_br2
 3,8 grass:ms objects:tree_ml1
@@ -151,7 +151,7 @@
 14,8 earth:tl
 15,8 earth:t1
 
-0,9 earth:rls
+0,9 earth:r
 1,9 [1] grass:n3 grass:treels2
 2,9 [1] grass:n6 grass:treers2
 3,9 grass:n1 grass:treels1 objects:tree_bl1
@@ -168,7 +168,7 @@
 14,9 earth:l
 15,9 earth:n
 
-0,10 grass:dark earth:brls
+0,10 grass:dark earth:br
 1,10 [1] grass:n1
 2,10 [1] grass:n1
 3,10 [1] grass:n1 grass:treels2

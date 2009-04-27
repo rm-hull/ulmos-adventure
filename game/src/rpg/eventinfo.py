@@ -59,9 +59,9 @@ def getTriggers_Bridge():
     triggers = []
     event = BoundaryEvent(LEFT, "start", 0)
     triggers.append(BoundaryTrigger(event, LEFT, 11, 12))
-    event = TransitionEvent("bridge", 3, 2, 3, DOWN)
+    event = TransitionEvent("bridge", 3, 1, 3, DOWN)
     triggers.append(TileTrigger(event, 7, 7, 1))
-    event = TransitionEvent("bridge", 7, 7, 1, DOWN)
+    event = TransitionEvent("bridge", 7, 6, 1, DOWN)
     triggers.append(TileTrigger(event, 3, 2, 3))
     return triggers
 
