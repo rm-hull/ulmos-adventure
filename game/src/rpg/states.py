@@ -158,6 +158,8 @@ class TransitionState:
             self.player.setPosition(self.event.mapPosition[0],
                                     self.event.mapPosition[1],
                                     self.event.mapLevel)
+            if self.event.boundary:
+                self.hidePlayer(nextRpgMap.mapRect)
             # create play state
             self.nextState = PlayState(self.player)
             # extract the next image from the state
@@ -170,10 +172,27 @@ class TransitionState:
             screen.blit(extract, (xBorder, yBorder))
             pygame.display.flip()
         else:
+            if self.event.boundary:
+                return ShowPlayerState(self.player, self.player.direction, self.nextState)
             return ShowPlayerState(self.player, self.player.direction, self.nextState, self.tickTargets)
             # return self.nextState
         self.ticks += 1
         return None
+
+    def hidePlayer(self, mapRect):
+        playerRect = self.player.mapRect
+        px, py = playerRect.topleft
+        # we position the player just off the screen and then use the ShowPlayer
+        # state to bring the player into view                 
+        if self.event.boundary == UP:
+            py = mapRect.bottom
+        elif self.event.boundary == DOWN:
+            py = 0 - playerRect.height
+        elif self.event.boundary == LEFT:
+            px = mapRect.right
+        else: # self.boundary == RIGHT
+            px = 0 - playerRect.width             
+        self.player.resetPosition(px, py)
 
 class BoundaryState:
     

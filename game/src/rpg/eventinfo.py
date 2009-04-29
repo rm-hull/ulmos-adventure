@@ -59,10 +59,18 @@ def getTriggers_Bridge():
     triggers = []
     event = BoundaryEvent(LEFT, "start", 0)
     triggers.append(BoundaryTrigger(event, LEFT, 10, 12))
-    event = TransitionEvent("bridge", 3, 1, 3, DOWN)
+    event = TransitionEvent("caves", 11, 14, 1, UP)
     triggers.append(TileTrigger(event, 7, 7, 1))
-    event = TransitionEvent("bridge", 7, 6, 1, DOWN)
+    event = TransitionEvent("caves", 4, 14, 1, UP)
     triggers.append(TileTrigger(event, 3, 2, 3))
+    return triggers
+
+def getTriggers_Caves():
+    triggers = []
+    event = TransitionEvent("bridge", 3, 1, 3)
+    triggers.append(BoundaryTrigger(event, DOWN, 4))
+    event = TransitionEvent("bridge", 7, 6, 1)
+    triggers.append(BoundaryTrigger(event, DOWN, 11))
     return triggers
 
 eventInfo = {}
@@ -72,6 +80,7 @@ eventInfo["dungeon"] = getTriggers_Dungeon
 eventInfo["islands"] = getTriggers_Islands
 eventInfo["start"] = getTriggers_Start
 eventInfo["bridge"] = getTriggers_Bridge
+eventInfo["caves"] = getTriggers_Caves
 
 def getTriggers(mapName):    
     if mapName in eventInfo:
@@ -111,10 +120,13 @@ class TileTrigger(EventTrigger):
         self.level = level
         
 class BoundaryTrigger(EventTrigger):
-    def __init__(self, event, boundary, min, max):
+    def __init__(self, event, boundary, min, max = None):
         EventTrigger.__init__(self, event, BOUNDARY_TRIGGER)
         self.boundary = boundary
-        self.range = range(min, max + 1)
+        if max:
+            self.range = range(min, max + 1)
+        else:
+            self.range = [min]
 
 class Event:
     def __init__(self, type):
@@ -125,11 +137,12 @@ class DummyEvent(Event):
         Event.__init__(self, DUMMY_EVENT)
             
 class TransitionEvent(Event):
-    def __init__(self, mapName, x, y, level, direction = None):
+    def __init__(self, mapName, x, y, level, boundary = None, direction = None):
         Event.__init__(self, TRANSITION_EVENT)
         self.mapName = mapName
         self.mapPosition = (x, y)
         self.mapLevel = level
+        self.boundary = boundary
         self.direction = direction
 
 class BoundaryEvent(Event):

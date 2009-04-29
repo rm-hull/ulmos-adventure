@@ -450,14 +450,17 @@ class Coin(StaticSprite):
     baseRectWidth = 8 * SCALAR    
     framesImage = None
     
-    def __init__(self):
+    def __init__(self, coinInfo = None):
         if self.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "coin.png")
             self.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(self.framesImage)
         StaticSprite.__init__(self, animationFrames, 6, (2, 2))
+        self.coinInfo = coinInfo
         
     def processCollision(self, player):
+        if self.coinInfo:
+            self.coinInfo.available = False
         player.incrementCoinCount(1)
         return True
 

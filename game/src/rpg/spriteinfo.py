@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 
 import pygame
-
-import rpg.sprites as sprites
+import sprites
+import registry
 
 def getGameSprites_Skulls():
     gameSprites = pygame.sprite.Group()
@@ -39,20 +39,33 @@ def getGameSprites_Islands():
     gameSprites.add(flames1, flames2, coin1, coin2)
     return gameSprites
 
+def addCoin(gameSprites, name, x, y, level):
+    coinInfo = registry.getInfo(name)
+    if coinInfo and coinInfo.available:
+        coin = sprites.Coin(coinInfo)
+        coin.setPosition(x, y, level)
+        gameSprites.add(coin)
+    
 def getGameSprites_Start():
     gameSprites = pygame.sprite.Group()
-    coin = sprites.Coin()
-    coin.setPosition(7, 4, 2)
-    gameSprites.add(coin)
+    addCoin(gameSprites, "start", 7, 4, 2)
     return gameSprites
 
 def getGameSprites_Bridge():
     gameSprites = pygame.sprite.Group()
-    coin1 = sprites.Coin()
-    coin1.setPosition(8, 5, 3)
-    coin2 = sprites.Coin()
-    coin2.setPosition(14, 5, 3)
-    gameSprites.add(coin1, coin2)
+    addCoin(gameSprites, "bridge1", 8, 5, 3)
+    addCoin(gameSprites, "bridge2", 14, 5, 3)
+    return gameSprites
+
+def getGameSprites_Caves():
+    gameSprites = pygame.sprite.Group()
+    flames1 = sprites.Flames()
+    flames1.setPosition(3, 4, 2)
+    flames2 = sprites.Flames()
+    flames2.setPosition(12, 1, 2)
+    flames3 = sprites.Flames()
+    flames3.setPosition(9, 10, 2)
+    gameSprites.add(flames1, flames2, flames3)
     return gameSprites
 
 spriteInfo = {}
@@ -61,6 +74,7 @@ spriteInfo["dungeon"] = getGameSprites_Dungeon
 spriteInfo["islands"] = getGameSprites_Islands
 spriteInfo["start"] = getGameSprites_Start
 spriteInfo["bridge"] = getGameSprites_Bridge
+spriteInfo["caves"] = getGameSprites_Caves
 
 def getMapSprites(mapName):
     if mapName in spriteInfo:
