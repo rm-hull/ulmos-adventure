@@ -87,23 +87,31 @@ public class MapTile {
 		levels = null;
 	}
 	
-	public MapTile copy() {
-    	MapTile mapTile = new MapTile(null);
+	public MapTileSnapshot getSnapshot() {
+    	MapTileSnapshot mapTileSnapshot = new MapTileSnapshot();
     	if (levels != null) {
-    		String[] levelsCopy = new String[levels.length];
+    		String[] levelsSnapshot = new String[levels.length];
     		for (int i = 0; i < levels.length; i++) {
-    			levelsCopy[i] = new String(levels[i]);
+    			// since String is immutable we know this is safe
+    			levelsSnapshot[i] = levels[i];
     		}
-    		mapTile.setLevels(levelsCopy);
+    		mapTileSnapshot.setLevels(levelsSnapshot);
     	}
     	if (tiles != null) {
-    		List<MaskTile> tilesCopy = new ArrayList<MaskTile>();
-    		for (MaskTile tile: tiles) {
-    			
+    		TileSnapshot[] tileSnapshots = new TileSnapshot[tiles.size()];
+    		for (int i = 0; i < tiles.size(); i++) {
+    			MaskTile maskTile = tiles.get(i);
+    			TileSnapshot tileSnapshot = new TileSnapshot();
+    			tileSnapshot.setName(maskTile.getTile().getName());
+    			String maskLevel = maskTile.getMaskLevel(); 
+    			if (maskLevel != null) {
+    				tileSnapshot.setMaskLevel(maskLevel);
+    			}
+    			tileSnapshots[i] = tileSnapshot;
     		}
-    		mapTile.setTiles(tilesCopy);
+    		mapTileSnapshot.setTiles(tileSnapshots);
     	}
-		return mapTile;
+		return mapTileSnapshot;
 	}
 	
 	public void sendToBack() {

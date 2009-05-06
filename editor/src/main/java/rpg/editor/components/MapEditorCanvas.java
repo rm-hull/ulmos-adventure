@@ -30,6 +30,7 @@ import rpg.editor.core.TileImagesEditor;
 import rpg.editor.core.TileLevelsEditor;
 import rpg.editor.core.TileMasksEditor;
 import rpg.editor.core.TileSelection;
+import rpg.editor.model.MapSnapshot;
 import rpg.editor.model.MapTile;
 import rpg.editor.model.RpgMap;
 import rpg.editor.model.Tile;
@@ -44,9 +45,9 @@ public class MapEditorCanvas extends TileCanvas {
 	private static final String EDIT_LEVELS = "Edit Levels";
 	private static final String EDIT_MASKS = "Edit Masks";
 	
-	private static final String CUT = "CUT";;
-	private static final String COPY = "COPY";
-	private static final String PASTE = "PASTE";
+	private static final String CUT = "Cut";;
+	private static final String COPY = "Copy";
+	private static final String PASTE = "Paste";
 		
 	protected TileSelection tileSelection = SharedTileSelection.getInstance();
 	protected EditMode editMode = EditMode.ADD;
@@ -54,6 +55,9 @@ public class MapEditorCanvas extends TileCanvas {
 	protected RpgMap map;
 
 	private Point startTile;
+	
+	// TODO: put this somewhere that's globally available
+	private MapSnapshot mapSnapshot;
 
 	private TileEditorFactory editImagesFactory = new TileEditorFactory() {
 		public TileEditor newTileEditor(Composite parent, MapTile mapTile) {
@@ -83,7 +87,6 @@ public class MapEditorCanvas extends TileCanvas {
 		popupMenu.addMenuListener(new MenuAdapter() {
 			@Override
 			public void menuShown(MenuEvent event) {
-				System.out.println("hello");
 				preparePopupMenu(popupMenu);
 			}
 		});
@@ -170,6 +173,8 @@ public class MapEditorCanvas extends TileCanvas {
 				int tileDepth = mapTile.getTileDepth();
 				if (tileDepth > 0) {
 					toEnable.add(CLEAR);
+					toEnable.add(COPY);
+					toEnable.add(CUT);
 					if (tileDepth > 1) {
 						toEnable.add(SEND_TO_BACK);
 						toEnable.add(KEEP_TOP);
@@ -185,6 +190,9 @@ public class MapEditorCanvas extends TileCanvas {
 				}
 			}
 			toEnable.add(EDIT_LEVELS);
+			if ((selected == 1) && (mapSnapshot != null)) {
+				toEnable.add(PASTE);
+			}
 		}
 		enableMenuItems(popupMenu, toEnable);
 	}
@@ -279,6 +287,40 @@ public class MapEditorCanvas extends TileCanvas {
 				if (tileEditor.editTile(mapTile)) {
 					setLabelText();				
 				}
+			}
+		});
+
+		// separator
+		new MenuItem(menu, SWT.SEPARATOR);
+
+		MenuItem cut = new MenuItem(menu, SWT.PUSH);
+		cut.setText(CUT);
+		cut.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event event) {
+				MapSnapshot copy = map.getSnapshot(determineTilePoints());
+				// System.out.println(copy);
+				mapSnapshot = copy;
+				map.clear(determineTilePoints());
+				redraw();
+				setLabelText();
+			}
+		});
+		MenuItem copy = new MenuItem(menu, SWT.PUSH);
+		copy.setText(COPY);
+		copy.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event event) {
+				MapSnapshot copy = map.getSnapshot(determineTilePoints());
+				// System.out.println(copy);
+				mapSnapshot = copy;
+			}
+		});
+		MenuItem paste = new MenuItem(menu, SWT.PUSH);
+		paste.setText(PASTE);
+		paste.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event event) {
+				map.paste(highlightTile, mapSnapshot);
+				redraw();
+				setLabelText();
 			}
 		});
 	}
