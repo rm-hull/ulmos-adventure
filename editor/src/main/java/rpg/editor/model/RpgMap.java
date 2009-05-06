@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -231,15 +232,6 @@ public class RpgMap {
 				updateTileImage(mapTiles[x][y], new Point(x, y));
 			}
 		}
-		/*paletteData = new PaletteData(new RGB[] { COLOUR_A, COLOUR_B });
-		imageData = new ImageData(cols, rows, 1, paletteData);
-		for (int x = 0; x < cols; x += 2) {
-			for (int y = 0; y < rows; y++) {
-				imageData.setPixel(x + (y % 2), y, 1);
-			}
-		}
-		mapImage = new Image(DisplayHelper.getDisplay(),
-	    		imageData.scaledTo(cols * TILE_SIZE, rows * TILE_SIZE));*/    	
     }
 
     public void saveRpgMap() {
@@ -354,6 +346,25 @@ public class RpgMap {
 		for (Point tilePoint: tilePoints) {
 			clear(tilePoint);
 		}
+    }
+    
+    /*public MapTile copy(Point tilePoint) {
+    	MapTile mapTileCopy = new MapTile(null);
+		MapTile mapTile = getMapTile(tilePoint);
+		String[] levels = mapTile.getLevels();
+		String[] levelsCopy = new String[levels.length];
+		for (int i = 0; i < levels.length; i++) {
+			levelsCopy[i] = new String(levels[i]);
+		}
+		mapTileCopy.setLevels(levelsCopy);
+		List levels = new String[]
+		copy.setLevels(levels);
+		copy.setTiles(tiles);
+		return copy;
+    }*/
+    
+    public MapTile[][] copy(List<Point> tilePoints) {
+    	return null;
     }
     
 	public void updateTileImage(MapTile mapTile, Point tilePoint) {

@@ -87,6 +87,24 @@ public class MapTile {
 		levels = null;
 	}
 	
+	public MapTile copy() {
+    	MapTile mapTile = new MapTile(null);
+    	if (levels != null) {
+    		String[] levelsCopy = new String[levels.length];
+    		for (int i = 0; i < levels.length; i++) {
+    			levelsCopy[i] = new String(levels[i]);
+    		}
+    		mapTile.setLevels(levelsCopy);
+    	}
+    	if (tiles != null) {
+    		List<MaskTile> tilesCopy = new ArrayList<MaskTile>();
+    		
+    		mapTile.setTiles(tiles);
+    		
+    	}
+		return mapTile;
+	}
+	
 	public void sendToBack() {
 		List<MaskTile> newTiles = new ArrayList<MaskTile>();
 		newTiles.add(tiles.get(tiles.size() - 1));

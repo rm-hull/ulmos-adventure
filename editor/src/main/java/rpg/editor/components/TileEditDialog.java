@@ -19,6 +19,7 @@ import rpg.editor.core.DisplayHelper;
 import rpg.editor.core.TileConversion;
 import rpg.editor.core.TileEditor;
 import rpg.editor.core.TileEditorFactory;
+import rpg.editor.core.TileImagesEditor;
 import rpg.editor.core.TileSelectionStub;
 import rpg.editor.model.MapTile;
 import rpg.editor.model.TileSet;
@@ -28,6 +29,8 @@ public class TileEditDialog extends Dialog {
 	private TileEditorFactory editorFactory;
 	
 	private Point size = null;
+	
+	private boolean applied = true;
 	
 	public TileEditDialog(Shell parent, TileEditorFactory editorFactory) {
 		this(parent, editorFactory, SWT.NONE);
@@ -47,7 +50,7 @@ public class TileEditDialog extends Dialog {
 		size = new Point(width, height);
 	}
 	
-	public void editTile(MapTile mapTile) {
+	public boolean editTile(MapTile mapTile) {
 		// setup
 		Shell parent = getParent();
 		final Shell shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
@@ -72,6 +75,7 @@ public class TileEditDialog extends Dialog {
 		cancel.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
 				shell.dispose();
+				applied = false;
 			}
 		});
 		if (size == null) {
@@ -94,6 +98,8 @@ public class TileEditDialog extends Dialog {
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch()) display.sleep();
 		}
+		
+		return applied;
 	}
 	
 	// =====================================================
@@ -115,9 +121,14 @@ public class TileEditDialog extends Dialog {
 		mapTile.addTile(tileConversion.convertTile(tileSet.getTile("l_supp")));
 		mapTile.setLevels(new String[] { "1", "S3", "2" });
 		
-		TileEditDialog tileEditor = new TileEditDialog(shell, new MapEditor.TileImagesEditorFactory());
-		// TileEditDialog tileEditor = new TileEditDialog(shell, new MapEditor.TileLevelsEditorFactory());
-		// TileEditDialog tileEditor = new TileEditDialog(shell, new MapEditor.TileMasksEditorFactory());
+		TileEditorFactory tileEditorFactory = new TileEditorFactory() {
+			public TileEditor newTileEditor(Composite parent, MapTile mapTile) {
+				return new TileImagesEditor(parent, mapTile);
+				// return new TileLevelsEditor(parent, mapTile);
+				// return new TileMasksEditor(parent, mapTile);
+			}
+		};
+		TileEditDialog tileEditor = new TileEditDialog(shell, tileEditorFactory);
 		tileEditor.editTile(mapTile);
 		System.out.println(mapTile);
 		
