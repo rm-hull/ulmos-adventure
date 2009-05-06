@@ -98,9 +98,10 @@ public class MapTile {
     	}
     	if (tiles != null) {
     		List<MaskTile> tilesCopy = new ArrayList<MaskTile>();
-    		
-    		mapTile.setTiles(tiles);
-    		
+    		for (MaskTile tile: tiles) {
+    			
+    		}
+    		mapTile.setTiles(tilesCopy);
     	}
 		return mapTile;
 	}
