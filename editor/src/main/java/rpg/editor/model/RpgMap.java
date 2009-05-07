@@ -404,6 +404,13 @@ public class RpgMap {
     	return new MapSnapshot(tileSnapshots);
     }
     
+    public void resize(int left, int right, int top, int bottom) {
+    	System.out.println("left: " + left);
+    	System.out.println("right: " + right);
+    	System.out.println("top: " + top);
+    	System.out.println("bottom: " + bottom);
+    }
+    
     public void paste(Point tilePoint, MapSnapshot mapSnapshot) {
 	    Map<String, TileSet> tileSets = new HashMap<String, TileSet>();
     	MapTileSnapshot[][] tileSnapshots = mapSnapshot.getMapTiles();

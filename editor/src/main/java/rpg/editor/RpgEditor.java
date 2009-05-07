@@ -21,6 +21,7 @@ import rpg.editor.components.MapEditor;
 import rpg.editor.components.RecentTiles;
 import rpg.editor.components.TilePicker;
 import rpg.editor.core.DisplayHelper;
+import rpg.editor.core.ResizeMapDialog;
 import rpg.editor.core.WarningDialog;
 import rpg.editor.model.RpgMap;
 import rpg.editor.model.TileSet;
@@ -44,6 +45,7 @@ public class RpgEditor {
 
 		Menu menuBar = new Menu(shell, SWT.BAR);
 		shell.setMenuBar(menuBar);
+		// file menu
 		MenuItem menuItem = new MenuItem(menuBar, SWT.CASCADE);
 		menuItem.setText("File");
 		Menu fileMenu = new Menu(shell, SWT.DROP_DOWN);
@@ -64,6 +66,23 @@ public class RpgEditor {
 				else {
 					saveMap.setEnabled(true);
 					saveMapAs.setEnabled(true);					
+				}
+			}
+		});
+		// map menu
+		menuItem = new MenuItem(menuBar, SWT.CASCADE);
+		menuItem.setText("Map");
+		Menu mapMenu = new Menu(shell, SWT.DROP_DOWN);
+		menuItem.setMenu(mapMenu);
+		final MenuItem resizeMap = addResizeMap(mapMenu);
+		mapMenu.addMenuListener(new MenuAdapter() {
+			@Override
+			public void menuShown(MenuEvent e) {
+				if (mapEditor.getMap() == null) {
+					resizeMap.setEnabled(false);
+				}
+				else {
+					resizeMap.setEnabled(true);
 				}
 			}
 		});
@@ -200,6 +219,25 @@ public class RpgEditor {
 			}
 		});
 		return saveMapAs;
+	}
+
+	private MenuItem addResizeMap(Menu menu) {
+		MenuItem resizeMap = new MenuItem(menu, SWT.PUSH);
+		resizeMap.setText("Resize Map");
+		resizeMap.addListener(SWT.Selection, new Listener() {
+			public void handleEvent(Event event) {
+		    	ResizeMapDialog resizeDialog = new ResizeMapDialog(DisplayHelper.getShell());
+		    	int[] adjustments = resizeDialog.getAdjustments();
+		    	if (adjustments != null) {
+					RpgMap map = mapEditor.getMap();
+					if (map != null) {
+						map.resize(adjustments[0], adjustments[1],
+								adjustments[2], adjustments[3]);
+					}		    		
+		    	}
+			}
+		});
+		return resizeMap;
 	}
 
 	public static void main(String[] args) {

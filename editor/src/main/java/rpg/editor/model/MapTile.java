@@ -101,8 +101,7 @@ public class MapTile {
     		TileSnapshot[] tileSnapshots = new TileSnapshot[tiles.size()];
     		for (int i = 0; i < tiles.size(); i++) {
     			MaskTile maskTile = tiles.get(i);
-    			TileSnapshot tileSnapshot = new TileSnapshot();
-    			tileSnapshot.setName(maskTile.getTile().getName());
+    			TileSnapshot tileSnapshot = new TileSnapshot(maskTile.getTile().getName());
     			String maskLevel = maskTile.getMaskLevel(); 
     			if (maskLevel != null) {
     				tileSnapshot.setMaskLevel(maskLevel);
