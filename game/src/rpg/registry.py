@@ -19,6 +19,6 @@ class CoinInfo(Info):
         Info.__init__(self, name)
         self.available = True
         
-registerInfo(CoinInfo("start"))
-registerInfo(CoinInfo("bridge1"))
-registerInfo(CoinInfo("bridge2"))
+registerInfo(CoinInfo("start1"))
+registerInfo(CoinInfo("start2"))
+registerInfo(CoinInfo("start3"))

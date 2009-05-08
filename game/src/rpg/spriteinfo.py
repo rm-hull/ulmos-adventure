@@ -48,13 +48,9 @@ def addCoin(gameSprites, name, x, y, level):
     
 def getGameSprites_Start():
     gameSprites = pygame.sprite.Group()
-    addCoin(gameSprites, "start", 7, 4, 2)
-    return gameSprites
-
-def getGameSprites_Bridge():
-    gameSprites = pygame.sprite.Group()
-    addCoin(gameSprites, "bridge1", 8, 5, 3)
-    addCoin(gameSprites, "bridge2", 14, 5, 3)
+    addCoin(gameSprites, "start1", 7, 4, 2)
+    addCoin(gameSprites, "start2", 24, 5, 3)
+    addCoin(gameSprites, "start3", 30, 5, 3)
     return gameSprites
 
 def getGameSprites_Caves():
@@ -73,7 +69,7 @@ spriteInfo["skulls"] = getGameSprites_Skulls
 spriteInfo["dungeon"] = getGameSprites_Dungeon
 spriteInfo["islands"] = getGameSprites_Islands
 spriteInfo["start"] = getGameSprites_Start
-spriteInfo["bridge"] = getGameSprites_Bridge
+# spriteInfo["bridge"] = getGameSprites_Bridge
 spriteInfo["caves"] = getGameSprites_Caves
 
 def getMapSprites(mapName):
