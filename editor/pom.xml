@@ -10,8 +10,8 @@
 	
     <properties>
         <!-- <platform>macosx</platform> -->
-        <platform>gtk</platform>
-        <!-- <platform>win32</platform> -->
+        <!-- <platform>gtk</platform> -->
+        <platform>win32</platform>
     </properties>
 
 	<dependencies>

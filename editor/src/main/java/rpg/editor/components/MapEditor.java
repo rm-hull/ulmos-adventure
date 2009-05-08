@@ -90,16 +90,29 @@ public class MapEditor extends Composite {
 		});
 	}
 	
+	public RpgMap getMap() {
+		return mapEditorCanvas.map;
+	}
+	
 	public void setMap(RpgMap map) {
 		mapEditorCanvas.map = map;
+		updateCanvas(map);
+	}
+	
+	public void resize(int left, int right, int top, int bottom) {
+		RpgMap map = mapEditorCanvas.map;
+		if (map != null) {
+			if (map.resize(left, right, top, bottom)) {
+				updateCanvas(map);
+			}
+		}
+	}
+	
+	private void updateCanvas(RpgMap map) {
 		mapEditorCanvas.tileImage = map.getMapImage();
 		Rectangle rect = map.getMapImage().getBounds();
 		canvasHolder.setMinSize(rect.width, rect.height);
 		mapEditorCanvas.redraw();
-	}
-	
-	public RpgMap getMap() {
-		return mapEditorCanvas.map;
 	}
 	
 	// =====================================================

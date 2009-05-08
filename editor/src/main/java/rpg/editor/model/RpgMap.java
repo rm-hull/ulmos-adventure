@@ -173,40 +173,6 @@ public class RpgMap {
    		return tileSet;
     }
     
-    private void pasteIntoMapTile(MapTile mapTile, MapTileSnapshot snapshot, Map<String, TileSet> tileSets) {
-    	mapTile.clearTiles();
-    	String[] levels = snapshot.getLevels();
-    	if (levels != null) {
-       		mapTile.setLevels(snapshot.getLevels());
-    	}
-    	TileSnapshot[] tiles = snapshot.getTiles();
-    	if ((tiles != null) && (tiles.length > 0)) {
-       		for (TileSnapshot tileSnapshot: snapshot.getTiles()) {
-       	   		String[] tileBits = tileSnapshot.getName().split(Constants.COLON);
-       			if (tileBits.length > 1) {
-       	    		String tileSetName = tileBits[0];
-       	    		TileSet tileSet = getTileSet(tileSetName, tileSets);
-       	    		if (tileSet == null) {
-       	    			System.out.println("tile set not found: " + tileSetName);
-       	    		}
-       	    		else {
-       	   	    		Tile tempTile = tileSet.getTile(tileBits[1]);
-       	   	    		if (tempTile != null) {
-       	   		    		Tile tile = tileConversion.convertTile(tempTile);
-       	   		    		String maskLevel = tileSnapshot.getMaskLevel();
-       	   		    		if (maskLevel == null) {
-       	   		    			mapTile.addTile(tile);
-       	   		    		}
-       	   		    		else {
-       	   		    			mapTile.addTile(tile, maskLevel);
-       	   		    		}
-       	   	    		}
-       	    		}
-       			}
-       		}
-    	}   	   		
-    }
-    
     private void populateMapTile(MapTile mapTile, String[] bits, Map<String, TileSet> tileSets) {
     	// we know there's at least one string or we wouldn't have added it
     	// to the map in the first place
@@ -250,6 +216,40 @@ public class RpgMap {
 	    		}
     		}
     	}    	
+    }
+    
+    private void pasteIntoMapTile(MapTile mapTile, MapTileSnapshot snapshot, Map<String, TileSet> tileSets) {
+    	mapTile.clearTiles();
+    	String[] levels = snapshot.getLevels();
+    	if (levels != null) {
+       		mapTile.setLevels(snapshot.getLevels());
+    	}
+    	TileSnapshot[] tiles = snapshot.getTiles();
+    	if ((tiles != null) && (tiles.length > 0)) {
+       		for (TileSnapshot tileSnapshot: snapshot.getTiles()) {
+       	   		String[] tileBits = tileSnapshot.getName().split(Constants.COLON);
+       			if (tileBits.length > 1) {
+       	    		String tileSetName = tileBits[0];
+       	    		TileSet tileSet = getTileSet(tileSetName, tileSets);
+       	    		if (tileSet == null) {
+       	    			System.out.println("tile set not found: " + tileSetName);
+       	    		}
+       	    		else {
+       	   	    		Tile tempTile = tileSet.getTile(tileBits[1]);
+       	   	    		if (tempTile != null) {
+       	   		    		Tile tile = tileConversion.convertTile(tempTile);
+       	   		    		String maskLevel = tileSnapshot.getMaskLevel();
+       	   		    		if (maskLevel == null) {
+       	   		    			mapTile.addTile(tile);
+       	   		    		}
+       	   		    		else {
+       	   		    			mapTile.addTile(tile, maskLevel);
+       	   		    		}
+       	   	    		}
+       	    		}
+       			}
+       		}
+    	}   	   		
     }
     
     private void initialiseMap(Point size) {
@@ -404,27 +404,55 @@ public class RpgMap {
     	return new MapSnapshot(tileSnapshots);
     }
     
-    public void resize(int left, int right, int top, int bottom) {
-    	System.out.println("left: " + left);
-    	System.out.println("right: " + right);
-    	System.out.println("top: " + top);
-    	System.out.println("bottom: " + bottom);
-    }
-    
     public void paste(Point tilePoint, MapSnapshot mapSnapshot) {
 	    Map<String, TileSet> tileSets = new HashMap<String, TileSet>();
     	MapTileSnapshot[][] tileSnapshots = mapSnapshot.getMapTiles();
-    	for (int x = 0; x < tileSnapshots.length; x++) {
-    		for (int y = 0; y < tileSnapshots[x].length; y++) {
+    	Point snapshotSize = mapSnapshot.getSize();
+    	int sRows = snapshotSize.y, sCols = snapshotSize.x;
+    	int rows = size.y, cols = size.x;
+    	for (int x = 0; x < sCols; x++) {
+    		for (int y = 0; y < sRows; y++) {
     			int tx = x + tilePoint.x;
     			int ty = y + tilePoint.y;
-    			if ((tx < mapTiles.length) && (ty < mapTiles[tx].length)) {
+    			if ((tx < cols) && (ty < rows)) {
     				MapTile mapTile = mapTiles[tx][ty];
     				pasteIntoMapTile(mapTile, tileSnapshots[x][y], tileSets);
     		    	updateTileImage(mapTile, new Point(tx, ty));
     			}
     		}
     	}
+    }
+    
+    public boolean resize(int left, int right, int top, int bottom) {
+    	boolean resized = false;
+    	System.out.println("left: " + left);
+    	System.out.println("right: " + right);
+    	System.out.println("top: " + top);
+    	System.out.println("bottom: " + bottom);
+    	int oldRows = size.y, oldCols = size.x;
+    	int rows = Math.min(oldRows + top + bottom, 64);
+    	int cols = Math.min(oldCols + left + right, 64);
+    	if ((rows > 0) && (cols > 0)) {
+    		System.out.println("** Made It! **");
+    		MapTile[][] oldMapTiles = mapTiles;
+    	    initialiseMap(new Point(cols, rows));
+    	    System.out.println(size);
+        	for (int x = 0; x < oldCols; x++) {
+        		for (int y = 0; y < oldRows; y++) {
+        			int tx = x + left;
+        			int ty = y + top;
+        			if ((tx < cols) && (ty < rows)) {
+        				MapTile oldMapTile = oldMapTiles[x][y];
+        				MapTile mapTile = mapTiles[tx][ty];
+        				mapTile.setTiles(oldMapTile.getTiles());
+        				mapTile.setLevels(oldMapTile.getLevels());
+        		    	updateTileImage(mapTile, new Point(tx, ty));
+        			}
+        		}
+        	}
+        	resized = true;
+    	}
+    	return resized;
     }
     
 	public void updateTileImage(MapTile mapTile, Point tilePoint) {

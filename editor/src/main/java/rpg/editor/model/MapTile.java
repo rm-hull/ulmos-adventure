@@ -26,8 +26,8 @@ public class MapTile {
 	
 	private String[] levels;
 	
-	public MapTile(Image myBaseTile) {
-		baseTile = myBaseTile;
+	public MapTile(Image baseTile) {
+		this.baseTile = baseTile;
 	}
 
 	public List<MaskTile> getTiles() {

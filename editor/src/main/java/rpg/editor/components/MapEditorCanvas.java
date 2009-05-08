@@ -20,6 +20,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 
+import rpg.editor.Clipboard;
 import rpg.editor.Constants;
 import rpg.editor.core.DisplayHelper;
 import rpg.editor.core.SharedTileSelection;
@@ -56,8 +57,7 @@ public class MapEditorCanvas extends TileCanvas {
 
 	private Point startTile;
 	
-	// TODO: put this somewhere that's globally available
-	private MapSnapshot mapSnapshot;
+	private Clipboard clipboard = Clipboard.getInstance();
 
 	private TileEditorFactory editImagesFactory = new TileEditorFactory() {
 		public TileEditor newTileEditor(Composite parent, MapTile mapTile) {
@@ -125,24 +125,26 @@ public class MapEditorCanvas extends TileCanvas {
 				if (tileImage != null) {
 					Point previousHighlightTile = highlightTile;
 					highlightTile = determineTilePoint(event);
-					if (startTile == null) {
-						// if we don't have a start tile then we know that the mouse button
-						// is up, ie. the user is just moving the mouse around the map
-						if (highlightTile != previousHighlightTile) {
-							highlightRectangle = null;
-							redraw();
-							setLabelText();
-						}					
-					}
-					else {
-						// otherwise, the user is changing the selected area on the map
-						if (highlightTile != previousHighlightTile) {
-							if (highlightTile != null) {
-								highlightRectangle = determineTileRectangle();
+					if (highlightTile != null) {
+						if (startTile == null) {
+							// if we don't have a start tile then we know that the mouse button
+							// is up, ie. the user is just moving the mouse around the map
+							if (!highlightTile.equals(previousHighlightTile)) {
+								highlightRectangle = null;
 								redraw();
-							}
-							setLabelText();
+								setLabelText();
+							}					
 						}
+						else {
+							// otherwise, the user is changing the selected area on the map
+							if (!highlightTile.equals(previousHighlightTile)) {
+								if (highlightTile != null) {
+									highlightRectangle = determineTileRectangle();
+									redraw();
+								}
+								setLabelText();
+							}
+						}						
 					}
 				}
 			}
@@ -190,7 +192,7 @@ public class MapEditorCanvas extends TileCanvas {
 				}
 			}
 			toEnable.add(EDIT_LEVELS);
-			if ((selected == 1) && (mapSnapshot != null)) {
+			if ((selected == 1) && (clipboard.containsData())) {
 				toEnable.add(PASTE);
 			}
 		}
@@ -297,9 +299,8 @@ public class MapEditorCanvas extends TileCanvas {
 		cut.setText(CUT);
 		cut.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
-				MapSnapshot copy = map.getSnapshot(determineTilePoints());
-				// System.out.println(copy);
-				mapSnapshot = copy;
+				MapSnapshot snapshot = map.getSnapshot(determineTilePoints());
+				clipboard.setMapSnapshot(snapshot);
 				map.clear(determineTilePoints());
 				redraw();
 				setLabelText();
@@ -309,16 +310,15 @@ public class MapEditorCanvas extends TileCanvas {
 		copy.setText(COPY);
 		copy.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
-				MapSnapshot copy = map.getSnapshot(determineTilePoints());
-				// System.out.println(copy);
-				mapSnapshot = copy;
+				MapSnapshot snapshot = map.getSnapshot(determineTilePoints());
+				clipboard.setMapSnapshot(snapshot);
 			}
 		});
 		MenuItem paste = new MenuItem(menu, SWT.PUSH);
 		paste.setText(PASTE);
 		paste.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event event) {
-				map.paste(highlightTile, mapSnapshot);
+				map.paste(highlightTile, clipboard.getMapSnapshot());
 				redraw();
 				setLabelText();
 			}

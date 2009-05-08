@@ -6,6 +6,8 @@ import org.eclipse.swt.graphics.Point;
 
 public class MapSnapshot {
 	
+	private Point size;
+	
 	private MapTileSnapshot[][] mapTiles;
 	
 	public MapSnapshot(Map<Point, MapTileSnapshot> tileSnapshots) {
@@ -27,8 +29,14 @@ public class MapSnapshot {
 	    	int y = tilePoint.y - minY;
 	    	mapTiles[x][y] = tileSnapshots.get(tilePoint);
 		}
+		// store size for later
+		size = new Point(cols, rows);
 	}
 
+	public Point getSize() {
+		return size;
+	}
+	
 	public MapTileSnapshot[][] getMapTiles() {
 		return mapTiles;
 	}

@@ -229,12 +229,9 @@ public class RpgEditor {
 		    	ResizeMapDialog resizeDialog = new ResizeMapDialog(DisplayHelper.getShell());
 		    	int[] adjustments = resizeDialog.getAdjustments();
 		    	if (adjustments != null) {
-					RpgMap map = mapEditor.getMap();
-					if (map != null) {
-						map.resize(adjustments[0], adjustments[1],
-								adjustments[2], adjustments[3]);
-					}		    		
-		    	}
+		    		mapEditor.resize(adjustments[0], adjustments[1],
+							adjustments[2], adjustments[3]);
+				}		    		
 			}
 		});
 		return resizeMap;
