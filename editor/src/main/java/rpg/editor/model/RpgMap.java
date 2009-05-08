@@ -433,7 +433,6 @@ public class RpgMap {
     	int rows = Math.min(oldRows + top + bottom, 64);
     	int cols = Math.min(oldCols + left + right, 64);
     	if ((rows > 0) && (cols > 0)) {
-    		System.out.println("** Made It! **");
     		MapTile[][] oldMapTiles = mapTiles;
     	    initialiseMap(new Point(cols, rows));
     	    System.out.println(size);
