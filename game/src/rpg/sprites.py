@@ -97,11 +97,10 @@ than the sprite.
 """
 class MaskSprite(RpgSprite):
     
-    def __init__(self, rpgMap, frameSkip, position = (0, 0)):
+    def __init__(self, frameSkip, position = (0, 0)):
         # pygame.sprite.Sprite.__init__(self, self.containers)
         RpgSprite.__init__(self, frameSkip, position)
         # properties common to all MaskSprites
-        self.rpgMap = rpgMap
         self.masked = False
 
     def doMove(self, px, py):
@@ -135,8 +134,8 @@ extending MaskSprite, but all animation functionality is encapsulated here.
 """        
 class Player(MaskSprite):
     
-    def __init__(self, rpgMap, animationFrames, position = (0, 0)):
-        MaskSprite.__init__(self, rpgMap, 6, position)
+    def __init__(self, animationFrames, position = (0, 0)):
+        MaskSprite.__init__(self, 6, position)
         # view rect is the scrolling window onto the map
         self.viewRect = Rect((0, 0), pygame.display.get_surface().get_size())
         # animation frames
@@ -148,7 +147,7 @@ class Player(MaskSprite):
         self.image = animationFrames[self.direction][self.animFrameCount]
         # sprite state
         self.movement = None
-        self.coinCount = 0
+        self.coinCount = None
     
     """
     The view rect is entirely determined by what the main sprite is doing.  Sometimes
@@ -389,19 +388,19 @@ class Player(MaskSprite):
         lastImage.blit(self.animationFrames[direction + OFFSET][animFrameCount], (0, 0))
 
     def incrementCoinCount(self, n):
-        self.coinCount += n
-        print self.coinCount
+        self.coinCount.incrementCount(n)
+        print self.coinCount.count
     
 class Ulmo(Player):
     
     framesImage = None
     
-    def __init__(self, rpgMap):
+    def __init__(self):
         if self.framesImage is None:          
             imagePath = os.path.join(SPRITES_FOLDER, "ulmo-frames.png")
             self.framesImage = view.loadScaledImage(imagePath, None)
         animationFrames = view.processMovementFrames(self.framesImage)
-        Player.__init__(self, rpgMap, animationFrames, (1, 4))
+        Player.__init__(self, animationFrames, (1, 4))
         
 """
 Defines a sprite that doesn't move independently, although it does move with the view.
@@ -474,20 +473,51 @@ class FixedSprite(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         # properties common to all RpgSprites
         self.position = [i * SCALAR for i in position]
-        #self.images = images
-        self.image = view.createDuplicateSpriteImage(image)
+        self.setImage(image)
+        
+    def setImage(self, image):
+        self.image = image
         self.rect = self.image.get_rect()
         self.rect.move_ip(self.position[0], self.position[1])
 
-class FixedCoin(FixedSprite):
+class CoinCount(FixedSprite):
     
     initialImage = None
     
     def __init__(self, position = (0, 0)):
         if self.initialImage is None:    
+            imagePath = os.path.join(SPRITES_FOLDER, "numbers.png")
+            self.initialImage = view.loadScaledImage(imagePath, None)
+        self.numbers = view.processStaticFrames(self.initialImage, 10)        
+        FixedSprite.__init__(self, self.numbers[0], position)
+        self.count = 0;
+        
+    def incrementCount(self, increment = 1):
+        self.count += increment
+        self.newImage()
+        
+    def newImage(self):
+        countString = str(self.count)
+        dimensions = (len(countString) * 8 * SCALAR, 8 * SCALAR)
+        newImage = view.createRectangle(dimensions, view.TRANSPARENT_COLOUR)
+        newImage.set_colorkey(view.TRANSPARENT_COLOUR, view.RLEACCEL)
+        px = 0;
+        for n in countString:
+            newImage.blit(self.numbers[int(n)], (px, 0))
+            px += 8 * SCALAR
+        self.setImage(newImage)
+        
+class FixedCoin(FixedSprite):
+
+    initialImage = None
+    
+    def __init__(self, position = (0, 0)):
+        if self.initialImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "coin.png")
-            self.initialImage = view.loadScaledImage(imagePath, None)        
-        FixedSprite.__init__(self, self.initialImage, position)
+            self.initialImage = view.loadScaledImage(imagePath, None)
+        FixedSprite.__init__(self,
+                             view.createDuplicateSpriteImage(self.initialImage),
+                             position)
     
 """
 Sprite group that ensures pseudo z ordering for the sprites.  This works
