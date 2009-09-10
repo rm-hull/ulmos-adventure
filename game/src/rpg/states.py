@@ -29,6 +29,14 @@ TICK_TARGETS = {UP: 24, DOWN: 24, LEFT: 14, RIGHT: 14}
 pygame.init()
 screen = pygame.display.set_mode(DIMENSIONS)
 
+fixedSprites = pygame.sprite.Group()
+fixedCoin = sprites.FixedCoin((1,1))
+fixedSprites.add(fixedCoin)
+
+rpgMap = parser.loadRpgMap("start")
+player = sprites.Ulmo(rpgMap)
+player.setPosition(9, 6, 2)
+
 """def startGame():
     # create the map
     rpgMap = parser.loadRpgMap("demo")
@@ -42,11 +50,11 @@ screen = pygame.display.set_mode(DIMENSIONS)
 
 def startGame():
     # create the map
-    rpgMap = parser.loadRpgMap("start")
+    #rpgMap = parser.loadRpgMap("start")
     # create the player sprite
-    player = sprites.Ulmo(rpgMap)
+    #player = sprites.Ulmo(rpgMap)
     # set the start position
-    player.setPosition(9, 6, 2)
+    #player.setPosition(9, 6, 2)
     # return the play state
     return PlayState(player)
 
@@ -61,6 +69,8 @@ class PlayState:
         self.visibleSprites = sprites.RpgSprites(player)
         # create more sprites
         self.gameSprites = spriteinfo.getMapSprites(self.rpgMap.name)
+        # fixedSprites
+        # self.fixedSprites = fixedSprites
              
     def execute(self, keyPresses):
         # have we triggered any events?
@@ -118,6 +128,7 @@ class PlayState:
         # the visibleSprites group as a side-effect 
         self.gameSprites.update(self.viewRect, self.visibleSprites, increment)
         self.visibleSprites.draw(surface)
+        fixedSprites.draw(surface)
     
     # method required by the ShowPlayer state
     def showPlayer(self, px, py):

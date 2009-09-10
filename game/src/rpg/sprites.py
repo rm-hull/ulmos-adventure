@@ -440,7 +440,7 @@ class Flames(StaticSprite):
     
     def __init__(self):
         if self.framesImage is None:    
-            imagePath = os.path.join(SPRITES_FOLDER, "flames.png")
+            imagePath = os.path.join(SPRITES_FOLDER, "flame-frames.png")
             self.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(self.framesImage)
         StaticSprite.__init__(self, animationFrames, 6, (4, 2))
@@ -452,7 +452,7 @@ class Coin(StaticSprite):
     
     def __init__(self, coinInfo = None):
         if self.framesImage is None:    
-            imagePath = os.path.join(SPRITES_FOLDER, "coin.png")
+            imagePath = os.path.join(SPRITES_FOLDER, "coin-frames.png")
             self.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(self.framesImage)
         StaticSprite.__init__(self, animationFrames, 6, (2, 2))
@@ -464,6 +464,31 @@ class Coin(StaticSprite):
         player.incrementCoinCount(1)
         return True
 
+"""
+Defines a sprite that is fixed on the game display
+"""
+class FixedSprite(pygame.sprite.Sprite):
+
+    def __init__(self, image, position = (0, 0)):
+        # pygame.sprite.Sprite.__init__(self, self.containers)
+        pygame.sprite.Sprite.__init__(self)
+        # properties common to all RpgSprites
+        self.position = [i * SCALAR for i in position]
+        #self.images = images
+        self.image = view.createDuplicateSpriteImage(image)
+        self.rect = self.image.get_rect()
+        self.rect.move_ip(self.position[0], self.position[1])
+
+class FixedCoin(FixedSprite):
+    
+    initialImage = None
+    
+    def __init__(self, position = (0, 0)):
+        if self.initialImage is None:    
+            imagePath = os.path.join(SPRITES_FOLDER, "coin.png")
+            self.initialImage = view.loadScaledImage(imagePath, None)        
+        FixedSprite.__init__(self, self.initialImage, position)
+    
 """
 Sprite group that ensures pseudo z ordering for the sprites.  This works
 because internally AbstractGroup calls self.sprites() to get a list of sprites
