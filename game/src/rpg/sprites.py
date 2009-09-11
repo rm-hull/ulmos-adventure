@@ -480,6 +480,18 @@ class FixedSprite(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.move_ip(self.position[0], self.position[1])
 
+class FixedCoin(FixedSprite):
+
+    initialImage = None
+    
+    def __init__(self, position = (0, 0)):
+        if self.initialImage is None:    
+            imagePath = os.path.join(SPRITES_FOLDER, "small-coin.png")
+            self.initialImage = view.loadScaledImage(imagePath, None)
+        FixedSprite.__init__(self,
+                             view.createDuplicateSpriteImage(self.initialImage),
+                             position)
+
 class CoinCount(FixedSprite):
     
     initialImage = None
@@ -506,19 +518,7 @@ class CoinCount(FixedSprite):
             newImage.blit(self.numbers[int(n)], (px, 0))
             px += 8 * SCALAR
         self.setImage(newImage)
-        
-class FixedCoin(FixedSprite):
-
-    initialImage = None
-    
-    def __init__(self, position = (0, 0)):
-        if self.initialImage is None:    
-            imagePath = os.path.join(SPRITES_FOLDER, "coin.png")
-            self.initialImage = view.loadScaledImage(imagePath, None)
-        FixedSprite.__init__(self,
-                             view.createDuplicateSpriteImage(self.initialImage),
-                             position)
-    
+            
 """
 Sprite group that ensures pseudo z ordering for the sprites.  This works
 because internally AbstractGroup calls self.sprites() to get a list of sprites

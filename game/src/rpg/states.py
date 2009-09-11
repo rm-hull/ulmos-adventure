@@ -30,8 +30,8 @@ pygame.init()
 screen = pygame.display.set_mode(DIMENSIONS)
 
 fixedSprites = pygame.sprite.Group()
-fixedCoin = sprites.FixedCoin((1, 1))
-coinCount = sprites.CoinCount((16, 3))
+fixedCoin = sprites.FixedCoin((3, 3))
+coinCount = sprites.CoinCount((14, 3))
 fixedSprites.add(fixedCoin, coinCount)
 
 player = sprites.Ulmo()
