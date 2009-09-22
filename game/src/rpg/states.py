@@ -2,57 +2,46 @@
 
 from pygame.locals import *
 
-from view import NONE, UP, DOWN, LEFT, RIGHT, SCALAR, TILE_SIZE
+from view import NONE, UP, DOWN, LEFT, RIGHT, SCALAR, TILE_SIZE, VIEW_WIDTH, VIEW_HEIGHT
 from sprites import MOVE_UNIT
 from eventinfo import DUMMY_EVENT, TRANSITION_EVENT, BOUNDARY_EVENT
 
 import pygame
 import parser
 import sprites
+import player
 import view
 import spriteinfo
 
 ORIGIN = (0, 0)
-#WIDTH = 256
-#HEIGHT = 192
-WIDTH = 384
-HEIGHT = 256
-X_MULT = WIDTH // 64
-Y_MULT = HEIGHT // 64
-DIMENSIONS = (WIDTH, HEIGHT)
+X_MULT = VIEW_WIDTH // 64
+Y_MULT = VIEW_HEIGHT // 64
+DIMENSIONS = (VIEW_WIDTH, VIEW_HEIGHT)
 
-# number of frames required to bring the player into view
-# from an off-screen position
+# number of frames required to bring the player into view from an off-screen position
 TICK_TARGETS = {UP: 24, DOWN: 24, LEFT: 14, RIGHT: 14}
 
 # initialise
 pygame.init()
 screen = pygame.display.set_mode(DIMENSIONS)
 
+# fixed sprites
 fixedSprites = pygame.sprite.Group()
 fixedCoin = sprites.FixedCoin((3, 3))
 coinCount = sprites.CoinCount((14, 3))
-fixedSprites.add(fixedCoin, coinCount)
+keyCount = sprites.KeyCount((VIEW_WIDTH - 3, 3))
+fixedSprites.add(fixedCoin, coinCount, keyCount)
 
-player = sprites.Ulmo()
+# create player
+player = player.Ulmo()
 player.coinCount = coinCount
-
-"""def startGame():
-    # create the map
-    rpgMap = parser.loadRpgMap("demo")
-    # rpgMap = parser.loadRpgMap("islands")
-    # create the player sprite
-    player = sprites.Ulmo(rpgMap)
-    player.setPosition(1, 0, 1)
-    # player.setPosition(2, 11, 2)
-    # player.setPosition(12, 3, 1)
-    return PlayState(player)"""
+player.keyCount = keyCount
 
 def startGame():
     # create the map
     player.rpgMap = parser.loadRpgMap("start")
     # set the start position
-    player.setPosition(9, 6, 2)
+    player.setPosition(30, 5, 3)
     # return the play state
     return PlayState()
 
@@ -83,10 +72,10 @@ class PlayState:
             directionBits += LEFT
         if keyPresses[K_RIGHT]:
             directionBits += RIGHT
-        # handle movement + check for boundaries
-        boundaryState = self.handleMovement(directionBits)
-        if boundaryState:
-            return boundaryState
+        # handle movement + check for boundaries/transitions
+        nextState = self.handleMovement(directionBits)
+        if nextState:
+            return nextState
         # draw the map view to the screen
         self.drawMapView(screen)
         pygame.display.flip()
@@ -112,7 +101,7 @@ class PlayState:
                 # we've hit a boundary - change states to swap the map
                 print "event %s" % event
                 if event.type == BOUNDARY_EVENT:
-                    return BoundaryState(player, event)
+                    return BoundaryState(event)
                 if event.type == TRANSITION_EVENT:
                     return TransitionState(event)
         return None
@@ -123,7 +112,8 @@ class PlayState:
         # the visibleSprites group as a side-effect 
         self.gameSprites.update(self.viewRect, self.visibleSprites, increment)
         self.visibleSprites.draw(surface)
-        fixedSprites.draw(surface)
+        if increment:
+            fixedSprites.draw(surface)
     
     # method required by the ShowPlayer state
     def showPlayer(self, px, py):
@@ -149,8 +139,8 @@ class TransitionState:
             xBorder, yBorder = (self.ticks + 1) * X_MULT, (self.ticks + 1) * Y_MULT
             screen.blit(self.blackRect, ORIGIN)
             extract = self.screenImage.subsurface(xBorder, yBorder,
-                                                  WIDTH - xBorder * 2,
-                                                  HEIGHT - yBorder * 2)
+                                                  VIEW_WIDTH - xBorder * 2,
+                                                  VIEW_HEIGHT - yBorder * 2)
             screen.blit(extract, (xBorder, yBorder))
             pygame.display.flip()
         elif self.ticks == 32:
@@ -172,8 +162,8 @@ class TransitionState:
         elif self.ticks < 64:
             xBorder, yBorder = (64 - self.ticks) * X_MULT, (64 - self.ticks) * Y_MULT
             extract = self.screenImage.subsurface(xBorder, yBorder,
-                                                  WIDTH - xBorder * 2,
-                                                  HEIGHT - yBorder * 2)
+                                                  VIEW_WIDTH - xBorder * 2,
+                                                  VIEW_HEIGHT - yBorder * 2)
             screen.blit(extract, (xBorder, yBorder))
             pygame.display.flip()
         else:
@@ -201,8 +191,7 @@ class TransitionState:
 
 class BoundaryState:
     
-    def __init__(self, player, boundaryEvent):
-        self.player = player
+    def __init__(self, boundaryEvent):
         self.mapName = boundaryEvent.mapName
         self.boundary = boundaryEvent.boundary
         self.modifier = boundaryEvent.modifier
@@ -215,7 +204,7 @@ class BoundaryState:
             self.oldImage = screen.copy()
             # load another map
             nextRpgMap = parser.loadRpgMap(self.mapName)
-            self.player.rpgMap = nextRpgMap
+            player.rpgMap = nextRpgMap
             # set the new position
             self.setPlayerPosition(nextRpgMap.mapRect, self.modifier)
             # create play state
@@ -225,26 +214,26 @@ class BoundaryState:
         elif self.ticks < 32:
             xSlice, ySlice = self.ticks * X_MULT * 2, self.ticks * Y_MULT * 2
             if self.boundary == UP:
-                screen.blit(self.oldImage.subsurface(0, 0, WIDTH, HEIGHT - ySlice), (0, ySlice))
-                screen.blit(self.nextImage.subsurface(0, HEIGHT - ySlice, WIDTH, ySlice), ORIGIN)                
+                screen.blit(self.oldImage.subsurface(0, 0, VIEW_WIDTH, VIEW_HEIGHT - ySlice), (0, ySlice))
+                screen.blit(self.nextImage.subsurface(0, VIEW_HEIGHT - ySlice, VIEW_WIDTH, ySlice), ORIGIN)                
             elif self.boundary == DOWN:
-                screen.blit(self.oldImage.subsurface(0, ySlice, WIDTH, HEIGHT - ySlice), ORIGIN)
-                screen.blit(self.nextImage.subsurface(0, 0, WIDTH, ySlice), (0, HEIGHT - ySlice))                
+                screen.blit(self.oldImage.subsurface(0, ySlice, VIEW_WIDTH, VIEW_HEIGHT - ySlice), ORIGIN)
+                screen.blit(self.nextImage.subsurface(0, 0, VIEW_WIDTH, ySlice), (0, VIEW_HEIGHT - ySlice))                
             elif self.boundary == LEFT:
-                screen.blit(self.oldImage.subsurface(0, 0, WIDTH - xSlice, HEIGHT), (xSlice, 0))
-                screen.blit(self.nextImage.subsurface(WIDTH - xSlice, 0, xSlice, HEIGHT), ORIGIN)                
+                screen.blit(self.oldImage.subsurface(0, 0, VIEW_WIDTH - xSlice, VIEW_HEIGHT), (xSlice, 0))
+                screen.blit(self.nextImage.subsurface(VIEW_WIDTH - xSlice, 0, xSlice, VIEW_HEIGHT), ORIGIN)                
             else: # self.boundary == RIGHT
-                screen.blit(self.oldImage.subsurface(xSlice, 0, WIDTH - xSlice, HEIGHT), ORIGIN)
-                screen.blit(self.nextImage.subsurface(0, 0, xSlice, HEIGHT), (WIDTH - xSlice, 0))                
+                screen.blit(self.oldImage.subsurface(xSlice, 0, VIEW_WIDTH - xSlice, VIEW_HEIGHT), ORIGIN)
+                screen.blit(self.nextImage.subsurface(0, 0, xSlice, VIEW_HEIGHT), (VIEW_WIDTH - xSlice, 0))                
             pygame.display.flip()
         else:
-            return ShowPlayerState(self.player, self.boundary, self.nextState)
+            return ShowPlayerState(self.boundary, self.nextState)
             # return self.nextState
         self.ticks += 1
         return None
         
     def setPlayerPosition(self, mapRect, modifier):
-        playerRect = self.player.mapRect
+        playerRect = player.mapRect
         px, py = [i + modifier * TILE_SIZE for i in playerRect.topleft]
         # we position the player just off the screen and then use the ShowPlayer
         # state to bring the player into view                 
@@ -256,7 +245,7 @@ class BoundaryState:
             px = mapRect.right
         else: # self.boundary == RIGHT
             px = 0 - playerRect.width             
-        self.player.resetPosition(px, py)
+        player.resetPosition(px, py)
 
 class ShowPlayerState:
     

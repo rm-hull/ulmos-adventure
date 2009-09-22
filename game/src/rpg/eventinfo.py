@@ -55,6 +55,8 @@ def getTriggers_Start():
     triggers.append(TileTrigger(event, 23, 7, 1))
     event = TransitionEvent("caves", 4, 14, 1, UP)
     triggers.append(TileTrigger(event, 19, 2, 3))
+    event = BoundaryEvent(RIGHT, "east", 0)
+    triggers.append(BoundaryTrigger(event, RIGHT, 3, 7))
     return triggers
 
 def getTriggers_Caves():
@@ -65,14 +67,21 @@ def getTriggers_Caves():
     triggers.append(BoundaryTrigger(event, DOWN, 11))
     return triggers
 
+def getTriggers_East():
+    triggers = []
+    event = BoundaryEvent(LEFT, "start", 0)
+    triggers.append(BoundaryTrigger(event, LEFT, 3, 7))
+    return triggers
+
 eventInfo = {}
 eventInfo["demo"] = getTriggers_Demo
 eventInfo["skulls"] = getTriggers_Skulls
 eventInfo["dungeon"] = getTriggers_Dungeon
 eventInfo["islands"] = getTriggers_Islands
+
 eventInfo["start"] = getTriggers_Start
-# eventInfo["bridge"] = getTriggers_Bridge
 eventInfo["caves"] = getTriggers_Caves
+eventInfo["east"] = getTriggers_East
 
 def getTriggers(mapName):    
     if mapName in eventInfo:

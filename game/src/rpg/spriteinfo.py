@@ -45,12 +45,20 @@ def addCoin(gameSprites, name, x, y, level):
         coin = sprites.Coin(coinInfo)
         coin.setPosition(x, y, level)
         gameSprites.add(coin)
+
+def addKey(gameSprites, name, x, y, level):
+    keyInfo = registry.getInfo(name)
+    if keyInfo and keyInfo.available:
+        key = sprites.Key(keyInfo)
+        key.setPosition(x, y, level)
+        gameSprites.add(key)
     
 def getGameSprites_Start():
     gameSprites = pygame.sprite.Group()
-    addCoin(gameSprites, "start1", 7, 4, 2)
-    addCoin(gameSprites, "start2", 24, 5, 3)
-    addCoin(gameSprites, "start3", 30, 5, 3)
+    addCoin(gameSprites, "start.coin.1", 7, 4, 2)
+    addCoin(gameSprites, "start.coin.2", 24, 5, 3)
+    # addCoin(gameSprites, "start.coin.3", 30, 5, 3)
+    addKey(gameSprites, "start.key.1", 30, 5, 3)
     return gameSprites
 
 def getGameSprites_Caves():
@@ -64,13 +72,18 @@ def getGameSprites_Caves():
     gameSprites.add(flames1, flames2, flames3)
     return gameSprites
 
+def getGameSprites_East():
+    gameSprites = pygame.sprite.Group()
+    addKey(gameSprites, "east.key.1", 4, 13, 1)
+    return gameSprites
+
 spriteInfo = {}
 spriteInfo["skulls"] = getGameSprites_Skulls
 spriteInfo["dungeon"] = getGameSprites_Dungeon
 spriteInfo["islands"] = getGameSprites_Islands
 spriteInfo["start"] = getGameSprites_Start
-# spriteInfo["bridge"] = getGameSprites_Bridge
 spriteInfo["caves"] = getGameSprites_Caves
+spriteInfo["east"] = getGameSprites_East
 
 def getMapSprites(mapName):
     if mapName in spriteInfo:

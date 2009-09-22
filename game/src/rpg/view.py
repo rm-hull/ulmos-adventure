@@ -8,6 +8,9 @@ SCALAR = 2
 
 TILE_SIZE = 16 * SCALAR
 
+VIEW_WIDTH = 192 * SCALAR
+VIEW_HEIGHT = 128 * SCALAR
+
 # 0, 51, 102, 153, 204, 255
 TRANSPARENT_COLOUR = GREEN
 TRANSPARENT_COLOUR_WITH_ALPHA = (0, 255, 0, 255)
@@ -71,4 +74,10 @@ def processStaticFrames(framesImage, numFrames = 4):
 
 def createBaseRectImage(baseRect):
     return createRectangle((baseRect.width, baseRect.height), RED)
+
+def createTransparentRect(dimensions):
+    transparentRect = createRectangle(dimensions, TRANSPARENT_COLOUR)
+    transparentRect.set_colorkey(TRANSPARENT_COLOUR, RLEACCEL)
+    return transparentRect
+
     

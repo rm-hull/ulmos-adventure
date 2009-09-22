@@ -18,7 +18,15 @@ class CoinInfo(Info):
     def __init__(self, name):
         Info.__init__(self, name)
         self.available = True
+
+class KeyInfo(Info):
+    def __init__(self, name):
+        Info.__init__(self, name)
+        self.available = True
         
-registerInfo(CoinInfo("start1"))
-registerInfo(CoinInfo("start2"))
-registerInfo(CoinInfo("start3"))
+registerInfo(CoinInfo("start.coin.1"))
+registerInfo(CoinInfo("start.coin.2"))
+# registerInfo(CoinInfo("start.coin.3"))
+registerInfo(CoinInfo("start.key.1"))
+
+registerInfo(KeyInfo("east.key.1"))
