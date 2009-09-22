@@ -113,6 +113,7 @@ public class MapEditor extends Composite {
 		Rectangle rect = map.getMapImage().getBounds();
 		canvasHolder.setMinSize(rect.width, rect.height);
 		mapEditorCanvas.redraw();
+		canvasHolder.redraw();
 	}
 	
 	// =====================================================
