@@ -34,9 +34,11 @@ def getGameSprites_Islands():
     flames2.setPosition(12, 1, 2)
     coin1 = sprites.Coin()
     coin1.setPosition(2, 10, 2)
-    coin2 = sprites.Coin()
-    coin2.setPosition(10, 9, 3)
-    gameSprites.add(flames1, flames2, coin1, coin2)
+    #coin2 = sprites.Coin()
+    #coin2.setPosition(10, 9, 3)
+    door = sprites.Door()
+    door.setPosition(10, 9, 3)
+    gameSprites.add(flames1, flames2, coin1, door)
     return gameSprites
 
 def addCoin(gameSprites, name, x, y, level):
@@ -59,6 +61,9 @@ def getGameSprites_Start():
     addCoin(gameSprites, "start.coin.2", 24, 5, 3)
     # addCoin(gameSprites, "start.coin.3", 30, 5, 3)
     addKey(gameSprites, "start.key.1", 30, 5, 3)
+    door = sprites.Door()
+    door.setPosition(19, 2, 3)
+    gameSprites.add(door)
     return gameSprites
 
 def getGameSprites_Caves():

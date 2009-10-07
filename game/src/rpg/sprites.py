@@ -144,11 +144,7 @@ class StaticSprite(RpgSprite):
     def update(self, viewRect, spriteGroup, increment):
         if self.mapRect.colliderect(viewRect):
             # some part of this sprite is in the current view
-            if increment:
-                self.frameCount += increment
-                if (self.frameCount % self.frameSkip == 0):
-                    self.animFrameCount = (self.animFrameCount + 1) % self.numFrames       
-                    self.image = self.animationFrames[self.animFrameCount]
+            self.advanceFrame(increment)
             # make self.rect relative to the view
             self.rect.topleft = (self.mapRect.left - viewRect.left,
                                  self.mapRect.top - viewRect.top)
@@ -158,6 +154,13 @@ class StaticSprite(RpgSprite):
         elif self.active:
             self.active = False
             self.remove(spriteGroup)
+            
+    def advanceFrame(self, increment):
+        if increment:
+            self.frameCount += increment
+            if (self.frameCount % self.frameSkip == 0):
+                self.animFrameCount = (self.animFrameCount + 1) % self.numFrames       
+                self.image = self.animationFrames[self.animFrameCount]
             
 class Flames(StaticSprite):
     
@@ -207,7 +210,38 @@ class Key(StaticSprite):
             self.keyInfo.available = False
         player.incrementKeyCount()
         return True
+
+class Door(StaticSprite): 
+
+    baseRectWidth = 2 * SCALAR    
+    framesImage = None
     
+    def __init__(self, keyInfo = None):
+        if self.framesImage is None:    
+            imagePath = os.path.join(SPRITES_FOLDER, "door-frames.png")
+            self.framesImage = view.loadScaledImage(imagePath, None)        
+        self.additionalFrames = view.processStaticFrames(self.framesImage, 8)
+        animationFrames = [self.additionalFrames[0]]
+        StaticSprite.__init__(self, animationFrames, 6, (0, 0))
+        self.opening = False
+        # self.keyInfo = keyInfo
+
+    def advanceFrame(self, increment):
+        if increment and self.opening:
+            self.frameCount += increment
+            if (self.frameCount % self.frameSkip == 0):
+                self.animFrameCount = (self.animFrameCount + 1) % 8       
+                self.image = self.additionalFrames[self.animFrameCount]
+            
+        
+    def processCollision(self, player):
+        #if self.keyInfo:
+        #    self.keyInfo.available = False
+        #player.incrementKeyCount()
+        self.opening = True
+        return False
+    
+       
 """
 Defines a sprite that is fixed on the game display.
 """
