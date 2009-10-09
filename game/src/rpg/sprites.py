@@ -56,6 +56,8 @@ class RpgSprite(pygame.sprite.Sprite):
         self.frameCount = 0
         # indicates if this sprite is currently visible
         self.active = False
+        # indicates if this sprite should be removed on next update
+        self.toRemove = False
 
     def setPosition(self, x, y, level):
         self.resetPosition(x * view.TILE_SIZE + self.position[0],
@@ -87,7 +89,7 @@ class RpgSprite(pygame.sprite.Sprite):
         myBaseRectHeight = BASE_RECT_HEIGHT
         if hasattr(self, "baseRectHeight"):
             myBaseRectHeight = self.baseRectHeight
-        baseRectTop = self.mapRect.bottom + BASE_RECT_EXTEND - myBaseRectHeight - 1
+        baseRectTop = self.mapRect.bottom + BASE_RECT_EXTEND - myBaseRectHeight
         baseRectLeft = (self.mapRect.width - myBaseRectWidth) / 2
         self.baseRect = Rect(baseRectLeft, baseRectTop, myBaseRectWidth, myBaseRectHeight)
 
@@ -141,8 +143,10 @@ class StaticSprite(RpgSprite):
         # additional animation properties
         self.image = animationFrames[self.animFrameCount]
 
-    def update(self, viewRect, spriteGroup, increment):
-        if self.mapRect.colliderect(viewRect):
+    def update(self, viewRect, gameSprites, visibleSprites, increment):
+        if self.toRemove:
+            self.remove(gameSprites)
+        elif self.mapRect.colliderect(viewRect):
             # some part of this sprite is in the current view
             self.advanceFrame(increment)
             # make self.rect relative to the view
@@ -150,10 +154,11 @@ class StaticSprite(RpgSprite):
                                  self.mapRect.top - viewRect.top)
             if not self.active:
                 self.active = True
-                self.add(spriteGroup)
-        elif self.active:
+                self.add(visibleSprites)
+            return
+        if self.active:
             self.active = False
-            self.remove(spriteGroup)
+            self.remove(visibleSprites)
             
     def advanceFrame(self, increment):
         if increment:
@@ -190,7 +195,7 @@ class Coin(StaticSprite):
         if self.coinInfo:
             self.coinInfo.available = False
         player.incrementCoinCount()
-        return True
+        self.toRemove = True
 
 class Key(StaticSprite):
     
@@ -209,37 +214,53 @@ class Key(StaticSprite):
         if self.keyInfo:
             self.keyInfo.available = False
         player.incrementKeyCount()
-        return True
+        self.toRemove = True
 
-class Door(StaticSprite): 
-
-    baseRectWidth = 2 * SCALAR    
+class Door(StaticSprite):
+    
+    baseRectWidth = 4 * SCALAR    
     framesImage = None
     
-    def __init__(self, keyInfo = None):
+    def __init__(self, rpgMap, doorInfo = None):
         if self.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "door-frames.png")
             self.framesImage = view.loadScaledImage(imagePath, None)        
         self.additionalFrames = view.processStaticFrames(self.framesImage, 8)
         animationFrames = [self.additionalFrames[0]]
         StaticSprite.__init__(self, animationFrames, 6, (0, 0))
+        self.rpgMap = rpgMap
+        self.doorInfo = doorInfo
         self.opening = False
-        # self.keyInfo = keyInfo
-
+        
+    # override
+    def setPosition(self, x, y, level):
+        self.x, self.y = x, y
+        self.resetPosition(x * view.TILE_SIZE + self.position[0],
+                           y * view.TILE_SIZE + self.position[1],
+                           level)
+        
+    # override
     def advanceFrame(self, increment):
         if increment and self.opening:
             self.frameCount += increment
             if (self.frameCount % self.frameSkip == 0):
                 self.animFrameCount = (self.animFrameCount + 1) % 8       
-                self.image = self.additionalFrames[self.animFrameCount]
-            
+                if (self.animFrameCount == 0):
+                    self.opened()
+                else:
+                    self.image = self.additionalFrames[self.animFrameCount]
+    
+    def opened(self):
+        self.toRemove = True
+        if self.doorInfo:
+            self.doorInfo.closed = False
+        # make the corresponding tile available for this level
+        self.rpgMap.addLevel(self.x, self.y + 1, self.level)
         
-    def processCollision(self, player):
-        #if self.keyInfo:
-        #    self.keyInfo.available = False
-        #player.incrementKeyCount()
-        self.opening = True
-        return False
+    def processAction(self, player):
+        if player.keyCount.count > 0:
+            player.keyCount.incrementCount(-1)
+            self.opening = True
     
        
 """

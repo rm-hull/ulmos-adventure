@@ -24,9 +24,15 @@ class KeyInfo(Info):
         Info.__init__(self, name)
         self.available = True
         
+class DoorInfo(Info):
+    def __init__(self, name):
+        Info.__init__(self, name)
+        self.closed = True
+        
 registerInfo(CoinInfo("start.coin.1"))
 registerInfo(CoinInfo("start.coin.2"))
 # registerInfo(CoinInfo("start.coin.3"))
 registerInfo(CoinInfo("start.key.1"))
+registerInfo(DoorInfo("start.door"))
 
-registerInfo(KeyInfo("east.key.1"))
+registerInfo(KeyInfo("east.key"))

@@ -191,6 +191,9 @@ class RpgMap:
         
     def convertBottomRight(self, px, py):
         return min(self.cols - 1, px // TILE_SIZE), min(self.rows - 1, py // TILE_SIZE)
+    
+    def addLevel(self, x, y, level):
+        self.mapTiles[x][y].addLevel(level)
 
 """
 A repository of named tile images.  Instances of this class are created and used

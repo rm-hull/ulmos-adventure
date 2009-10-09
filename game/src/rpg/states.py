@@ -54,7 +54,7 @@ class PlayState:
         # add the player to the visible group
         self.visibleSprites = sprites.RpgSprites(player)
         # create more sprites
-        self.gameSprites = spriteinfo.getMapSprites(self.rpgMap.name)
+        self.gameSprites = spriteinfo.getMapSprites(self.rpgMap)
              
     def execute(self, keyPresses):
         # have we triggered any events?
@@ -64,6 +64,7 @@ class PlayState:
         # have we collided with any sprites
         self.handleSpriteCollisions()
         directionBits = NONE
+        action = False
         if keyPresses[K_UP]:
             directionBits += UP
         if keyPresses[K_DOWN]:
@@ -72,10 +73,14 @@ class PlayState:
             directionBits += LEFT
         if keyPresses[K_RIGHT]:
             directionBits += RIGHT
+        if keyPresses[K_SPACE]:
+            action = True
         # handle movement + check for boundaries/transitions
         nextState = self.handleMovement(directionBits)
         if nextState:
             return nextState
+        # handle actions
+        self.handleAction(action)
         # draw the map view to the screen
         self.drawMapView(screen)
         pygame.display.flip()
@@ -89,14 +94,11 @@ class PlayState:
     
     def handleSpriteCollisions(self):
         # have we collided with any sprites?
-        toRemove = player.processCollisions(self.visibleSprites.sprites())
-        if len(toRemove) > 0:
-            self.gameSprites.remove(toRemove)
-            self.visibleSprites.remove(toRemove)
+        player.processCollisions(self.visibleSprites.sprites())
     
     def handleMovement(self, directionBits):
         if directionBits > 0:
-            event, self.viewRect = player.move(directionBits)
+            event, self.viewRect = player.handleMovement(directionBits)
             if event:
                 # we've hit a boundary - change states to swap the map
                 print "event %s" % event
@@ -106,11 +108,15 @@ class PlayState:
                     return TransitionState(event)
         return None
     
+    def handleAction(self, action):
+        if action:
+            player.handleAction(self.visibleSprites.sprites())
+    
     def drawMapView(self, surface, increment = 1):
         surface.blit(self.rpgMap.getMapView(self.viewRect), ORIGIN)
         # if the sprite being updated is visible in the view it will be added to
-        # the visibleSprites group as a side-effect 
-        self.gameSprites.update(self.viewRect, self.visibleSprites, increment)
+        # the visibleSprites group as a side-effect
+        self.gameSprites.update(self.viewRect, self.gameSprites, self.visibleSprites, increment)
         self.visibleSprites.draw(surface)
         if increment:
             fixedSprites.draw(surface)

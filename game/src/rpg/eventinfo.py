@@ -12,43 +12,6 @@ BOUNDARY_EVENT = 2
 
 EMPTY_LIST = []
 
-def getTriggers_Demo():
-    triggers = []
-    event = BoundaryEvent(UP, "skulls", 4)
-    triggers.append(BoundaryTrigger(event, UP, 4, 7))
-    event = BoundaryEvent(UP, "demo", 2)
-    triggers.append(BoundaryTrigger(event, UP, 0, 3))
-    event = BoundaryEvent(DOWN, "demo", -2)
-    triggers.append(BoundaryTrigger(event, DOWN, 4, 7))
-    event = BoundaryEvent(LEFT, "demo", 0)
-    triggers.append(BoundaryTrigger(event, LEFT, 0, 8))
-    event = BoundaryEvent(RIGHT, "demo", 0)
-    triggers.append(BoundaryTrigger(event, RIGHT, 0, 8))
-    return triggers
-    
-def getTriggers_Skulls():
-    triggers = []
-    event = TransitionEvent("demo", 2, 0, 1)
-    # event = BoundaryEvent(DOWN, "demo", -4)
-    triggers.append(BoundaryTrigger(event, DOWN, 0, 8))
-    return triggers
-    
-def getTriggers_Islands():
-    triggers = []
-    event = TransitionEvent("dungeon", 10, 6, 1)
-    triggers.append(TileTrigger(event, 5, 12, 2))
-    event = TransitionEvent("dungeon", 10, 10, 1)
-    triggers.append(TileTrigger(event, 2, 9, 2))
-    event = BoundaryEvent(UP, "dungeon", -7)
-    triggers.append(BoundaryTrigger(event, UP, 8, 15))
-    return triggers
-
-def getTriggers_Dungeon():
-    triggers = []
-    event = BoundaryEvent(DOWN, "islands", 7)
-    triggers.append(BoundaryTrigger(event, DOWN, 0, 7))
-    return triggers
-
 def getTriggers_Start():
     triggers = []
     event = TransitionEvent("caves", 11, 14, 1, UP)
@@ -74,11 +37,6 @@ def getTriggers_East():
     return triggers
 
 eventInfo = {}
-eventInfo["demo"] = getTriggers_Demo
-eventInfo["skulls"] = getTriggers_Skulls
-eventInfo["dungeon"] = getTriggers_Dungeon
-eventInfo["islands"] = getTriggers_Islands
-
 eventInfo["start"] = getTriggers_Start
 eventInfo["caves"] = getTriggers_Caves
 eventInfo["east"] = getTriggers_East

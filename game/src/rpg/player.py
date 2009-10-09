@@ -60,7 +60,7 @@ class Player(MaskSprite):
     > If not valid, attempt to shuffle the player.
     > If still not valid, check for a change in direction.
     """
-    def move(self, directionBits):
+    def handleMovement(self, directionBits):
         useCurrentView, boundary = True, NO_BOUNDARY
         movement = getMovement(directionBits)
         if movement:
@@ -246,15 +246,31 @@ class Player(MaskSprite):
     def processCollisions(self, sprites):
         # if there are less than two sprites then self is the only sprite
         if len(sprites) < 2:
-            return EMPTY_LIST
-        toRemove = []
+            return
         for sprite in sprites:
             if sprite != self and sprite.level == self.level:
                 # they're on the same level, but do their base rects intersect?
                 if hasattr(sprite, "processCollision") and self.baseRect.colliderect(sprite.baseRect):
-                    if sprite.processCollision(self):
-                        toRemove.append(sprite)
-        return toRemove
+                    sprite.processCollision(self)
+
+    """
+    Processes interactions with other sprites in the given sprite collection.
+    """
+    def processActions(self, sprites):
+        # if there are less than two sprites then self is the only sprite
+        if len(sprites) < 2:
+            return
+        for sprite in sprites:
+            if sprite != self and sprite.level == self.level:
+                # they're on the same level, but do their base rects intersect?
+                if hasattr(sprite, "processAction") and self.baseRect.colliderect(sprite.baseRect):
+                    sprite.processAction(self)
+                    
+    """
+    Handles action input from the user.
+    """
+    def handleAction(self, sprites):
+        self.processActions(sprites)
                     
     # overidden  
     def repairImage(self):
@@ -266,8 +282,8 @@ class Player(MaskSprite):
         self.coinCount.incrementCount(n)
         print "coins: " + str(self.coinCount.count)
         
-    def incrementKeyCount(self):
-        self.keyCount.incrementCount()
+    def incrementKeyCount(self, n = 1):
+        self.keyCount.incrementCount(n)
         print "keys: " + str(self.keyCount.count)
 
 """
