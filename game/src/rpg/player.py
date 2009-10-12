@@ -1,6 +1,31 @@
 #!/usr/bin/env python
 
+import eventinfo
+
 from sprites import *
+from view import UP, DOWN, LEFT, RIGHT, OFFSET
+
+DUMMY_EVENT = eventinfo.DummyEvent()
+
+# ====================
+# == MODULE METHODS ==
+# ====================
+
+# valid movement combinations - movement is keyed on direction bits and is
+# stored as a tuple (px, py, direction, diagonal) 
+MOVEMENT = {UP: (0, -MOVE_UNIT, UP, False),
+            DOWN: (0, MOVE_UNIT, DOWN, False),
+            LEFT: (-MOVE_UNIT, 0, LEFT, False),
+            RIGHT: (MOVE_UNIT, 0, RIGHT, False),
+            UP + LEFT: (-MOVE_UNIT, -MOVE_UNIT, UP, True),
+            UP + RIGHT: (MOVE_UNIT, -MOVE_UNIT, UP, True),
+            DOWN + LEFT: (-MOVE_UNIT, MOVE_UNIT, DOWN, True),
+            DOWN + RIGHT: (MOVE_UNIT, MOVE_UNIT, DOWN, True)}
+
+def getMovement(directionBits):
+    if directionBits in MOVEMENT:
+        return MOVEMENT[directionBits]
+    return None
 
 """
 An animated player controlled sprite.  This provides movement + masking by
@@ -77,10 +102,6 @@ class Player(MaskSprite):
                     newBaseRect = self.baseRect.move(px, py)
                     valid, level = self.rpgMap.isMoveValid(self.level, newBaseRect)
                     if valid:
-                        #if diagonal:
-                        #    self.movement = movement
-                        #    self.deferMovement(level, direction, px, py)
-                        #else:
                         useCurrentView = self.wrapMovement(level, direction, px, py)
                     else:
                         if diagonal:

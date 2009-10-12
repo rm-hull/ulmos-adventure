@@ -31,8 +31,6 @@ class DoorInfo(Info):
         
 registerInfo(CoinInfo("start.coin.1"))
 registerInfo(CoinInfo("start.coin.2"))
-# registerInfo(CoinInfo("start.coin.3"))
-registerInfo(CoinInfo("start.key.1"))
 registerInfo(DoorInfo("start.door"))
 
 registerInfo(KeyInfo("east.key"))

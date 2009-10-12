@@ -2,13 +2,14 @@
 
 from pygame.locals import *
 
-from view import NONE, UP, DOWN, LEFT, RIGHT, SCALAR, TILE_SIZE, VIEW_WIDTH, VIEW_HEIGHT
+from view import NONE, UP, DOWN, LEFT, RIGHT, TILE_SIZE, VIEW_WIDTH, VIEW_HEIGHT
 from sprites import MOVE_UNIT
 from eventinfo import DUMMY_EVENT, TRANSITION_EVENT, BOUNDARY_EVENT
 
 import pygame
 import parser
 import sprites
+import fixedsprites
 import player
 import view
 import spriteinfo
@@ -27,9 +28,9 @@ screen = pygame.display.set_mode(DIMENSIONS)
 
 # fixed sprites
 fixedSprites = pygame.sprite.Group()
-fixedCoin = sprites.FixedCoin((3, 3))
-coinCount = sprites.CoinCount((14, 3))
-keyCount = sprites.KeyCount((VIEW_WIDTH - 3, 3))
+fixedCoin = fixedsprites.FixedCoin((3, 3))
+coinCount = fixedsprites.CoinCount((14, 3))
+keyCount = fixedsprites.KeyCount((VIEW_WIDTH - 3, 3))
 fixedSprites.add(fixedCoin, coinCount, keyCount)
 
 # create player
