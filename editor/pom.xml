@@ -9,15 +9,15 @@
 	<name>editor</name>
 	
     <properties>
-        <platform>macosx</platform>
-        <!-- <platform>gtk</platform> -->
+        <platform>macosx-carbon</platform>
+        <!-- <platform>linux-gtk</platform> -->
         <!-- <platform>win32</platform> -->
     </properties>
 
 	<dependencies>
 		<dependency>
-			<groupId>org.eclipse.swt.carbon</groupId>
-			<artifactId>${platform}</artifactId>
+			<groupId>org.eclipse.swt</groupId>
+			<artifactId>swt-${platform}</artifactId>
 			<version>3.4.1</version>
 		</dependency>
 	</dependencies>

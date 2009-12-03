@@ -1,0 +1,21 @@
+usePlugin 'java'
+
+usePlugin 'eclipse'
+
+sourceCompatibility = 1.5
+version = '1.0'
+manifest.mainAttributes(
+    'Implementation-Title': 'RPG Editor',
+    'Implementation-Version': version
+)
+
+repositories {
+    mavenCentral()
+    flatDir name: 'localRepository', dirs: 'lib'
+}
+
+dependencies {
+    compile group: 'org.eclipse.swt', name: 'swt-macosx-carbon', version: '3.4.1'
+    // compile group: 'org.eclipse.swt', name: 'swt-linux-gtk', version: '3.4.1'
+    // compile group: 'org.eclipse.swt', name: 'swt-win32', version: '3.4.1'
+}
