@@ -28,6 +28,14 @@ def getTriggers_Caves():
     triggers.append(BoundaryTrigger(event, DOWN, 4))
     event = TransitionEvent("start", 23, 6, 1)
     triggers.append(BoundaryTrigger(event, DOWN, 11))
+    event = BoundaryEvent(LEFT, "corner", -2)
+    triggers.append(BoundaryTrigger(event, LEFT, 7, 8))
+    return triggers
+
+def getTriggers_Corner():
+    triggers = []
+    event = BoundaryEvent(RIGHT, "caves", 2)
+    triggers.append(BoundaryTrigger(event, RIGHT, 5, 6))
     return triggers
 
 def getTriggers_East():
@@ -39,6 +47,7 @@ def getTriggers_East():
 eventInfo = {}
 eventInfo["start"] = getTriggers_Start
 eventInfo["caves"] = getTriggers_Caves
+eventInfo["corner"] = getTriggers_Corner
 eventInfo["east"] = getTriggers_East
 
 def getTriggers(mapName):    

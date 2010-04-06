@@ -33,6 +33,7 @@ def getGameSprites_Start(rpgMap):
     gameSprites = pygame.sprite.Group()
     addCoin(gameSprites, "start.coin.1", 7, 4, 2)
     addCoin(gameSprites, "start.coin.2", 30, 5, 3)
+    # addKey(gameSprites, "east.key", 30, 5, 3)
     addDoor(gameSprites, "start.door", 19, 2, 3, rpgMap)
     return gameSprites
 

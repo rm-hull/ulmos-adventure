@@ -13,7 +13,7 @@ class FixedSprite(pygame.sprite.Sprite):
     def __init__(self, image, position = (0, 0)):
         # pygame.sprite.Sprite.__init__(self, self.containers)
         pygame.sprite.Sprite.__init__(self)
-        # properties common to all RpgSprites
+        # properties common to all FixedSprites
         self.position = [i * SCALAR for i in position]
         self.setImage(image)
         
