@@ -15,5 +15,5 @@ repositories {
 }
 
 dependencies {
-    compile group: 'org.eclipse.swt', name: "swt-${platform}", version: '3.4.1'
+    compile group: 'org.eclipse.swt', name: "swt-${platform}", version: "${swtVersion}"
 }
