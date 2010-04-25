@@ -5,8 +5,10 @@ from __future__ import with_statement
 import os
 import view
 import map
+import events
 
 from pygame.locals import Rect
+from view import UP, DOWN, LEFT, RIGHT
 
 TILES_FOLDER = "tiles"
 MAPS_FOLDER = "maps"
@@ -16,10 +18,18 @@ SPECIAL_LEVEL = "S"
 VERTICAL_MASK = "V"
 COLON = ":"
 COMMA = ","
+SPRITE = "sprite"
+TRIGGER = "event"
+PIPE = "|"
+DASH = "-"
+
+BOUNDARIES = {"up": UP, "down": DOWN, "left": LEFT, "right": RIGHT}
 
 def loadRpgMap(name):
     # tileData is keyed on an x,y tuple
     tileData = {}
+    spriteData = []
+    triggerData = []
     # parse map file - each line represents one map tile        
     mapPath = os.path.join(MAPS_FOLDER, name + ".map")
     with open(mapPath) as mapFile:
@@ -30,19 +40,28 @@ def loadRpgMap(name):
                 line = line.strip()
                 if len(line) > 0:                        
                     bits = line.split()
-                    if len(bits) > 0:                            
-                        tilePoint = bits[0]
-                        #print "%s -> %s" % (tileRef, tileName)
-                        x, y = [int(n) for n in tilePoint.split(COMMA)]
-                        maxX, maxY = max(x, maxX), max(y, maxY)
-                        if len(bits) > 1:
-                            tileData[(x, y)] = bits[1:]
+                    if len(bits) > 0:
+                        if bits[0] == SPRITE:
+                            if len(bits) > 1:
+                                spriteData.append(bits[1:])
+                        elif bits[0] == TRIGGER:
+                            if len(bits) > 1:
+                                triggerData.append(bits[1:])
+                        else:                          
+                            tilePoint = bits[0]
+                            #print "%s -> %s" % (tileRef, tileName)
+                            x, y = [int(n) for n in tilePoint.split(COMMA)]
+                            maxX, maxY = max(x, maxX), max(y, maxY)
+                            if len(bits) > 1:
+                                tileData[(x, y)] = bits[1:]
             except ValueError:
                 pass
     # create map tiles
     mapTiles = createMapTiles(maxX + 1, maxY + 1, tileData)
+    mapSprites = createMapSprites(spriteData, name)
+    mapTriggers = createMapTriggers(triggerData)
     # create map and return
-    return map.RpgMap(name, mapTiles)
+    return map.RpgMap(name, mapTiles, mapSprites, mapTriggers)
 
 def createMapTiles(cols, rows, tileData):
     mapTiles = [[None] * (rows) for i in range(cols)]
@@ -114,3 +133,91 @@ def loadTileSet(name):
                 pass
     # create tile set and return
     return map.TileSet(tiles)
+
+def createMapSprites(spriteData, mapName):
+    mapSprites = []
+    typeCounts = {}
+    for spriteBits in spriteData:
+        if len(spriteBits) > 2:
+            type = spriteBits[0]
+            x, y = [int(n) for n in spriteBits[1].split(COMMA)]
+            level = int(spriteBits[2])
+            if type in typeCounts:
+                typeCounts[type] += 1
+            else:
+                typeCounts[type] = 0
+            typeCount = typeCounts[type]
+            name = mapName + COLON + type + COLON + str(typeCount)
+            mapSprite = map.MapSprite(type, name, x, y, level)
+            mapSprites.append(mapSprite)
+    return mapSprites
+            
+def createMapTriggers(triggerData):
+    mapTriggers = []
+    for triggerBits in triggerData:
+        eventBits = None
+        try:
+            eventIndex = triggerBits.index(PIPE) + 1
+            eventBits = triggerBits[eventIndex:]
+            triggerBits = triggerBits[0:eventIndex]
+        except (ValueError, IndexError):
+            pass
+        if eventBits:
+            event = None
+            eventType = eventBits[0]
+            if eventType == "boundary":
+                event = createBoundaryEvent(eventBits)
+            elif eventType == "transition":
+                event = createTransitionEvent(eventBits)
+            if event and triggerBits:
+                trigger = None
+                triggerType = triggerBits[0]
+                if triggerType == "boundary":
+                    trigger = createBoundaryTrigger(triggerBits, event)
+                elif triggerType == "tile":
+                    trigger = createTileTrigger(triggerBits, event)
+                if trigger:
+                    mapTriggers.append(trigger)
+    return mapTriggers
+                            
+def createBoundaryEvent(eventBits):
+    if len(eventBits) < 3:
+        return None
+    mapName = eventBits[1]
+    boundary = BOUNDARIES[eventBits[2]]
+    if len(eventBits) > 3:
+        modifier = int(eventBits[3])
+        return events.BoundaryEvent(mapName, boundary, modifier)
+    return events.BoundaryEvent(mapName, boundary)
+
+def createTransitionEvent(eventBits):
+    if len(eventBits) < 4:
+        return None
+    mapName = eventBits[1]
+    x, y = [int(n) for n in eventBits[2].split(COMMA)]
+    level = int(eventBits[3])
+    if len(eventBits) > 4:
+        boundary = BOUNDARIES[eventBits[4]]
+        if len(eventBits) > 5:
+            direction = BOUNDARIES[eventBits[5]]
+            return events.TransitionEvent(mapName, x, y, level, boundary, direction)
+        return events.TransitionEvent(mapName, x, y, level, boundary)
+    return events.TransitionEvent(mapName, x, y, level)
+    
+def createBoundaryTrigger(triggerBits, event):
+    if len(triggerBits) < 3:
+        return None
+    boundary = BOUNDARIES[triggerBits[1]]
+    range = triggerBits[2]
+    if DASH in range:
+        min, max = [int(n) for n in range.split(DASH)]
+        return events.BoundaryTrigger(event, boundary, min, max)
+    return events.BoundaryTrigger(event, boundary, int(range))
+
+def createTileTrigger(triggerBits, event):
+    if len(triggerBits) < 3:
+        return None
+    x, y = [int(n) for n in triggerBits[1].split(COMMA)]
+    level = int(triggerBits[2])
+    return events.TileTrigger(event, x, y, level)
+    return None

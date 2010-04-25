@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 
-import eventinfo
+import events
 
 from sprites import *
 from view import UP, DOWN, LEFT, RIGHT, OFFSET
 
-DUMMY_EVENT = eventinfo.DummyEvent()
+DUMMY_EVENT = events.DummyEvent()
 
 # ====================
 # == MODULE METHODS ==

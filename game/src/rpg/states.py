@@ -4,7 +4,7 @@ from pygame.locals import *
 
 from view import NONE, UP, DOWN, LEFT, RIGHT, TILE_SIZE, VIEW_WIDTH, VIEW_HEIGHT
 from sprites import MOVE_UNIT
-from eventinfo import DUMMY_EVENT, TRANSITION_EVENT, BOUNDARY_EVENT
+from events import DUMMY_EVENT, TRANSITION_EVENT, BOUNDARY_EVENT
 
 import pygame
 import parser
@@ -12,7 +12,6 @@ import sprites
 import fixedsprites
 import player
 import view
-import spriteinfo
 
 ORIGIN = (0, 0)
 X_MULT = VIEW_WIDTH // 64
@@ -55,7 +54,7 @@ class PlayState:
         # add the player to the visible group
         self.visibleSprites = sprites.RpgSprites(player)
         # create more sprites
-        self.gameSprites = spriteinfo.getMapSprites(self.rpgMap)
+        self.gameSprites = self.rpgMap.getSprites()
              
     def execute(self, keyPresses):
         # have we triggered any events?

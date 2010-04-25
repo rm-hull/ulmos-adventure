@@ -6,7 +6,8 @@ from view import TILE_SIZE
 
 import time
 import view
-import eventinfo
+import events
+import spriteinfo
 
 FLOAT_TEST = '.5'
 
@@ -17,20 +18,35 @@ MAX_SHUFFLE = (-1, 1, 0, -1)
 
 """
 Encapsulates the logic required for the main map.  You should not instantiate
-this class directly - instead, use parser.loadRpgMap and the mapTiles will be
-populated from the named map file.
+this class directly - instead, use parser.loadRpgMap and the mapTiles, mapSprites
+and mapTriggers will be populated from the named map file.
 """
 class RpgMap:
     
-    def __init__(self, name, mapTiles):
+    def __init__(self, name, mapTiles, mapSprites, mapTriggers):
         self.name = name
         self.mapTiles = mapTiles
+        self.mapSprites = mapSprites
         self.cols = len(self.mapTiles)
         self.rows = len(self.mapTiles[0])
-        self.tileTriggers = eventinfo.getTileTriggers(name)
-        self.boundaryTriggers = eventinfo.getBoundaryTriggers(name)
+        self.initialiseTriggers(mapTriggers)
         self.initialiseMapImage()
-
+        
+    def initialiseTriggers(self, mapTriggers):
+        self.boundaryTriggers = {}
+        self.tileTriggers = {}
+        for trigger in mapTriggers:
+            if trigger.type == events.BOUNDARY_TRIGGER:
+                if trigger.boundary in self.boundaryTriggers:
+                    self.boundaryTriggers[trigger.boundary].append(trigger)
+                else:
+                    self.boundaryTriggers[trigger.boundary] = [trigger]
+            elif trigger.type == events.TILE_TRIGGER:
+                if trigger.level in self.tileTriggers:
+                    self.tileTriggers[trigger.level].append(trigger)
+                else:
+                    self.tileTriggers[trigger.level] = [trigger]
+                
     def initialiseMapImage(self):
         self.mapImage = view.createRectangle((self.cols * view.TILE_SIZE,
                                               self.rows * view.TILE_SIZE),
@@ -44,6 +60,9 @@ class RpgMap:
                         self.mapImage.blit(tileImage, (x * view.TILE_SIZE, y * view.TILE_SIZE))
         self.mapRect = self.mapImage.get_rect()
     
+    def getSprites(self):
+        return spriteinfo.getMapSprites(self)
+               
     def getMapView(self, viewRect):
         return self.mapImage.subsurface(viewRect)
     
@@ -289,4 +308,12 @@ class MaskInfo:
         self.flat = flat
         self.tileIndex = tileIndex
         self.z = (y + 1) * TILE_SIZE + level * TILE_SIZE - 1
+        
+class MapSprite:
+    def __init__(self, type, name, x, y, level):
+        self.type = type
+        self.name = name
+        self.x = x
+        self.y = y
+        self.level = level
             

@@ -526,3 +526,10 @@
 30,15 water:w2
 31,15 water:w2
 
+sprite coin 7,4 2
+sprite key 30,5 3
+sprite door 19,2 3
+
+event tile 23,7 1 | transition caves 11,14 1 up
+event tile 19,2 3 | transition caves 4,14 1 up
+event boundary right 3-7 | boundary east right

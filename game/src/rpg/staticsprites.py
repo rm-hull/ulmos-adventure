@@ -2,6 +2,8 @@
 
 from sprites import *
 
+import registry
+
 """
 Defines a sprite that doesn't move independently, although (unlike FixedSprite)
 it does move with the view.
@@ -44,19 +46,20 @@ class Flames(StaticSprite):
     
     framesImage = None
     
-    def __init__(self):
+    def __init__(self, flamesInfo):
         if self.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "flame-frames.png")
             self.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(self.framesImage)
         StaticSprite.__init__(self, animationFrames, 6, (4, 2))
+        self.flamesInfo = flamesInfo
 
 class Coin(StaticSprite):
     
     baseRectWidth = 8 * SCALAR    
     framesImage = None
     
-    def __init__(self, coinInfo = None):
+    def __init__(self, coinInfo):
         if self.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "coin-frames.png")
             self.framesImage = view.loadScaledImage(imagePath, None)        
@@ -65,8 +68,7 @@ class Coin(StaticSprite):
         self.coinInfo = coinInfo
         
     def processCollision(self, player):
-        if self.coinInfo:
-            self.coinInfo.available = False
+        self.coinInfo.collected = True
         player.incrementCoinCount()
         self.toRemove = True
 
@@ -75,7 +77,7 @@ class Key(StaticSprite):
     baseRectWidth = 8 * SCALAR    
     framesImage = None
     
-    def __init__(self, keyInfo = None):
+    def __init__(self, keyInfo):
         if self.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "key-frames.png")
             self.framesImage = view.loadScaledImage(imagePath, None)        
@@ -84,8 +86,7 @@ class Key(StaticSprite):
         self.keyInfo = keyInfo
         
     def processCollision(self, player):
-        if self.keyInfo:
-            self.keyInfo.available = False
+        self.keyInfo.collected = True
         player.incrementKeyCount()
         self.toRemove = True
 
@@ -94,7 +95,7 @@ class Door(StaticSprite):
     baseRectWidth = 4 * SCALAR    
     framesImage = None
     
-    def __init__(self, rpgMap, doorInfo = None):
+    def __init__(self, rpgMap, doorInfo):
         if self.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "door-frames.png")
             self.framesImage = view.loadScaledImage(imagePath, None)        
@@ -102,9 +103,9 @@ class Door(StaticSprite):
         animationFrames = [self.additionalFrames[0]]
         StaticSprite.__init__(self, animationFrames, 6, (0, 0))
         self.rpgMap = rpgMap
-        self.doorInfo = doorInfo
         self.opening = False
-        
+        self.doorInfo = doorInfo
+               
     # override
     def setPosition(self, x, y, level):
         self.x, self.y = x, y
@@ -125,8 +126,7 @@ class Door(StaticSprite):
     
     def opened(self):
         self.toRemove = True
-        if self.doorInfo:
-            self.doorInfo.closed = False
+        self.doorInfo.open = True
         # make the corresponding tile available for this level
         self.rpgMap.addLevel(self.x, self.y + 1, self.level)
         

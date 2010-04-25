@@ -14,23 +14,23 @@ class Info:
     def __init__(self, uid):
         self.uid = uid
     
+class FlamesInfo(Info):
+    def __init__(self, name):
+        Info.__init__(self, name)
+        self.goneOut = False
+
 class CoinInfo(Info):
     def __init__(self, name):
         Info.__init__(self, name)
-        self.available = True
+        self.collected = False
 
 class KeyInfo(Info):
     def __init__(self, name):
         Info.__init__(self, name)
-        self.available = True
+        self.collected = False
         
 class DoorInfo(Info):
     def __init__(self, name):
         Info.__init__(self, name)
-        self.closed = True
+        self.open = False
         
-registerInfo(CoinInfo("start.coin.1"))
-registerInfo(CoinInfo("start.coin.2"))
-registerInfo(DoorInfo("start.door"))
-
-registerInfo(KeyInfo("east.key"))
