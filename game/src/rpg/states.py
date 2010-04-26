@@ -9,6 +9,7 @@ from events import DUMMY_EVENT, TRANSITION_EVENT, BOUNDARY_EVENT
 import pygame
 import parser
 import sprites
+import spriteinfo
 import fixedsprites
 import player
 import view
@@ -54,7 +55,7 @@ class PlayState:
         # add the player to the visible group
         self.visibleSprites = sprites.RpgSprites(player)
         # create more sprites
-        self.gameSprites = self.rpgMap.getSprites()
+        self.gameSprites = spriteinfo.getMapSprites(self.rpgMap)
              
     def execute(self, keyPresses):
         # have we triggered any events?

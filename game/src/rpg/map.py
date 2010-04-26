@@ -7,7 +7,6 @@ from view import TILE_SIZE
 import time
 import view
 import events
-import spriteinfo
 
 FLOAT_TEST = '.5'
 
@@ -60,9 +59,6 @@ class RpgMap:
                         self.mapImage.blit(tileImage, (x * view.TILE_SIZE, y * view.TILE_SIZE))
         self.mapRect = self.mapImage.get_rect()
     
-    def getSprites(self):
-        return spriteinfo.getMapSprites(self)
-               
     def getMapView(self, viewRect):
         return self.mapImage.subsurface(viewRect)
     

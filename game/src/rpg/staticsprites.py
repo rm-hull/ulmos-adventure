@@ -2,8 +2,6 @@
 
 from sprites import *
 
-import registry
-
 """
 Defines a sprite that doesn't move independently, although (unlike FixedSprite)
 it does move with the view.
@@ -95,7 +93,7 @@ class Door(StaticSprite):
     baseRectWidth = 4 * SCALAR    
     framesImage = None
     
-    def __init__(self, rpgMap, doorInfo):
+    def __init__(self, doorInfo, rpgMap):
         if self.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "door-frames.png")
             self.framesImage = view.loadScaledImage(imagePath, None)        
@@ -131,6 +129,6 @@ class Door(StaticSprite):
         self.rpgMap.addLevel(self.x, self.y + 1, self.level)
         
     def processAction(self, player):
-        if player.keyCount.count > 0:
+        if player.keyCount.count > 0 and not self.opening:
             player.keyCount.incrementCount(-1)
             self.opening = True

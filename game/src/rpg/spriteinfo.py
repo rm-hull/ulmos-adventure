@@ -1,43 +1,38 @@
 #! /usr/bin/env python
 
 import pygame
-import staticsprites
 import registry
+import staticsprites
 
-def createFlames(name, x, y, level, rpgMap = None):
-    flamesInfo = registry.getInfo(name)
-    if flamesInfo and flamesInfo.goneOut:
+"""
+Standard method for creating registered sprites.  Most types of sprite should be
+able to use this.
+"""
+def createSprite(name, x, y, level, spriteInfoClass):
+    spriteInfo = registry.getInfo(name)
+    if spriteInfo and spriteInfo.isInactive():
         return None
-    if flamesInfo is None:
-        flamesInfo = registry.FlamesInfo(name)
-        registry.registerInfo(flamesInfo)
-    flames = staticsprites.Flames(flamesInfo)
-    flames.setPosition(x, y, level)
-    return flames
+    if spriteInfo is None:
+        spriteInfo = spriteInfoClass(name)
+        registry.registerInfo(spriteInfo)
+    sprite = spriteInfo.getSprite()
+    sprite.setPosition(x, y, level)
+    return sprite
+    
+def createFlames(name, x, y, level, rpgMap = None):
+    return createSprite(name, x, y, level, registry.FlamesInfo)
 
 def createCoin(name, x, y, level, rpgMap = None):
-    coinInfo = registry.getInfo(name)
-    if coinInfo and coinInfo.collected:
-        return None
-    if coinInfo is None:
-        coinInfo = registry.CoinInfo(name)
-        registry.registerInfo(coinInfo)
-    coin = staticsprites.Coin(coinInfo)
-    coin.setPosition(x, y, level)
-    return coin
+    return createSprite(name, x, y, level, registry.CoinInfo)
 
 def createKey(name, x, y, level, rpgMap = None):
-    keyInfo = registry.getInfo(name)
-    if keyInfo and keyInfo.collected:
-        return None
-    if keyInfo is None:
-        keyInfo = registry.KeyInfo(name)
-        registry.registerInfo(keyInfo)        
-    key = staticsprites.Key(keyInfo)
-    key.setPosition(x, y, level)
-    return key
+    return createSprite(name, x, y, level, registry.KeyInfo)
 
-def createDoor(name, x, y, level, rpgMap = None):
+"""
+Door sprites require a specialised method since opening them changes the state
+of the parent map.
+"""
+def createDoor(name, x, y, level, rpgMap):
     doorInfo = registry.getInfo(name)
     if doorInfo and doorInfo.open:
         rpgMap.addLevel(x, y + 1, level)
@@ -45,7 +40,7 @@ def createDoor(name, x, y, level, rpgMap = None):
     if doorInfo is None:
         doorInfo = registry.DoorInfo(name)
         registry.registerInfo(doorInfo)        
-    door = staticsprites.Door(rpgMap, doorInfo)
+    door = staticsprites.Door(doorInfo, rpgMap)
     door.setPosition(x, y, level)
     return door
 
@@ -55,6 +50,9 @@ createSpriteMethods["coin"] = createCoin
 createSpriteMethods["key"] = createKey
 createSpriteMethods["door"] = createDoor
 
+"""
+Returns a group of registered sprites for the given map.
+"""
 def getMapSprites(rpgMap):
     gameSprites = pygame.sprite.Group()
     if rpgMap.mapSprites:
