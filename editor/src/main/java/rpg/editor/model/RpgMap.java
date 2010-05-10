@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +40,9 @@ public class RpgMap {
 	private static final String MAPS_PATH = "maps.path";
 	private static final String MAPS_EXTENSION = "maps.extension";
 	
+	private static final String SPRITE_MARKER = "sprite";
+	private static final String EVENT_MARKER = "event";
+	
 	private static final int TILE_SIZE = ViewSize.MEDIUM.getTileSize();
 	
 	private static final RGB COLOUR_A = new RGB(204, 153, 204);
@@ -52,6 +56,9 @@ public class RpgMap {
 	private TileConversion tileConversion = SharedTileSelection.getInstance();
 	
     private MapTile[][] mapTiles;
+    
+    private List<String> sprites = new ArrayList<String>();
+    private List<String> events = new ArrayList<String>();
 
 	private Point size;
     private String path;
@@ -122,14 +129,22 @@ public class RpgMap {
 				if (lot.length() > 0) {
 					String[] bits = lot.split(Constants.SPACE);
 					if (bits.length > 0) {
-				    	String[] xny = bits[0].split(Constants.COMMA);
-				    	int x = Integer.parseInt(xny[0]), y = Integer.parseInt(xny[1]);
-				    	maxX = x > maxX ? x : maxX;
-				    	maxY = y > maxY ? y : maxY;
-						if (bits.length > 1) {
-					    	Point tilePoint = new Point(x, y);
-					    	tileData.put(tilePoint, bits);
-						}					
+						if (bits[0].equals(SPRITE_MARKER)) {
+							sprites.add(lot);
+						}
+						else if (bits[0].equals(EVENT_MARKER)) {
+							events.add(lot);
+						}
+						else {
+					    	String[] xny = bits[0].split(Constants.COMMA);
+					    	int x = Integer.parseInt(xny[0]), y = Integer.parseInt(xny[1]);
+					    	maxX = x > maxX ? x : maxX;
+					    	maxY = y > maxY ? y : maxY;
+							if (bits.length > 1) {
+						    	Point tilePoint = new Point(x, y);
+						    	tileData.put(tilePoint, bits);
+							}							
+						}
 					}					
 				}
 			}
@@ -291,6 +306,9 @@ public class RpgMap {
         		return;
         	}
     	}
+    	if (!path.endsWith(mapsExtension)) {
+    		path += mapsExtension;
+    	}
     	BufferedWriter writer = null;
     	try {
         	writer = new BufferedWriter(new FileWriter(path));
@@ -303,6 +321,20 @@ public class RpgMap {
         			writer.write(buffer.toString());
         			writer.newLine();
     			}
+        		writer.newLine();
+    		}
+    		if (sprites.size() > 0) {
+        		for (String lot: sprites) {
+        			writer.write(lot);
+            		writer.newLine();
+        		}    			
+        		writer.newLine();
+    		}
+    		if (events.size() > 0) {
+        		for (String lot: events) {
+        			writer.write(lot);
+            		writer.newLine();
+        		}    			
         		writer.newLine();
     		}
         	writer.flush();
