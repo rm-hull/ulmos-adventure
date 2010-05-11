@@ -19,7 +19,7 @@ def testMain():
                 return
         # detect key presses    
         keyPresses = pygame.key.get_pressed()
-        # delegate key presses to the cuurent state
+        # delegate key presses to the current state
         newState = currentState.execute(keyPresses)
         # change state if necessary
         if newState:
