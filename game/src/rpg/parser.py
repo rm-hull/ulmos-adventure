@@ -25,6 +25,9 @@ DASH = "-"
 
 BOUNDARIES = {"up": UP, "down": DOWN, "left": LEFT, "right": RIGHT}
 
+def getXY(xyStr, delimiter = COMMA):
+    return [int(n) for n in xyStr.split(delimiter)]
+
 def loadRpgMap(name):
     # tileData is keyed on an x,y tuple
     tileData = {}
@@ -50,7 +53,7 @@ def loadRpgMap(name):
                         else:                          
                             tilePoint = bits[0]
                             #print "%s -> %s" % (tileRef, tileName)
-                            x, y = [int(n) for n in tilePoint.split(COMMA)]
+                            x, y = getXY(tilePoint)
                             maxX, maxY = max(x, maxX), max(y, maxY)
                             if len(bits) > 1:
                                 tileData[(x, y)] = bits[1:]
@@ -140,7 +143,7 @@ def createMapSprites(spriteData, mapName):
     for spriteBits in spriteData:
         if len(spriteBits) > 2:
             type = spriteBits[0]
-            x, y = [int(n) for n in spriteBits[1].split(COMMA)]
+            x, y = getXY(spriteBits[1])
             level = int(spriteBits[2])
             if type in typeCounts:
                 typeCounts[type] += 1
@@ -194,7 +197,7 @@ def createTransitionEvent(eventBits):
     if len(eventBits) < 4:
         return None
     mapName = eventBits[1]
-    x, y = [int(n) for n in eventBits[2].split(COMMA)]
+    x, y = getXY(eventBits[2])
     level = int(eventBits[3])
     if len(eventBits) > 4:
         boundary = BOUNDARIES[eventBits[4]]
@@ -210,14 +213,14 @@ def createBoundaryTrigger(triggerBits, event):
     boundary = BOUNDARIES[triggerBits[1]]
     range = triggerBits[2]
     if DASH in range:
-        min, max = [int(n) for n in range.split(DASH)]
+        min, max = getXY(range, DASH)
         return events.BoundaryTrigger(event, boundary, min, max)
     return events.BoundaryTrigger(event, boundary, int(range))
 
 def createTileTrigger(triggerBits, event):
     if len(triggerBits) < 3:
         return None
-    x, y = [int(n) for n in triggerBits[1].split(COMMA)]
+    x, y = getXY(triggerBits[1])
     level = int(triggerBits[2])
     return events.TileTrigger(event, x, y, level)
     return None

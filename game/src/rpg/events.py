@@ -55,4 +55,3 @@ class BoundaryEvent(Event):
         self.mapName = mapName
         self.boundary = boundary
         self.modifier = modifier
-   

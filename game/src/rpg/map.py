@@ -4,7 +4,6 @@ from __future__ import with_statement
 
 from view import TILE_SIZE
 
-import time
 import view
 import events
 
