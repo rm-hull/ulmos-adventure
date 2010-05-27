@@ -2,6 +2,7 @@ package rpg.editor.core;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.PaletteData;
 
 import rpg.editor.model.Tile;
 
@@ -28,9 +29,9 @@ public class SharedTileSelection implements TileSelection, TileConversion {
 	
 	public Tile convertTile(Tile tile) {
 		ImageData imageData = tile.getImage().getImageData();
-		//PaletteData paletteData = imageData.palette;
-		//imageData.transparentPixel = paletteData.getPixel(ImageHelper.TRANSPARENT_COLOUR);
-		imageData.transparentPixel = 65344; // hack required for macosx cocoa
+		PaletteData paletteData = imageData.palette;
+		imageData.transparentPixel = paletteData.getPixel(ImageHelper.TRANSPARENT_COLOUR);
+		// imageData.transparentPixel = 65344; // hack required for macosx cocoa
 		Image transparentImage = new Image(DisplayHelper.getDisplay(), imageData);
 		return new Tile(tile.getName(), transparentImage);		
 	}
