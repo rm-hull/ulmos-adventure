@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from sprites import *
+from rpg.spriteinfo import KeyInfo, CoinInfo, DoorInfo
 
 """
 Defines a sprite that doesn't move independently, although (unlike FixedSprite)
@@ -8,9 +9,11 @@ it does move with the view.
 """
 class StaticSprite(RpgSprite):
     
-    def __init__(self, animationFrames, frameSkip, position = (0, 0)):
+    def __init__(self, uid, registry, animationFrames, frameSkip, position = (0, 0)):
         RpgSprite.__init__(self, frameSkip, position)
         # animation frames
+        self.uid = uid
+        self.registry = registry
         self.animationFrames = animationFrames     
         self.numFrames = len(animationFrames)
         # additional animation properties
@@ -44,29 +47,28 @@ class Flames(StaticSprite):
     
     framesImage = None
     
-    def __init__(self, flamesInfo):
+    def __init__(self, uid, rpgMap, registry):
         if self.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "flame-frames.png")
             self.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(self.framesImage)
-        StaticSprite.__init__(self, animationFrames, 6, (4, 2))
-        self.flamesInfo = flamesInfo
+        StaticSprite.__init__(self, uid, registry, animationFrames, 6, (4, 2))
 
 class Coin(StaticSprite):
     
     baseRectWidth = 8 * SCALAR    
     framesImage = None
     
-    def __init__(self, coinInfo):
+    def __init__(self, uid, rpgMap, registry):
         if self.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "coin-frames.png")
             self.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(self.framesImage)
-        StaticSprite.__init__(self, animationFrames, 6, (2, 2))
-        self.coinInfo = coinInfo
+        StaticSprite.__init__(self, uid, registry, animationFrames, 6, (2, 2))
         
     def processCollision(self, player):
-        self.coinInfo.collected = True
+        coinInfo = CoinInfo(self.uid)
+        self.registry.registerMetadata(coinInfo)
         player.incrementCoinCount()
         self.toRemove = True
 
@@ -75,16 +77,16 @@ class Key(StaticSprite):
     baseRectWidth = 8 * SCALAR    
     framesImage = None
     
-    def __init__(self, keyInfo):
+    def __init__(self, uid, rpgMap, registry):
         if self.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "key-frames.png")
             self.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(self.framesImage, 6)
-        StaticSprite.__init__(self, animationFrames, 6, (2, 2))
-        self.keyInfo = keyInfo
+        StaticSprite.__init__(self, uid, registry, animationFrames, 6, (2, 2))
         
     def processCollision(self, player):
-        self.keyInfo.collected = True
+        keyInfo = KeyInfo(self.uid)
+        self.registry.registerMetadata(keyInfo)
         player.incrementKeyCount()
         self.toRemove = True
 
@@ -93,23 +95,15 @@ class Door(StaticSprite):
     baseRectWidth = 4 * SCALAR    
     framesImage = None
     
-    def __init__(self, doorInfo, rpgMap):
+    def __init__(self, uid, rpgMap, registry):
         if self.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "door-frames.png")
             self.framesImage = view.loadScaledImage(imagePath, None)        
         self.additionalFrames = view.processStaticFrames(self.framesImage, 8)
         animationFrames = [self.additionalFrames[0]]
-        StaticSprite.__init__(self, animationFrames, 6, (0, 0))
-        self.rpgMap = rpgMap
+        StaticSprite.__init__(self, uid, registry, animationFrames, 6, (0, 0))
         self.opening = False
-        self.doorInfo = doorInfo
-               
-    # override
-    def setPosition(self, x, y, level):
-        self.x, self.y = x, y
-        self.resetPosition(x * view.TILE_SIZE + self.position[0],
-                           y * view.TILE_SIZE + self.position[1],
-                           level)
+        self.rpgMap = rpgMap
         
     # override
     def advanceFrame(self, increment):
@@ -123,10 +117,12 @@ class Door(StaticSprite):
                     self.image = self.additionalFrames[self.animFrameCount]
     
     def opened(self):
+        doorInfo = DoorInfo(self.uid, self.x, self.y, self.level)
+        doorInfo.applyMapActions(self.rpgMap)
+        self.registry.registerMetadata(doorInfo)
         self.toRemove = True
-        self.doorInfo.open = True
         # make the corresponding tile available for this level
-        self.rpgMap.addLevel(self.x, self.y + 1, self.level)
+        # self.rpgMap.addLevel(self.x, self.y + 1, self.level)
         
     def processAction(self, player):
         if player.keyCount.count > 0 and not self.opening:

@@ -303,11 +303,14 @@ class MaskInfo:
         self.flat = flat
         self.tileIndex = tileIndex
         self.z = (y + 1) * TILE_SIZE + level * TILE_SIZE - 1
-        
+
+"""
+Sprite placeholder that is used to construct a real sprite
+"""        
 class MapSprite:
-    def __init__(self, type, name, x, y, level):
+    def __init__(self, type, uid, x, y, level):
         self.type = type
-        self.name = name
+        self.uid = uid
         self.x = x
         self.y = y
         self.level = level

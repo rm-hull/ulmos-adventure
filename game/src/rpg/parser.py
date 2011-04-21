@@ -150,8 +150,8 @@ def createMapSprites(spriteData, mapName):
             else:
                 typeCounts[type] = 0
             typeCount = typeCounts[type]
-            name = mapName + COLON + type + COLON + str(typeCount)
-            mapSprite = map.MapSprite(type, name, x, y, level)
+            uid = mapName + COLON + type + COLON + str(typeCount)
+            mapSprite = map.MapSprite(type, uid, x, y, level)
             mapSprites.append(mapSprite)
     return mapSprites
             

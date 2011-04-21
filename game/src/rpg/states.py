@@ -9,10 +9,11 @@ from events import DUMMY_EVENT, TRANSITION_EVENT, BOUNDARY_EVENT
 import pygame
 import parser
 import sprites
-import spriteinfo
 import fixedsprites
 import player
 import view
+import registry
+import spritebuilder
 
 ORIGIN = (0, 0)
 X_MULT = VIEW_WIDTH // 64
@@ -22,11 +23,11 @@ DIMENSIONS = (VIEW_WIDTH, VIEW_HEIGHT)
 # number of frames required to bring the player into view from an off-screen position
 TICK_TARGETS = {UP: 24, DOWN: 24, LEFT: 14, RIGHT: 14}
 
-# initialise
+# initialise pygame
 pygame.init()
 screen = pygame.display.set_mode(DIMENSIONS)
 
-# fixed sprites
+# create fixed sprites
 fixedSprites = pygame.sprite.Group()
 fixedCoin = fixedsprites.FixedCoin((3, 3))
 coinCount = fixedsprites.CoinCount((14, 3))
@@ -37,6 +38,9 @@ fixedSprites.add(fixedCoin, coinCount, keyCount)
 player = player.Ulmo()
 player.coinCount = coinCount
 player.keyCount = keyCount
+
+# create registry
+registry = registry.Registry()
 
 def startGame():
     # create the map
@@ -55,7 +59,7 @@ class PlayState:
         # add the player to the visible group
         self.visibleSprites = sprites.RpgSprites(player)
         # create more sprites
-        self.gameSprites = spriteinfo.getMapSprites(self.rpgMap)
+        self.gameSprites = spritebuilder.createSpritesForMap(self.rpgMap, registry)
              
     def execute(self, keyPresses):
         # have we triggered any events?

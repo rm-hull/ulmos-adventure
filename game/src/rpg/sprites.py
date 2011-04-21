@@ -35,6 +35,7 @@ class RpgSprite(pygame.sprite.Sprite):
         self.toRemove = False
 
     def setPosition(self, x, y, level):
+        self.x, self.y = x, y
         self.resetPosition(x * view.TILE_SIZE + self.position[0],
                            y * view.TILE_SIZE + self.position[1],
                            level)
