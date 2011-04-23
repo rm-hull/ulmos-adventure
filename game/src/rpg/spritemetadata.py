@@ -1,52 +1,52 @@
 #! /usr/bin/env python
 
-class SpriteInfo:
+class SpriteMetadata:
     
     def __init__(self, uid):
         self.uid = uid
     
     # placeholder method    
-    def isInactive(self):
+    def isRemovedFromMap(self):
         return False
     
     # placeholder method
     def applyMapActions(self, rpgMap):
         pass
     
-class FlamesInfo(SpriteInfo):
+class FlamesMetadata(SpriteMetadata):
 
     def __init__(self, uid):
-        SpriteInfo.__init__(self, uid)
+        SpriteMetadata.__init__(self, uid)
 
-class CoinInfo(SpriteInfo):
+class CoinMetadata(SpriteMetadata):
     
     def __init__(self, uid, collected = True):
-        SpriteInfo.__init__(self, uid)
+        SpriteMetadata.__init__(self, uid)
         self.collected = collected
 
-    def isInactive(self):
+    def isRemovedFromMap(self):
         return self.collected
         
-class KeyInfo(SpriteInfo):
+class KeyMetadata(SpriteMetadata):
 
     def __init__(self, uid, collected = True):
-        SpriteInfo.__init__(self, uid)
+        SpriteMetadata.__init__(self, uid)
         self.collected = collected
         
-    def isInactive(self):
+    def isRemovedFromMap(self):
         return self.collected
 
-class DoorInfo(SpriteInfo):
+class DoorMetadata(SpriteMetadata):
     
     def __init__(self, uid, x, y, level, open = True):
-        SpriteInfo.__init__(self, uid)
-        self.x = x
-        self.y = y
+        SpriteMetadata.__init__(self, uid)
+        self.x, self.y = x, y
         self.level = level
         self.open = open
 
-    def isInactive(self):
+    def isRemovedFromMap(self):
         return self.open
     
+    # makes the corresponding tile available for this level
     def applyMapActions(self, rpgMap):
         rpgMap.addLevel(self.x, self.y + 1, self.level)

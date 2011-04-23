@@ -33,8 +33,8 @@ extending MaskSprite, but all animation functionality is encapsulated here.
 """        
 class Player(MaskSprite):
     
-    def __init__(self, animationFrames, position = (0, 0)):
-        MaskSprite.__init__(self, 6, position)
+    def __init__(self, uid, registry, animationFrames, position = (0, 0)):
+        MaskSprite.__init__(self, uid, registry, 6, position)
         # view rect is the scrolling window onto the map
         self.viewRect = Rect((0, 0), pygame.display.get_surface().get_size())
         # animation frames
@@ -269,10 +269,8 @@ class Player(MaskSprite):
         if len(sprites) < 2:
             return
         for sprite in sprites:
-            if sprite != self and sprite.level == self.level:
-                # they're on the same level, but do their base rects intersect?
-                if hasattr(sprite, "processCollision") and self.baseRect.colliderect(sprite.baseRect):
-                    sprite.processCollision(self)
+            if sprite.isIntersecting(self):
+                sprite.processCollision(self)
 
     """
     Processes interactions with other sprites in the given sprite collection.
@@ -282,10 +280,8 @@ class Player(MaskSprite):
         if len(sprites) < 2:
             return
         for sprite in sprites:
-            if sprite != self and sprite.level == self.level:
-                # they're on the same level, but do their base rects intersect?
-                if hasattr(sprite, "processAction") and self.baseRect.colliderect(sprite.baseRect):
-                    sprite.processAction(self)
+            if sprite.isIntersecting(self):
+                sprite.processAction(self)
                     
     """
     Handles action input from the user.
@@ -300,12 +296,13 @@ class Player(MaskSprite):
         lastImage.blit(self.animationFrames[direction + OFFSET][animFrameCount], (0, 0))
 
     def incrementCoinCount(self, n = 1):
-        self.coinCount.incrementCount(n)
-        print "coins: " + str(self.coinCount.count)
+        self.coinCount.incrementCoinCount(n)
         
     def incrementKeyCount(self, n = 1):
-        self.keyCount.incrementCount(n)
-        print "keys: " + str(self.keyCount.count)
+        self.keyCount.incrementKeyCount(n)
+        
+    def getKeyCount(self):
+        return self.keyCount.count;
 
 """
 Extends the player sprite by defining a set of frame images.
@@ -314,10 +311,10 @@ class Ulmo(Player):
     
     framesImage = None
     
-    def __init__(self):
-        if self.framesImage is None:          
+    def __init__(self, registry):
+        if Ulmo.framesImage is None:          
             imagePath = os.path.join(SPRITES_FOLDER, "ulmo-frames.png")
-            self.framesImage = view.loadScaledImage(imagePath, None)
-        animationFrames = view.processMovementFrames(self.framesImage)
-        Player.__init__(self, animationFrames, (1, 4))
+            Ulmo.framesImage = view.loadScaledImage(imagePath, None)
+        animationFrames = view.processMovementFrames(Ulmo.framesImage)
+        Player.__init__(self, "ulmo", registry, animationFrames, (1, 4))
         

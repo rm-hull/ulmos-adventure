@@ -21,12 +21,14 @@ Base sprite class.
 """
 class RpgSprite(pygame.sprite.Sprite):
 
-    def __init__(self, frameSkip, position = (0, 0)):
+    def __init__(self, uid, registry, frameSkip, position = (0, 0)):
         # pygame.sprite.Sprite.__init__(self, self.containers)
         pygame.sprite.Sprite.__init__(self)
         # properties common to all RpgSprites
-        self.position = [i * SCALAR for i in position]
+        self.uid = uid
+        self.registry = registry
         self.frameSkip = frameSkip
+        self.position = [i * SCALAR for i in position]
         self.animFrameCount = 0
         self.frameCount = 0
         # indicates if this sprite is currently visible
@@ -68,6 +70,18 @@ class RpgSprite(pygame.sprite.Sprite):
         baseRectTop = self.mapRect.bottom + BASE_RECT_EXTEND - myBaseRectHeight
         baseRectLeft = (self.mapRect.width - myBaseRectWidth) / 2
         self.baseRect = Rect(baseRectLeft, baseRectTop, myBaseRectWidth, myBaseRectHeight)
+        # print self.uid, self.baseRect.width, self.baseRect.height
+
+    def isIntersecting(self, sprite):
+        if self != sprite and self.level == sprite.level and self.baseRect.colliderect(sprite.baseRect):
+            return True
+        return False;
+        
+    def processCollision(self, player):
+        pass
+    
+    def processAction(self, player):
+        pass
 
 """
 Sprite that supports being masked by tile images that are 'closer' to the viewer
@@ -75,9 +89,9 @@ than the sprite.
 """
 class MaskSprite(RpgSprite):
     
-    def __init__(self, frameSkip, position = (0, 0)):
+    def __init__(self, uid, registry, frameSkip, position = (0, 0)):
         # pygame.sprite.Sprite.__init__(self, self.containers)
-        RpgSprite.__init__(self, frameSkip, position)
+        RpgSprite.__init__(self, uid, registry, frameSkip, position)
         # properties common to all MaskSprites
         self.masked = False
 
@@ -112,7 +126,7 @@ Sprite group that ensures pseudo z ordering for the sprites.  This works
 because internally AbstractGroup calls self.sprites() to get a list of sprites
 before it draws them.  I've overidden the sprites() method to return the
 sprites in the correct order - this works, but I might be in trouble if the
-internals of AbstractGroup should ever change.
+internals of AbstractGroup ever changes.
 """
 class RpgSprites(pygame.sprite.Group):
     

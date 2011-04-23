@@ -4,17 +4,24 @@ from staticsprites import Flames, Coin, Key, Door
 
 import pygame
 
+# map of sprite classes keyed on type
 spriteClasses = {}
 spriteClasses["flames"] = Flames
 spriteClasses["coin"] = Coin
 spriteClasses["key"] = Key
 spriteClasses["door"] = Door
 
+"""
+Returns a sprite instance based on the given mapSprite.  If the registry
+indicates that the sprite has been removed from the map, this method returns
+None.
+"""
 def createSprite(rpgMap, registry, mapSprite):
     spriteMetadata = registry.getMetadata(mapSprite.uid);
     if spriteMetadata:
+        # allow any interactions with the map, eg. an open door
         spriteMetadata.applyMapActions(rpgMap)
-        if spriteMetadata.isInactive():
+        if spriteMetadata.isRemovedFromMap():
             return None
     if mapSprite.type in spriteClasses:
         spriteClass = spriteClasses[mapSprite.type]
@@ -23,6 +30,10 @@ def createSprite(rpgMap, registry, mapSprite):
         return sprite
     return None
 
+"""
+Returns a sprite group for the given map.  This excludes any sprites that are
+removed from the map.
+"""
 def createSpritesForMap(rpgMap, registry):
     gameSprites = pygame.sprite.Group()
     if rpgMap.mapSprites:

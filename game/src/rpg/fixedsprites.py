@@ -10,47 +10,39 @@ sprites does not extend RpgSprite.
 """
 class FixedSprite(pygame.sprite.Sprite):
 
-    def __init__(self, image, position = (0, 0)):
-        # pygame.sprite.Sprite.__init__(self, self.containers)
+    def __init__(self, position = (0, 0)):
         pygame.sprite.Sprite.__init__(self)
-        # properties common to all FixedSprites
         self.position = [i * SCALAR for i in position]
-        self.setImage(image)
         
     def setImage(self, image):
         self.image = image
         self.rect = self.image.get_rect()
         self.rect.move_ip(self.position[0], self.position[1])
         
-
 class FixedCoin(FixedSprite):
 
     initialImage = None
     
     def __init__(self, position = (0, 0)):
-        if self.initialImage is None:    
+        if FixedCoin.initialImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "small-coin.png")
-            self.initialImage = view.loadScaledImage(imagePath, None)
-        FixedSprite.__init__(self,
-                             view.createDuplicateSpriteImage(self.initialImage),
-                             position)
+            FixedCoin.initialImage = view.loadScaledImage(imagePath, None)
+        FixedSprite.__init__(self, position)
+        self.setImage(view.createDuplicateSpriteImage(FixedCoin.initialImage))
 
 class CoinCount(FixedSprite):
     
     initialImage = None
     
-    def __init__(self, position = (0, 0)):
-        if self.initialImage is None:    
+    def __init__(self, count = 0, position = (0, 0)):
+        if CoinCount.initialImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "numbers.png")
-            self.initialImage = view.loadScaledImage(imagePath, None)
-        self.numbers = view.processStaticFrames(self.initialImage, 10)        
-        FixedSprite.__init__(self, self.numbers[0], position)
-        self.count = 0;
-        
-    def incrementCount(self, increment = 1):
-        self.count += increment
+            CoinCount.initialImage = view.loadScaledImage(imagePath, None)
+        self.numbers = view.processStaticFrames(CoinCount.initialImage, 10)        
+        FixedSprite.__init__(self, position)
+        self.count = count;
         self.newImage()
-        
+                
     def newImage(self):
         countString = str(self.count)
         dimensions = (len(countString) * 8 * SCALAR, 8 * SCALAR)
@@ -61,25 +53,27 @@ class CoinCount(FixedSprite):
             newImage.blit(self.numbers[int(n)], (px, 0))
             px += 8 * SCALAR
         self.setImage(newImage)
+        
+    def incrementCoinCount(self, n = 1):
+        self.count += n
+        self.newImage()
+        print "coins:", self.count
 
 class KeyCount(FixedSprite):
     
     initialImage = None
     
-    def __init__(self, position = (0, 0)):
-        FixedSprite.__init__(self, view.createTransparentRect((0, 8)), position)
-        if self.initialImage is None:    
+    def __init__(self, count = 0, position = (0, 0)):
+        # FixedSprite.__init__(self, registry, view.createTransparentRect((0, 8)), position)
+        if KeyCount.initialImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "small-key.png")
-            self.initialImage = view.loadScaledImage(imagePath, None)
-        self.keyImage = view.createDuplicateSpriteImage(self.initialImage)
-        self.count = 0;
-        
-    def incrementCount(self, increment = 1):
-        self.count += increment
+            KeyCount.initialImage = view.loadScaledImage(imagePath, None)
+        self.keyImage = view.createDuplicateSpriteImage(KeyCount.initialImage)
+        FixedSprite.__init__(self, position)
+        self.count = count
         self.newImage()
         
-    def newImage(self):        
-        # countString = str(self.count)
+    def newImage(self):
         dimensions = (self.count * 8 * SCALAR, 8 * SCALAR)
         newImage = view.createTransparentRect(dimensions)
         px = 0;
@@ -88,4 +82,9 @@ class KeyCount(FixedSprite):
             px += 8 * SCALAR
         self.setImage(newImage)
         self.rect.left = VIEW_WIDTH - (3 + self.count * 8) * SCALAR
+
+    def incrementKeyCount(self, n = 1):
+        self.count += n
+        self.newImage()
+        print "keys:", self.count
    
