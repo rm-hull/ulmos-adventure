@@ -54,7 +54,7 @@ class CoinCount(FixedSprite):
             px += 8 * SCALAR
         self.setImage(newImage)
         
-    def incrementCoinCount(self, n = 1):
+    def incrementCount(self, n = 1):
         self.count += n
         self.newImage()
         print "coins:", self.count
@@ -83,7 +83,7 @@ class KeyCount(FixedSprite):
         self.setImage(newImage)
         self.rect.left = VIEW_WIDTH - (3 + self.count * 8) * SCALAR
 
-    def incrementKeyCount(self, n = 1):
+    def incrementCount(self, n = 1):
         self.count += n
         self.newImage()
         print "keys:", self.count

@@ -42,7 +42,7 @@ class Player(MaskSprite):
         self.animationFrames = animationFrames     
         self.numFrames = len(animationFrames[self.direction])
         # additional animation properties
-        self.imageInfo = (self.direction, self.animFrameCount)
+        self.lastImageInfo = (self.direction, self.animFrameCount)
         self.image = animationFrames[self.direction][self.animFrameCount]
         # sprite state
         self.movement = None
@@ -191,7 +191,7 @@ class Player(MaskSprite):
         # move the sprite to its new location
         self.doMove(px, py)
         # keep this information for next time
-        self.imageInfo = (self.direction, self.animFrameCount)
+        self.lastImageInfo = (self.direction, self.animFrameCount)
     
     """
     Sets the direction without moving anywhere.
@@ -284,15 +284,15 @@ class Player(MaskSprite):
                     
     # overidden  
     def repairImage(self):
-        direction, animFrameCount = self.imageInfo
+        direction, animFrameCount = self.lastImageInfo
         lastImage = self.animationFrames[direction][animFrameCount]
         lastImage.blit(self.animationFrames[direction + OFFSET][animFrameCount], (0, 0))
 
     def incrementCoinCount(self, n = 1):
-        self.coinCount.incrementCoinCount(n)
+        self.coinCount.incrementCount(n)
         
     def incrementKeyCount(self, n = 1):
-        self.keyCount.incrementKeyCount(n)
+        self.keyCount.incrementCount(n)
         
     def getKeyCount(self):
         return self.keyCount.count;

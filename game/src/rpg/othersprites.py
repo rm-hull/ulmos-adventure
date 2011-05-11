@@ -19,7 +19,7 @@ class OtherSprite(MaskSprite):
         self.numFrames = len(animationFrames)
         # additional animation properties
         self.image = animationFrames[self.animFrameCount]
-        self.movement = RobotMovementStrategy([(24, 3), (24,6)], (4, 2));
+        self.movement = RobotMovementStrategy([(4, 4), (9, 4)], (4, 2));
 
     def update(self, viewRect, gameSprites, visibleSprites, increment):
         if self.toRemove:
@@ -43,8 +43,8 @@ class OtherSprite(MaskSprite):
             
     def advanceFrame(self, increment):
         if increment:
-            self.frameCount += increment
-            if (self.frameCount % self.frameSkip == 0):
+            self.frameCount = (self.frameCount + increment) % self.frameSkip
+            if (self.frameCount == 0):
                 self.animFrameCount = (self.animFrameCount + 1) % self.numFrames       
                 self.image = self.animationFrames[self.animFrameCount]
             

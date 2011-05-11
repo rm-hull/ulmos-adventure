@@ -270,6 +270,6 @@
 14,15 water:w2
 15,15 water:w1
 
-sprite 4,13 key:1
+sprite baddie 4,4 1
 
 event boundary left 3-7 | boundary start left
