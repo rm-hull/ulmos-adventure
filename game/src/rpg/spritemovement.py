@@ -15,7 +15,6 @@ class RobotMovementStrategy(MovementStrategy):
         for tilePoint in tilePoints:
             self.pathPoints.append((tilePoint[0] * TILE_SIZE + position[0],
                                     tilePoint[1] * TILE_SIZE + position[1]))
-        print self.pathPoints
         self.numPoints = len(tilePoints)
         self.currentPathPoint = self.pathPoints[0]
         self.pathPointIndex = 0

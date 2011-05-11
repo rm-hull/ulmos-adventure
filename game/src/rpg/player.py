@@ -3,7 +3,7 @@
 import events
 
 from sprites import *
-from view import UP, DOWN, LEFT, RIGHT, OFFSET
+from view import UP, DOWN, LEFT, RIGHT
 
 DUMMY_EVENT = events.DummyEvent()
 
@@ -39,11 +39,12 @@ class Player(MaskSprite):
         self.viewRect = Rect((0, 0), pygame.display.get_surface().get_size())
         # animation frames
         self.direction = DOWN
-        self.animationFrames = animationFrames     
+        self.virginAnimationFrames = animationFrames
+        self.animationFrames = view.copyMovementFrames(animationFrames)    
         self.numFrames = len(animationFrames[self.direction])
         # additional animation properties
         self.lastImageInfo = (self.direction, self.animFrameCount)
-        self.image = animationFrames[self.direction][self.animFrameCount]
+        self.image = self.animationFrames[self.direction][self.animFrameCount]
         # sprite state
         self.movement = None
         self.coinCount = None
@@ -286,7 +287,7 @@ class Player(MaskSprite):
     def repairImage(self):
         direction, animFrameCount = self.lastImageInfo
         lastImage = self.animationFrames[direction][animFrameCount]
-        lastImage.blit(self.animationFrames[direction + OFFSET][animFrameCount], (0, 0))
+        lastImage.blit(self.virginAnimationFrames[direction][animFrameCount], (0, 0))
 
     def incrementCoinCount(self, n = 1):
         self.coinCount.incrementCount(n)

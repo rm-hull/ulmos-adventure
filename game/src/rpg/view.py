@@ -21,8 +21,6 @@ DOWN = 2
 LEFT = 4
 RIGHT = 8
 
-OFFSET = 16
-
 DIRECTIONS = [UP, DOWN, LEFT, RIGHT]
 
 SPRITES_FOLDER = "sprites"
@@ -48,17 +46,31 @@ def processMovementFrames(framesImage, numFrames = 4):
     height = framesRect.height // len(DIRECTIONS)
     # map of image lists for animation keyed on direction
     animationFrames = {}
-    for row in range(len(DIRECTIONS)):
-        frames, originalFrames = [], []
+    row = 0
+    for direction in DIRECTIONS:
+        frames = []
         rowOffsetY = row * height
         for i in range(numFrames):
             img = framesImage.subsurface(i * width, rowOffsetY, width, height)
-            originalFrames.append(img)
-            frames.append(createDuplicateSpriteImage(img))
-        direction = DIRECTIONS[row]
+            frames.append(img)
         animationFrames[direction] = frames
-        animationFrames[direction + OFFSET] = originalFrames
+        row += 1
+        #animationFrames[direction + OFFSET] = originalFrames
     return animationFrames
+
+# create a copy of the given animation frames
+def copyMovementFrames(animationFrames):
+    # map of image lists for animation keyed on direction
+    animationFramesCopy = {}
+    for direction in DIRECTIONS:
+        framesCopy = []
+        frames = animationFrames[direction]
+        for i in range(len(frames)):
+            img = createDuplicateSpriteImage(frames[i])
+            framesCopy.append(img)
+        animationFramesCopy[direction] = framesCopy
+        #animationFrames[direction + OFFSET] = originalFrames
+    return animationFramesCopy
 
 # process animation frames from the composite image
 def processStaticFrames(framesImage, numFrames = 4):
@@ -69,8 +81,18 @@ def processStaticFrames(framesImage, numFrames = 4):
     animationFrames = []
     for i in range(numFrames):
         img = framesImage.subsurface((i * width, 0), (width, height))
-        animationFrames.append(createDuplicateSpriteImage(img))
+        #animationFrames.append(createDuplicateSpriteImage(img))
+        animationFrames.append(img)
     return animationFrames
+
+# create a copy of the given animation frames
+def copyStaticFrames(animationFrames):
+    # map of image lists for animation keyed on direction
+    animationFramesCopy = []
+    for i in range(len(animationFrames)):
+        img = createDuplicateSpriteImage(animationFrames[i])
+        animationFramesCopy.append(img)
+    return animationFramesCopy
 
 def createBaseRectImage(baseRect):
     return createRectangle((baseRect.width, baseRect.height), RED)

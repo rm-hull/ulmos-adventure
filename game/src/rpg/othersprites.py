@@ -15,10 +15,12 @@ class OtherSprite(MaskSprite):
         #self.viewRect = Rect((0, 0), pygame.display.get_surface().get_size())
         # animation frames
         #self.direction = DOWN
-        self.animationFrames = animationFrames     
+        self.virginAnimationFrames = animationFrames
+        self.animationFrames = view.copyStaticFrames(animationFrames)    
         self.numFrames = len(animationFrames)
         # additional animation properties
-        self.image = animationFrames[self.animFrameCount]
+        self.lastImageInfo = self.animFrameCount # might need to add direction here
+        self.image = self.animationFrames[self.animFrameCount]
         self.movement = RobotMovementStrategy([(4, 4), (9, 4)], (4, 2));
 
     def update(self, viewRect, gameSprites, visibleSprites, increment):
@@ -31,7 +33,7 @@ class OtherSprite(MaskSprite):
             # make self.rect relative to the view
             self.rect.topleft = (self.mapRect.left - viewRect.left,
                                  self.mapRect.top - viewRect.top)
-            print self.baseRect            
+            self.lastImageInfo = self.animFrameCount
         if self.mapRect.colliderect(viewRect):
             if not self.active:
                 self.active = True
@@ -47,6 +49,12 @@ class OtherSprite(MaskSprite):
             if (self.frameCount == 0):
                 self.animFrameCount = (self.animFrameCount + 1) % self.numFrames       
                 self.image = self.animationFrames[self.animFrameCount]
+
+    # overidden  
+    def repairImage(self):
+        animFrameCount = self.lastImageInfo
+        lastImage = self.animationFrames[animFrameCount]
+        lastImage.blit(self.virginAnimationFrames[animFrameCount], (0, 0))
             
 class Baddie(OtherSprite):
     
