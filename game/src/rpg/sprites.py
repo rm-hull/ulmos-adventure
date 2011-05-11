@@ -38,8 +38,8 @@ class RpgSprite(pygame.sprite.Sprite):
 
     def setPosition(self, x, y, level):
         self.x, self.y = x, y
-        self.resetPosition(x * view.TILE_SIZE + self.position[0],
-                           y * view.TILE_SIZE + self.position[1],
+        self.resetPosition(x * TILE_SIZE + self.position[0],
+                           y * TILE_SIZE + self.position[1],
                            level)
 
     def resetPosition(self, px = 0, py = 0, level = None):

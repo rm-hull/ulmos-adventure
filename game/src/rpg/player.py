@@ -108,7 +108,9 @@ class Player(MaskSprite):
                             valid = self.slide(movement)
                         else:
                             valid = self.shuffle(movement)
-                        self.changeDirection(level, direction, valid)
+                        # apply a stationary change of direction if required
+                        if not valid and self.direction != direction:
+                            self.setDirection(direction);
         # return
         if useCurrentView:
             return boundary, self.viewRect
@@ -159,15 +161,6 @@ class Player(MaskSprite):
         return valid
     
     """
-    Applies a stationary change in direction if movement is not valid.
-    """
-    def changeDirection(self, level, direction, valid):
-        if not valid and self.direction != direction:
-            # we need to animate the sprite to show a change in direction
-            # but we set px and py to zero so it doesn't move anywhere
-            self.applyMovement(level, direction, 0, 0)
-    
-    """
     Calls applyMovement and performs some additional operations.
     """      
     def wrapMovement(self, level, direction, px, py):
@@ -191,8 +184,8 @@ class Player(MaskSprite):
         # change any fields required for animation
         self.level = level
         self.direction = direction
-        self.frameCount += 1
-        if (self.frameCount % self.frameSkip == 0):
+        self.frameCount = (self.frameCount + 1) % self.frameSkip
+        if (self.frameCount == 0):
             self.animFrameCount = (self.animFrameCount + 1) % self.numFrames    
         self.image = self.animationFrames[self.direction][self.animFrameCount]
         # move the sprite to its new location
@@ -201,7 +194,7 @@ class Player(MaskSprite):
         self.imageInfo = (self.direction, self.animFrameCount)
     
     """
-    Required for state transitions.
+    Sets the direction without moving anywhere.
     """
     def setDirection(self, direction):
         self.applyMovement(self.level, direction, 0, 0)

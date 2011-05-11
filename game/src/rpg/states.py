@@ -162,8 +162,8 @@ class TransitionState:
             if self.event.direction:
                 player.setDirection(self.event.direction)
             player.setPosition(self.event.mapPosition[0],
-                                    self.event.mapPosition[1],
-                                    self.event.mapLevel)
+                               self.event.mapPosition[1],
+                               self.event.mapLevel)
             if self.event.boundary:
                 self.hidePlayer(nextRpgMap.mapRect)
             # create play state
@@ -181,7 +181,6 @@ class TransitionState:
             if self.event.boundary:
                 return ShowPlayerState(player.direction, self.nextState)
             return ShowPlayerState(player.direction, self.nextState, self.tickTargets)
-            # return self.nextState
         self.ticks += 1
         return None
 

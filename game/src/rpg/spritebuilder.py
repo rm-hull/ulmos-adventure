@@ -2,6 +2,8 @@
 
 from staticsprites import Flames, Coin, Key, Door
 
+from othersprites import Baddie
+
 import pygame
 
 # map of sprite classes keyed on type
@@ -10,6 +12,7 @@ spriteClasses["flames"] = Flames
 spriteClasses["coin"] = Coin
 spriteClasses["key"] = Key
 spriteClasses["door"] = Door
+spriteClasses["baddie"] = Baddie
 
 """
 Returns a sprite instance based on the given mapSprite.  If the registry

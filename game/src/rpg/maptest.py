@@ -15,7 +15,6 @@ screen = pygame.display.set_mode((1, 1))
 parser.MAPS_FOLDER = "../maps"
 parser.TILES_FOLDER = "../tiles"
 
-print
 rpgMap = parser.loadRpgMap("islands")
 
 class SpriteInfo:

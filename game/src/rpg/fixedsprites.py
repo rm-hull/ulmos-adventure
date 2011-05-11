@@ -6,7 +6,7 @@ from view import VIEW_WIDTH
 
 """
 Defines a sprite that is fixed on the game display.  Note that this class of
-sprites does not extend RpgSprite. 
+sprite does not extend RpgSprite. 
 """
 class FixedSprite(pygame.sprite.Sprite):
 
