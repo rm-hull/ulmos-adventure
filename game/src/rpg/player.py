@@ -186,7 +186,7 @@ class Player(MaskSprite):
         self.level = level
         self.direction = direction
         self.frameCount = (self.frameCount + 1) % self.frameSkip
-        if (self.frameCount == 0):
+        if self.frameCount == 0:
             self.animFrameCount = (self.animFrameCount + 1) % self.numFrames    
         self.image = self.animationFrames[self.direction][self.animFrameCount]
         # move the sprite to its new location

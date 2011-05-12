@@ -2,7 +2,7 @@
 
 from sprites import *
 
-from rpg.spritemetadata import KeyMetadata, CoinMetadata, DoorMetadata
+from spritemetadata import KeyMetadata, CoinMetadata, DoorMetadata
 
 """
 Defines a sprite that doesn't move independently, although (unlike FixedSprite)
@@ -13,10 +13,9 @@ class StaticSprite(RpgSprite):
     def __init__(self, uid, registry, animationFrames, frameSkip, position = (0, 0)):
         RpgSprite.__init__(self, uid, registry, frameSkip, position)
         # animation frames
-        self.animationFrames = animationFrames     
+        self.animationFrames = view.copyStaticFrames(animationFrames)    
         self.numFrames = len(animationFrames)
-        # additional animation properties
-        self.image = animationFrames[self.animFrameCount]
+        self.image = self.animationFrames[self.animFrameCount]
 
     def update(self, viewRect, gameSprites, visibleSprites, increment):
         if self.toRemove:
@@ -37,8 +36,8 @@ class StaticSprite(RpgSprite):
             
     def advanceFrame(self, increment):
         if increment:
-            self.frameCount += increment
-            if (self.frameCount % self.frameSkip == 0):
+            self.frameCount = (self.frameCount + increment) % self.frameSkip
+            if self.frameCount == 0:
                 self.animFrameCount = (self.animFrameCount + 1) % self.numFrames       
                 self.image = self.animationFrames[self.animFrameCount]
             
@@ -97,9 +96,10 @@ class Door(StaticSprite):
     def __init__(self, uid, rpgMap, registry):
         if Door.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "door-frames.png")
-            Door.framesImage = view.loadScaledImage(imagePath, None)        
-        self.additionalFrames = view.processStaticFrames(Door.framesImage, 8)
-        animationFrames = [self.additionalFrames[0]]
+            Door.framesImage = view.loadScaledImage(imagePath, None)
+        additionalFrames = view.processStaticFrames(Door.framesImage, 8)        
+        self.additionalFrames = view.copyStaticFrames(additionalFrames)
+        animationFrames = [additionalFrames[0]]
         StaticSprite.__init__(self, uid, registry, animationFrames, 6, (0, 0))
         self.rpgMap = rpgMap
         self.opening = False
@@ -107,10 +107,10 @@ class Door(StaticSprite):
     # override
     def advanceFrame(self, increment):
         if increment and self.opening:
-            self.frameCount += increment
-            if (self.frameCount % self.frameSkip == 0):
+            self.frameCount = (self.frameCount + increment) % self.frameSkip
+            if self.frameCount == 0:
                 self.animFrameCount = (self.animFrameCount + 1) % 8       
-                if (self.animFrameCount == 0):
+                if self.animFrameCount == 0:
                     self.opened()
                 else:
                     self.image = self.additionalFrames[self.animFrameCount]

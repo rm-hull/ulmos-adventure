@@ -94,6 +94,7 @@ class PlayState:
     def handleEvents(self):
         event = player.processEvents()
         if event and event.type > DUMMY_EVENT:
+            print "event: %s" % event.__class__.__name__
             return TransitionState(event)
         return None
     
@@ -106,7 +107,7 @@ class PlayState:
             event, self.viewRect = player.handleMovement(directionBits)
             if event:
                 # we've hit a boundary - change states to swap the map
-                print "event %s" % event
+                print "event: %s" % event.__class__.__name__
                 if event.type == BOUNDARY_EVENT:
                     return BoundaryState(event)
                 if event.type == TRANSITION_EVENT:

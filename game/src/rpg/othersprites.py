@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from sprites import *
-from rpg.spritemovement import RobotMovementStrategy
+from spritemovement import RobotMovementStrategy
 
 """
 Defines a sprite that doesn't move independently, although (unlike FixedSprite)
@@ -11,10 +11,7 @@ class OtherSprite(MaskSprite):
     
     def __init__(self, uid, registry, animationFrames, position = (0, 0)):
         MaskSprite.__init__(self, uid, registry, 6, position)
-        # view rect is the scrolling window onto the map
-        #self.viewRect = Rect((0, 0), pygame.display.get_surface().get_size())
-        # animation frames
-        #self.direction = DOWN
+        # self.direction = DOWN
         self.virginAnimationFrames = animationFrames
         self.animationFrames = view.copyStaticFrames(animationFrames)    
         self.numFrames = len(animationFrames)
@@ -46,7 +43,7 @@ class OtherSprite(MaskSprite):
     def advanceFrame(self, increment):
         if increment:
             self.frameCount = (self.frameCount + increment) % self.frameSkip
-            if (self.frameCount == 0):
+            if self.frameCount == 0:
                 self.animFrameCount = (self.animFrameCount + 1) % self.numFrames       
                 self.image = self.animationFrames[self.animFrameCount]
 

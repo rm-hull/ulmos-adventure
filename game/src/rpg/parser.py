@@ -35,6 +35,7 @@ def loadRpgMap(name):
     triggerData = []
     # parse map file - each line represents one map tile        
     mapPath = os.path.join(MAPS_FOLDER, name + ".map")
+    print "loading: %s" % mapPath
     with open(mapPath) as mapFile:
         # eg. 10,4 [1] water:dark grass:l2 wood:lrs_supp:3
         maxX, maxY = 0, 0
@@ -110,7 +111,7 @@ def createMapTiles(cols, rows, tileData):
     return mapTiles
 
 def loadTileSet(name):
-    print "load tileset: %s" % (name)
+    # print "load tileset: %s" % (name)
     # tileSet = map.TileSet()
     tiles = {}
     # load tile set image
