@@ -48,6 +48,11 @@ class TransitionEvent(Event):
         self.mapLevel = level
         self.boundary = boundary
         self.direction = direction
+        # this is needed for replay events
+        self.pixelPosition = None
+        
+    def setPixelPosition(self, px, py):
+        self.pixelPosition = (px, py)
 
 class BoundaryEvent(Event):
     def __init__(self, mapName, boundary, modifier = 0):

@@ -70,4 +70,5 @@ class Baddie(OtherSprite):
         #self.registry.registerMetadata(metadata)
         #player.incrementCoinCount()
         #self.toRemove = True
-        pass
+        print "life lost!"
+        return True

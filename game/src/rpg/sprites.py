@@ -22,7 +22,6 @@ Base sprite class.
 class RpgSprite(pygame.sprite.Sprite):
 
     def __init__(self, uid, registry, frameSkip, position = (0, 0)):
-        # pygame.sprite.Sprite.__init__(self, self.containers)
         pygame.sprite.Sprite.__init__(self)
         # properties common to all RpgSprites
         self.uid = uid

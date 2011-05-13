@@ -261,10 +261,12 @@ class Player(MaskSprite):
     def processCollisions(self, sprites):
         # if there are less than two sprites then self is the only sprite
         if len(sprites) < 2:
-            return
+            return None
         for sprite in sprites:
             if sprite.isIntersecting(self):
-                sprite.processCollision(self)
+                if sprite.processCollision(self):
+                    return True
+        return None
 
     """
     Processes interactions with other sprites in the given sprite collection.
