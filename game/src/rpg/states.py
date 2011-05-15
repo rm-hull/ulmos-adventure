@@ -4,7 +4,7 @@ from pygame.locals import *
 
 from view import NONE, UP, DOWN, LEFT, RIGHT, TILE_SIZE, VIEW_WIDTH, VIEW_HEIGHT
 from sprites import MOVE_UNIT
-from events import DUMMY_EVENT, TRANSITION_EVENT, BOUNDARY_EVENT
+from events import DUMMY_EVENT, TRANSITION_EVENT, REPLAY_EVENT, BOUNDARY_EVENT
 
 import pygame
 import parser
@@ -14,7 +14,7 @@ import player
 import view
 import registry
 import spritebuilder
-from rpg.events import TransitionEvent
+import events
 
 ORIGIN = (0, 0)
 X_MULT = VIEW_WIDTH // 64
@@ -51,6 +51,23 @@ def startGame():
     # return the play state
     return PlayState()
 
+def hidePlayer(boundary, mapRect, modifier = None):
+    playerRect = player.mapRect
+    px, py = playerRect.topleft
+    if modifier:
+        px, py = [i + modifier * TILE_SIZE for i in playerRect.topleft]
+    # we position the player just off the screen and then use the ShowPlayer
+    # state to bring the player into view                 
+    if boundary == UP:
+        py = mapRect.bottom
+    elif boundary == DOWN:
+        py = 0 - playerRect.height
+    elif boundary == LEFT:
+        px = mapRect.right
+    else: # boundary == RIGHT
+        px = 0 - playerRect.width             
+    player.resetPosition(px, py)
+
 class PlayState:
     
     def __init__(self, lastEvent = None):
@@ -69,7 +86,7 @@ class PlayState:
         eventState = self.handleEvents()
         if eventState:
             return eventState
-        # have we collided with any sprites
+        # have we collided with any sprites?
         replayState = self.handleCollisions()
         if replayState:
             return replayState
@@ -145,9 +162,9 @@ class TransitionState:
     
     tickTargets = {UP: 16, DOWN: 16, LEFT: 16, RIGHT: 16}
     
-    def __init__(self, transitionEvent, showPlayerState = None):
+    def __init__(self, transitionEvent):
         self.event = transitionEvent
-        self.showPlayerState = showPlayerState
+        #self.showPlayerState = showPlayerState
         self.screenImage = screen.copy()
         self.blackRect = view.createRectangle(DIMENSIONS)
         self.nextState = None
@@ -163,22 +180,23 @@ class TransitionState:
             screen.blit(extract, (xBorder, yBorder))
             pygame.display.flip()
         elif self.ticks == 32:
-            # load another map
+            # load the next map
             nextRpgMap = parser.loadRpgMap(self.event.mapName)
             player.rpgMap = nextRpgMap
             # set player position
             if self.event.direction:
                 player.setDirection(self.event.direction)
-            if self.event.pixelPosition:
+            if self.event.type == REPLAY_EVENT:
                 player.resetPosition(self.event.pixelPosition[0],
                                      self.event.pixelPosition[1],
-                                     self.event.mapLevel)
-            else:    
-                player.setPosition(self.event.mapPosition[0],
-                                   self.event.mapPosition[1],
-                                   self.event.mapLevel)
+                                     self.event.level)
+                # player is already hidden
+            else: # self.event.type == TRANSITION_EVENT    
+                player.setPosition(self.event.tilePosition[0],
+                                   self.event.tilePosition[1],
+                                   self.event.level)
                 if self.event.boundary:
-                    self.hidePlayer(nextRpgMap.mapRect)
+                    hidePlayer(self.event.boundary, nextRpgMap.mapRect)
             # create play state
             self.nextState = PlayState(self.event)
             # extract the next image from the state
@@ -191,30 +209,11 @@ class TransitionState:
             screen.blit(extract, (xBorder, yBorder))
             pygame.display.flip()
         else:
-            # return the existing showPlayerState if we have one
-            if self.showPlayerState:
-                return self.showPlayerState
-            # otherwise work out what type of showPlayerState we need
             if self.event.boundary:
                 return ShowPlayerState(player.direction, self.nextState)
             return ShowPlayerState(player.direction, self.nextState, self.tickTargets)
         self.ticks += 1
         return None
-
-    def hidePlayer(self, mapRect):
-        playerRect = player.mapRect
-        px, py = playerRect.topleft
-        # we position the player just off the screen and then use the ShowPlayer
-        # state to bring the player into view                 
-        if self.event.boundary == UP:
-            py = mapRect.bottom
-        elif self.event.boundary == DOWN:
-            py = 0 - playerRect.height
-        elif self.event.boundary == LEFT:
-            px = mapRect.right
-        else: # self.boundary == RIGHT
-            px = 0 - playerRect.width             
-        player.resetPosition(px, py)
 
 class BoundaryState:
     
@@ -224,7 +223,6 @@ class BoundaryState:
         self.nextImage = view.createRectangle(DIMENSIONS)
         self.nextState = None
         self.ticks = 0
-        self.replayEvent = TransitionEvent(boundaryEvent.mapName, 0, 0, player.level, self.boundary, player.direction)
                      
     def execute(self, keyPresses):
         if self.ticks == 0:
@@ -232,11 +230,11 @@ class BoundaryState:
             # load another map
             nextRpgMap = parser.loadRpgMap(self.event.mapName)
             player.rpgMap = nextRpgMap
+            player.direction = self.boundary
             # set the new position
-            self.hidePlayer(nextRpgMap.mapRect, self.event.modifier)
-            self.replayEvent.setPixelPosition(player.mapRect.left, player.mapRect.top)
+            hidePlayer(self.boundary, nextRpgMap.mapRect, self.event.modifier)
             # create play state
-            self.nextState = PlayState(self.replayEvent)
+            self.nextState = PlayState(self.createReplayEvent())
             # extract the next image from the state
             self.nextState.drawMapView(self.nextImage, 0)
         elif self.ticks < 32:
@@ -259,22 +257,15 @@ class BoundaryState:
             # return self.nextState
         self.ticks += 1
         return None
+    
+    def createReplayEvent(self):
+        return events.ReplayEvent(self.event.mapName,
+                                  player.mapRect.left,
+                                  player.mapRect.top,
+                                  player.level,
+                                  self.boundary,
+                                  player.direction)
         
-    def hidePlayer(self, mapRect, modifier):
-        playerRect = player.mapRect
-        px, py = [i + modifier * TILE_SIZE for i in playerRect.topleft]
-        # we position the player just off the screen and then use the ShowPlayer
-        # state to bring the player into view                 
-        if self.boundary == UP:
-            py = mapRect.bottom
-        elif self.boundary == DOWN:
-            py = 0 - playerRect.height
-        elif self.boundary == LEFT:
-            px = mapRect.right
-        else: # self.boundary == RIGHT
-            px = 0 - playerRect.width             
-        player.resetPosition(px, py)
-
 class ShowPlayerState:
     
     def __init__(self, boundary, nextState, tickTargets = TICK_TARGETS):

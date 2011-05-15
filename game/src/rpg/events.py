@@ -8,7 +8,8 @@ BOUNDARY_TRIGGER = 2
 
 DUMMY_EVENT = 0
 TRANSITION_EVENT = 1
-BOUNDARY_EVENT = 2
+REPLAY_EVENT = 2
+BOUNDARY_EVENT = 3
 
 EMPTY_LIST = []
 
@@ -39,21 +40,36 @@ class Event:
 class DummyEvent(Event):
     def __init__(self):
         Event.__init__(self, DUMMY_EVENT)
-            
+
+"""
+Describes a transition event that can occur when the player hits a tile/boundary trigger.
+"""            
 class TransitionEvent(Event):
     def __init__(self, mapName, x, y, level, boundary = None, direction = None):
         Event.__init__(self, TRANSITION_EVENT)
         self.mapName = mapName
-        self.mapPosition = (x, y)
-        self.mapLevel = level
+        self.tilePosition = (x, y)
+        self.level = level
         self.boundary = boundary
         self.direction = direction
-        # this is needed for replay events
-        self.pixelPosition = None
-        
-    def setPixelPosition(self, px, py):
-        self.pixelPosition = (px, py)
 
+"""
+Very similar to transition event, but describes a replay event that occurs when
+the player loses a life and the scene is reset.
+"""        
+class ReplayEvent(Event):
+    def __init__(self, mapName, px, py, level, boundary = None, direction = None):
+        Event.__init__(self, REPLAY_EVENT)
+        self.mapName = mapName
+        self.pixelPosition = (px, py)
+        self.level = level
+        self.boundary = boundary
+        self.direction = direction
+
+"""
+Describes a boundary event that occurs when the player walks off the edge of
+one map and onto another.
+"""        
 class BoundaryEvent(Event):
     def __init__(self, mapName, boundary, modifier = 0):
         Event.__init__(self, BOUNDARY_EVENT)

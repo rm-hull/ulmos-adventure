@@ -18,7 +18,7 @@ class OtherSprite(MaskSprite):
         # additional animation properties
         self.lastImageInfo = self.animFrameCount # might need to add direction here
         self.image = self.animationFrames[self.animFrameCount]
-        self.movement = RobotMovementStrategy([(4, 4), (9, 4)], (4, 2));
+        self.movement = RobotMovementStrategy([(4, 4), (9, 4)], position);
 
     def update(self, viewRect, gameSprites, visibleSprites, increment):
         if self.toRemove:
@@ -66,9 +66,5 @@ class Baddie(OtherSprite):
         self.rpgMap = rpgMap
 
     def processCollision(self, player):
-        #metadata = CoinMetadata(self.uid)
-        #self.registry.registerMetadata(metadata)
-        #player.incrementCoinCount()
-        #self.toRemove = True
         print "life lost!"
         return True
