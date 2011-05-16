@@ -10,7 +10,6 @@ class MovementStrategy:
 class RobotMovementStrategy(MovementStrategy):
     
     def __init__(self, tilePoints, position = (0, 0)):
-        position = [i * SCALAR for i in position]
         self.pathPoints = []
         for tilePoint in tilePoints:
             self.pathPoints.append((tilePoint[0] * TILE_SIZE + position[0],

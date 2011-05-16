@@ -29,7 +29,13 @@ def createSprite(rpgMap, registry, mapSprite):
     if mapSprite.type in spriteClasses:
         spriteClass = spriteClasses[mapSprite.type]
         sprite = spriteClass(mapSprite.uid, rpgMap, registry)
-        sprite.setPosition(mapSprite.x, mapSprite.y, mapSprite.level)
+        tilePoints = mapSprite.tilePoints
+        if len(tilePoints) > 1:
+            sprite.setMovement(tilePoints, mapSprite.level)
+        else:
+            # there's only one tilePoint - use it to set the position
+            x, y = tilePoints[0][0], tilePoints[0][1]    
+            sprite.setPosition(x, y, mapSprite.level)
         return sprite
     return None
 

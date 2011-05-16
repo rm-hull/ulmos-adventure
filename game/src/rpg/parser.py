@@ -28,6 +28,12 @@ BOUNDARIES = {"up": UP, "down": DOWN, "left": LEFT, "right": RIGHT}
 def getXY(xyStr, delimiter = COMMA):
     return [int(n) for n in xyStr.split(delimiter)]
 
+def getTilePoints(xyList, delimiter = COMMA):
+    tilePoints = []
+    for xy in xyList:
+        tilePoints.append(getXY(xy, delimiter))
+    return tilePoints
+    
 def loadRpgMap(name):
     # tileData is keyed on an x,y tuple
     tileData = {}
@@ -144,15 +150,15 @@ def createMapSprites(spriteData, mapName):
     for spriteBits in spriteData:
         if len(spriteBits) > 2:
             type = spriteBits[0]
-            x, y = getXY(spriteBits[1])
-            level = int(spriteBits[2])
+            level = int(spriteBits[1])
+            tilePoints = getTilePoints(spriteBits[2:])
             if type in typeCounts:
                 typeCounts[type] += 1
             else:
                 typeCounts[type] = 0
             typeCount = typeCounts[type]
             uid = mapName + COLON + type + COLON + str(typeCount)
-            mapSprite = map.MapSprite(type, uid, x, y, level)
+            mapSprite = map.MapSprite(type, uid, level, tilePoints)
             mapSprites.append(mapSprite)
     return mapSprites
             

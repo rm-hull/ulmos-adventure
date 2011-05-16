@@ -18,8 +18,13 @@ class OtherSprite(MaskSprite):
         # additional animation properties
         self.lastImageInfo = self.animFrameCount # might need to add direction here
         self.image = self.animationFrames[self.animFrameCount]
-        self.movement = RobotMovementStrategy([(4, 4), (9, 4)], position);
-
+    
+    def setMovement(self, tilePoints, level):
+        self.movement = RobotMovementStrategy(tilePoints, self.position);
+        # use the first tile point to set the position
+        x, y = tilePoints[0][0], tilePoints[0][1]    
+        self.setPosition(x, y, level)
+    
     def update(self, viewRect, gameSprites, visibleSprites, increment):
         if self.toRemove:
             self.remove(gameSprites)

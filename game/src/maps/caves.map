@@ -270,9 +270,9 @@
 14,15
 15,15
 
-sprite flames 3,4 2
-sprite flames 12,1 2
-sprite flames 9,10 2
+sprite flames 2 3,4
+sprite flames 2 12,1
+sprite flames 2 9,10
 
 event boundary left 7-8 | boundary corner left -2
 event boundary down 11 | transition start 23,6 1

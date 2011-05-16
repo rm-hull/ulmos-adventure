@@ -186,6 +186,8 @@ class TransitionState:
             # set player position
             if self.event.direction:
                 player.setDirection(self.event.direction)
+            else:
+                self.event.direction = player.direction
             if self.event.type == REPLAY_EVENT:
                 player.resetPosition(self.event.pixelPosition[0],
                                      self.event.pixelPosition[1],
