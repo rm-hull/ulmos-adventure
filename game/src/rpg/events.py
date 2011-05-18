@@ -45,26 +45,28 @@ class DummyEvent(Event):
 Describes a transition event that can occur when the player hits a tile/boundary trigger.
 """            
 class TransitionEvent(Event):
-    def __init__(self, mapName, x, y, level, boundary = None, direction = None):
+    def __init__(self, mapName, x, y, level, direction, boundary = None):
         Event.__init__(self, TRANSITION_EVENT)
         self.mapName = mapName
         self.tilePosition = (x, y)
         self.level = level
-        self.boundary = boundary
         self.direction = direction
+        self.boundary = boundary
+        self.firstMap = False
 
 """
 Very similar to transition event, but describes a replay event that occurs when
 the player loses a life and the scene is reset.
 """        
 class ReplayEvent(Event):
-    def __init__(self, mapName, px, py, level, boundary = None, direction = None):
+    def __init__(self, mapName, px, py, level, direction, boundary = None):
         Event.__init__(self, REPLAY_EVENT)
         self.mapName = mapName
         self.pixelPosition = (px, py)
         self.level = level
-        self.boundary = boundary
         self.direction = direction
+        self.boundary = boundary
+        self.firstMap = False
 
 """
 Describes a boundary event that occurs when the player walks off the edge of

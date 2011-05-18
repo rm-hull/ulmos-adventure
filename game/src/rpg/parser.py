@@ -201,18 +201,16 @@ def createBoundaryEvent(eventBits):
     return events.BoundaryEvent(mapName, boundary)
 
 def createTransitionEvent(eventBits):
-    if len(eventBits) < 4:
+    if len(eventBits) < 5:
         return None
     mapName = eventBits[1]
     x, y = getXY(eventBits[2])
     level = int(eventBits[3])
-    if len(eventBits) > 4:
-        boundary = BOUNDARIES[eventBits[4]]
-        if len(eventBits) > 5:
-            direction = BOUNDARIES[eventBits[5]]
-            return events.TransitionEvent(mapName, x, y, level, boundary, direction)
-        return events.TransitionEvent(mapName, x, y, level, boundary)
-    return events.TransitionEvent(mapName, x, y, level)
+    direction = BOUNDARIES[eventBits[4]]
+    if len(eventBits) > 5:
+        boundary = BOUNDARIES[eventBits[5]]
+        return events.TransitionEvent(mapName, x, y, level, direction, boundary)
+    return events.TransitionEvent(mapName, x, y, level, direction)
     
 def createBoundaryTrigger(triggerBits, event):
     if len(triggerBits) < 3:

@@ -73,6 +73,8 @@ class PlayState:
     def __init__(self, lastEvent = None):
         # we might need this if the player loses a life
         self.lastEvent = lastEvent
+        if lastEvent == None:
+            self.lastEvent = self.createReplayEvent()
         # must set the player map + position before we create this state
         self.rpgMap = player.rpgMap
         self.viewRect = player.getViewRect()
@@ -157,6 +159,16 @@ class PlayState:
                              px, py)
         self.viewRect = player.getViewRect()
         self.drawMapView(screen, 0)
+
+    def createReplayEvent(self):
+        replayEvent = events.ReplayEvent(player.rpgMap.name,
+                                         player.mapRect.left,
+                                         player.mapRect.top,
+                                         player.level,
+                                         player.direction)
+        replayEvent.firstMap = True
+        return replayEvent
+        
                         
 class TransitionState:
     
@@ -184,10 +196,7 @@ class TransitionState:
             nextRpgMap = parser.loadRpgMap(self.event.mapName)
             player.rpgMap = nextRpgMap
             # set player position
-            if self.event.direction:
-                player.setDirection(self.event.direction)
-            else:
-                self.event.direction = player.direction
+            player.setDirection(self.event.direction)
             if self.event.type == REPLAY_EVENT:
                 player.resetPosition(self.event.pixelPosition[0],
                                      self.event.pixelPosition[1],
@@ -211,6 +220,8 @@ class TransitionState:
             screen.blit(extract, (xBorder, yBorder))
             pygame.display.flip()
         else:
+            if self.event.firstMap:
+                return self.nextState
             if self.event.boundary:
                 return ShowPlayerState(player.direction, self.nextState)
             return ShowPlayerState(player.direction, self.nextState, self.tickTargets)
@@ -265,8 +276,8 @@ class BoundaryState:
                                   player.mapRect.left,
                                   player.mapRect.top,
                                   player.level,
-                                  self.boundary,
-                                  player.direction)
+                                  player.direction,
+                                  self.boundary)
         
 class ShowPlayerState:
     
