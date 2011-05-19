@@ -6,7 +6,12 @@ class MovementStrategy:
     
     def getMovement(self, currentPosition):
         pass
+
+class NoMovementStrategy(MovementStrategy):
     
+    def getMovement(self, currentPosition):
+        return 0, 0
+        
 class RobotMovementStrategy(MovementStrategy):
     
     def __init__(self, tilePoints, position = (0, 0)):

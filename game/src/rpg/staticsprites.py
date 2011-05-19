@@ -3,7 +3,7 @@
 from sprites import *
 
 from spritemetadata import KeyMetadata, CoinMetadata, DoorMetadata
-from rpg.spriteframes import StaticFrames
+from spriteframes import StaticFrames
 
 """
 Defines a sprite that doesn't move independently, although (unlike FixedSprite)

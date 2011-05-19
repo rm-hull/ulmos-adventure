@@ -1,17 +1,15 @@
 #! /usr/bin/env python
 
-from staticsprites import Flames, Coin, Key, Door
-
-from othersprites import Baddie
+from othersprites import Baddie, MyFlames, MyCoin, MyKey
 
 import pygame
 
 # map of sprite classes keyed on type
 spriteClasses = {}
-spriteClasses["flames"] = Flames
-spriteClasses["coin"] = Coin
-spriteClasses["key"] = Key
-spriteClasses["door"] = Door
+spriteClasses["flames"] = MyFlames
+spriteClasses["coin"] = MyCoin
+spriteClasses["key"] = MyKey
+#spriteClasses["door"] = Door
 spriteClasses["baddie"] = Baddie
 
 """
@@ -30,12 +28,7 @@ def createSprite(rpgMap, registry, mapSprite):
         spriteClass = spriteClasses[mapSprite.type]
         sprite = spriteClass(mapSprite.uid, rpgMap, registry)
         tilePoints = mapSprite.tilePoints
-        if len(tilePoints) > 1:
-            sprite.setMovement(tilePoints, mapSprite.level)
-        else:
-            # there's only one tilePoint - use it to set the position
-            x, y = tilePoints[0][0], tilePoints[0][1]    
-            sprite.setPosition(x, y, mapSprite.level)
+        sprite.setMovement(tilePoints, mapSprite.level)
         return sprite
     return None
 

@@ -223,8 +223,8 @@ class TransitionState:
             if self.event.firstMap:
                 return self.nextState
             if self.event.boundary:
-                return ShowPlayerState(player.direction, self.nextState)
-            return ShowPlayerState(player.direction, self.nextState, self.tickTargets)
+                return ShowPlayerState(player.spriteFrames.direction, self.nextState)
+            return ShowPlayerState(player.spriteFrames.direction, self.nextState, self.tickTargets)
         self.ticks += 1
         return None
 

@@ -90,10 +90,9 @@ than the sprite.
 """
 class MaskSprite(RpgSprite):
     
-    def __init__(self, uid, registry, spriteFrames, position = (0, 0)):
-        # pygame.sprite.Sprite.__init__(self, self.containers)
+    def __init__(self, uid, registry, rpgMap, spriteFrames, position = (0, 0)):
         RpgSprite.__init__(self, uid, registry, spriteFrames, position)
-        # properties common to all MaskSprites
+        self.rpgMap = rpgMap
         self.masked = False
 
     def doMove(self, px, py):
