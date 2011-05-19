@@ -196,7 +196,6 @@ class TransitionState:
             nextRpgMap = parser.loadRpgMap(self.event.mapName)
             player.rpgMap = nextRpgMap
             # set player position
-            player.setDirection(self.event.direction)
             if self.event.type == REPLAY_EVENT:
                 player.resetPosition(self.event.pixelPosition[0],
                                      self.event.pixelPosition[1],
@@ -208,6 +207,8 @@ class TransitionState:
                                    self.event.level)
                 if self.event.boundary:
                     hidePlayer(self.event.boundary, nextRpgMap.mapRect)
+            # setting the direction will also apply masks
+            player.setDirection(self.event.direction)
             # create play state
             self.nextState = PlayState(self.event)
             # extract the next image from the state
