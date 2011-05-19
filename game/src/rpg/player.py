@@ -176,12 +176,14 @@ class Player(RpgSprite):
     Applies valid movement.
     """
     def applyMovement(self, level, direction, px, py):
-        # change any fields required for animation
+        # move the player to its new location
         self.level = level
+        self.doMove(px, py)
+        # animate the player
+        self.clearMasks()
         self.spriteFrames.direction = direction
         self.image = self.spriteFrames.advanceFrame(1)
-        # move the sprite to its new location
-        self.doMove(px, py)
+        self.applyMasks()
     
     """
     Sets the direction without moving anywhere.

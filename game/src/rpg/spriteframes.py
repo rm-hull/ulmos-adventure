@@ -21,7 +21,7 @@ class SpriteFrames:
     def getCurrentFrame(self):
         pass       
     
-    def repairLastFrame(self):
+    def repairCurrentFrame(self):
         pass
     
 class StaticFrames(SpriteFrames):
@@ -31,16 +31,13 @@ class StaticFrames(SpriteFrames):
         self.virginAnimationFrames = animationFrames
         self.animationFrames = view.copyStaticFrames(animationFrames)
         self.numFrames = len(self.animationFrames)
-        self.lastFrameIndex = self.frameIndex
 
     def getCurrentFrame(self):
         return self.animationFrames[self.frameIndex]
 
-    def repairLastFrame(self):
-        lastImage = self.animationFrames[self.lastFrameIndex]
-        lastImage.blit(self.virginAnimationFrames[self.lastFrameIndex], (0, 0))
-        self.lastFrameIndex = self.frameIndex
-
+    def repairCurrentFrame(self):
+        lastImage = self.animationFrames[self.frameIndex]
+        lastImage.blit(self.virginAnimationFrames[self.frameIndex], (0, 0))
 
 class DirectionalFrames(SpriteFrames):
     
@@ -50,14 +47,12 @@ class DirectionalFrames(SpriteFrames):
         self.animationFrames = view.copyMovementFrames(animationFrames)
         self.direction = DOWN
         self.numFrames = len(animationFrames[self.direction])
-        self.lastDirection = self.direction
-        self.lastFrameIndex = self.frameIndex
 
     def getCurrentFrame(self):
         return self.animationFrames[self.direction][self.frameIndex]
 
-    def repairLastFrame(self):
-        lastImage = self.animationFrames[self.lastDirection][self.lastFrameIndex]
-        lastImage.blit(self.virginAnimationFrames[self.lastDirection][self.lastFrameIndex], (0, 0))
-        self.lastDirection, self.lastFrameIndex = self.direction, self.frameIndex
+    def repairCurrentFrame(self):
+        lastImage = self.animationFrames[self.direction][self.frameIndex]
+        lastImage.blit(self.virginAnimationFrames[self.direction][self.frameIndex], (0, 0))
+        #self.lastDirection, self.lastFrameIndex = self.direction, self.frameIndex
         

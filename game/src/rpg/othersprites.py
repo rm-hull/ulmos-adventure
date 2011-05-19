@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
 from sprites import *
-from spritemovement import NoMovementStrategy, RobotMovementStrategy
 from spriteframes import StaticFrames
-from rpg.spritemetadata import KeyMetadata, CoinMetadata
 
 class Baddie(OtherSprite):
     

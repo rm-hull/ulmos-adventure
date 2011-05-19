@@ -73,13 +73,13 @@ class RpgSprite(pygame.sprite.Sprite):
         self.baseRect.move_ip(px, py)
         # pseudo z order that is used to test if one sprite is behind another
         self.z = int(self.mapRect.bottom + self.level * TILE_SIZE)
-        self.applyMasks()
 
-    def applyMasks(self):
-        # clear any existing masking first
+    def clearMasks(self):
         if self.masked:
             self.masked = False
-            self.spriteFrames.repairLastFrame()
+            self.spriteFrames.repairCurrentFrame()
+        
+    def applyMasks(self):
         # masks is a map of lists, keyed on the associated tile points
         masks = self.rpgMap.getMasks(self)
         if len(masks) > 0:
@@ -121,13 +121,17 @@ class OtherSprite(RpgSprite):
         if self.toRemove:
             self.remove(gameSprites)
         else:
-            self.image = self.spriteFrames.advanceFrame(increment)
+            # apply movement
             px, py = self.movement.getMovement(self.mapRect.topleft)            
             self.doMove(px, py)
             # make self.rect relative to the view
             self.rect.topleft = (self.mapRect.left - viewRect.left,
                                  self.mapRect.top - viewRect.top)
             if self.mapRect.colliderect(viewRect):
+                # some part of this sprite is in the view
+                self.clearMasks()
+                self.image = self.spriteFrames.advanceFrame(increment)
+                self.applyMasks()
                 if not self.active:
                     self.active = True
                     self.add(visibleSprites)
@@ -137,7 +141,7 @@ class OtherSprite(RpgSprite):
             self.remove(visibleSprites)
             
     # overidden  
-    def repairImage(self):
+    def cles(self):
         self.spriteFrames.repairLastFrame()
                        
 """
