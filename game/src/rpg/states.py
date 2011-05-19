@@ -155,7 +155,7 @@ class PlayState:
     # method required by the ShowPlayer state
     def showPlayer(self, px, py):
         player.applyMovement(player.level,
-                             player.direction,
+                             player.spriteFrames.direction,
                              px, py)
         self.viewRect = player.getViewRect()
         self.drawMapView(screen, 0)
@@ -165,7 +165,7 @@ class PlayState:
                                          player.mapRect.left,
                                          player.mapRect.top,
                                          player.level,
-                                         player.direction)
+                                         player.spriteFrames.direction)
         replayEvent.firstMap = True
         return replayEvent
         
@@ -243,7 +243,7 @@ class BoundaryState:
             # load another map
             nextRpgMap = parser.loadRpgMap(self.event.mapName)
             player.rpgMap = nextRpgMap
-            player.direction = self.boundary
+            player.spriteFrames.direction = self.boundary
             # set the new position
             hidePlayer(self.boundary, nextRpgMap.mapRect, self.event.modifier)
             # create play state
@@ -276,7 +276,7 @@ class BoundaryState:
                                   player.mapRect.left,
                                   player.mapRect.top,
                                   player.level,
-                                  player.direction,
+                                  player.spriteFrames.direction,
                                   self.boundary)
         
 class ShowPlayerState:

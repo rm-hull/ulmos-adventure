@@ -3,6 +3,7 @@
 from sprites import *
 
 from spritemetadata import KeyMetadata, CoinMetadata, DoorMetadata
+from rpg.spriteframes import StaticFrames
 
 """
 Defines a sprite that doesn't move independently, although (unlike FixedSprite)
@@ -10,19 +11,15 @@ it does move with the view.
 """
 class StaticSprite(RpgSprite):
     
-    def __init__(self, uid, registry, animationFrames, frameSkip, position = (0, 0)):
-        RpgSprite.__init__(self, uid, registry, frameSkip, position)
-        # animation frames
-        self.animationFrames = view.copyStaticFrames(animationFrames)    
-        self.numFrames = len(animationFrames)
-        self.image = self.animationFrames[self.animFrameCount]
+    def __init__(self, uid, registry, spriteFrames, position = (0, 0)):
+        RpgSprite.__init__(self, uid, registry, spriteFrames, position)
 
     def update(self, viewRect, gameSprites, visibleSprites, increment):
         if self.toRemove:
             self.remove(gameSprites)
         elif self.mapRect.colliderect(viewRect):
             # some part of this sprite is in the current view
-            self.advanceFrame(increment)
+            self.image = self.spriteFrames.advanceFrame(increment)
             # make self.rect relative to the view
             self.rect.topleft = (self.mapRect.left - viewRect.left,
                                  self.mapRect.top - viewRect.top)
@@ -34,12 +31,12 @@ class StaticSprite(RpgSprite):
             self.active = False
             self.remove(visibleSprites)
             
-    def advanceFrame(self, increment):
+    """def advanceFrame(self, increment):
         if increment:
             self.frameCount = (self.frameCount + increment) % self.frameSkip
             if self.frameCount == 0:
                 self.animFrameCount = (self.animFrameCount + 1) % self.numFrames       
-                self.image = self.animationFrames[self.animFrameCount]
+                self.image = self.animationFrames[self.animFrameCount]"""
             
 class Flames(StaticSprite):
     
@@ -50,7 +47,8 @@ class Flames(StaticSprite):
             imagePath = os.path.join(SPRITES_FOLDER, "flame-frames.png")
             Flames.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(Flames.framesImage)
-        StaticSprite.__init__(self, uid, registry, animationFrames, 6, (4, 2))
+        spriteFrames = StaticFrames(animationFrames, 6)
+        StaticSprite.__init__(self, uid, registry, spriteFrames, (4, 2))
 
 class Coin(StaticSprite):
     
@@ -62,7 +60,8 @@ class Coin(StaticSprite):
             imagePath = os.path.join(SPRITES_FOLDER, "coin-frames.png")
             Coin.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(Coin.framesImage)
-        StaticSprite.__init__(self, uid, registry, animationFrames, 6, (2, 2))
+        spriteFrames = StaticFrames(animationFrames, 6)
+        StaticSprite.__init__(self, uid, registry, spriteFrames, (2, 2))
         
     def processCollision(self, player):
         metadata = CoinMetadata(self.uid)
@@ -80,7 +79,8 @@ class Key(StaticSprite):
             imagePath = os.path.join(SPRITES_FOLDER, "key-frames.png")
             Key.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(Key.framesImage, 6)
-        StaticSprite.__init__(self, uid, registry, animationFrames, 6, (2, 2))
+        spriteFrames = StaticFrames(animationFrames, 6)
+        StaticSprite.__init__(self, uid, registry, spriteFrames, (2, 2))
         
     def processCollision(self, player):
         metadata = KeyMetadata(self.uid)
@@ -100,7 +100,8 @@ class Door(StaticSprite):
         additionalFrames = view.processStaticFrames(Door.framesImage, 8)        
         self.additionalFrames = view.copyStaticFrames(additionalFrames)
         animationFrames = [additionalFrames[0]]
-        StaticSprite.__init__(self, uid, registry, animationFrames, 6, (0, 0))
+        spriteFrames = StaticFrames(animationFrames, 6)
+        StaticSprite.__init__(self, uid, registry, spriteFrames, (0, 0))
         self.rpgMap = rpgMap
         self.opening = False
         

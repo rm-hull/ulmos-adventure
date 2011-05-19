@@ -21,15 +21,17 @@ Base sprite class.
 """
 class RpgSprite(pygame.sprite.Sprite):
 
-    def __init__(self, uid, registry, frameSkip, position = (0, 0)):
+    def __init__(self, uid, registry, spriteFrames, position = (0, 0)):
         pygame.sprite.Sprite.__init__(self)
         # properties common to all RpgSprites
         self.uid = uid
         self.registry = registry
-        self.frameSkip = frameSkip
+        self.spriteFrames = spriteFrames
+        self.image = self.spriteFrames.getCurrentFrame()
+        #self.frameSkip = frameSkip
         self.position = [i * SCALAR for i in position]
-        self.animFrameCount = 0
-        self.frameCount = 0
+        #self.animFrameCount = 0
+        #self.frameCount = 0
         # indicates if this sprite is currently visible
         self.active = False
         # indicates if this sprite should be removed on next update
@@ -88,21 +90,21 @@ than the sprite.
 """
 class MaskSprite(RpgSprite):
     
-    def __init__(self, uid, registry, frameSkip, position = (0, 0)):
+    def __init__(self, uid, registry, spriteFrames, position = (0, 0)):
         # pygame.sprite.Sprite.__init__(self, self.containers)
-        RpgSprite.__init__(self, uid, registry, frameSkip, position)
+        RpgSprite.__init__(self, uid, registry, spriteFrames, position)
         # properties common to all MaskSprites
         self.masked = False
 
     def doMove(self, px, py):
         RpgSprite.doMove(self, px, py)
-        self.applyMasks()
+        self.applyMasks() # decouple this from the move method?
         
     def applyMasks(self):
         # clear any existing masking first
         if self.masked:
             self.masked = False
-            self.repairImage()
+            self.spriteFrames.repairLastFrame()
         # masks is a map of lists, keyed on the associated tile points
         masks = self.rpgMap.getMasks(self)
         if len(masks) > 0:

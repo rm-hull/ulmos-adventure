@@ -4,6 +4,7 @@ import events
 
 from sprites import *
 from view import UP, DOWN, LEFT, RIGHT
+from rpg.spriteframes import StaticFrames, DirectionalFrames
 
 DUMMY_EVENT = events.DummyEvent()
 
@@ -33,18 +34,19 @@ extending MaskSprite, but all animation functionality is encapsulated here.
 """        
 class Player(MaskSprite):
     
-    def __init__(self, uid, registry, animationFrames, position = (0, 0)):
-        MaskSprite.__init__(self, uid, registry, 6, position)
+    def __init__(self, uid, registry, spriteFrames, position = (0, 0)):
+        MaskSprite.__init__(self, uid, registry, spriteFrames, position)
         # view rect is the scrolling window onto the map
         self.viewRect = Rect((0, 0), pygame.display.get_surface().get_size())
         # animation frames
-        self.direction = DOWN
-        self.virginAnimationFrames = animationFrames
-        self.animationFrames = view.copyMovementFrames(animationFrames)    
-        self.numFrames = len(animationFrames[self.direction])
+        #self.direction = DOWN
+        #self.virginAnimationFrames = animationFrames
+        #self.animationFrames = view.copyMovementFrames(animationFrames)    
+        #self.numFrames = len(animationFrames[self.direction])
         # additional animation properties
-        self.lastImageInfo = (self.direction, self.animFrameCount)
-        self.image = self.animationFrames[self.direction][self.animFrameCount]
+        #self.lastImageInfo = (self.direction, self.animFrameCount)
+        #self.image = self.animationFrames[self.direction][self.animFrameCount]
+        #self.image = self.spriteFrames.getCurrentFrame()
         # sprite state
         self.movement = None
         self.coinCount = None
@@ -110,7 +112,7 @@ class Player(MaskSprite):
                         else:
                             valid = self.shuffle(movement)
                         # apply a stationary change of direction if required
-                        if not valid and self.direction != direction:
+                        if not valid and self.spriteFrames.direction != direction:
                             self.setDirection(direction);
         # return
         if useCurrentView:
@@ -184,15 +186,16 @@ class Player(MaskSprite):
     def applyMovement(self, level, direction, px, py):
         # change any fields required for animation
         self.level = level
-        self.direction = direction
-        self.frameCount = (self.frameCount + 1) % self.frameSkip
-        if self.frameCount == 0:
-            self.animFrameCount = (self.animFrameCount + 1) % self.numFrames    
-        self.image = self.animationFrames[self.direction][self.animFrameCount]
+        self.spriteFrames.direction = direction
+        self.image = self.spriteFrames.advanceFrame(1)
+        #self.frameCount = (self.frameCount + 1) % self.frameSkip
+        #if self.frameCount == 0:
+        #    self.animFrameCount = (self.animFrameCount + 1) % self.numFrames    
+        #self.image = self.animationFrames[self.direction][self.animFrameCount]
         # move the sprite to its new location
         self.doMove(px, py)
         # keep this information for next time
-        self.lastImageInfo = (self.direction, self.animFrameCount)
+        # self.lastImageInfo = (self.direction, self.animFrameCount)
     
     """
     Sets the direction without moving anywhere.
@@ -286,10 +289,11 @@ class Player(MaskSprite):
         self.processActions(sprites)
                     
     # overidden  
-    def repairImage(self):
+    """def repairImage(self):
         direction, animFrameCount = self.lastImageInfo
         lastImage = self.animationFrames[direction][animFrameCount]
         lastImage.blit(self.virginAnimationFrames[direction][animFrameCount], (0, 0))
+        self.lastImageInfo = (self.direction, self.animFrameCount)"""
 
     def incrementCoinCount(self, n = 1):
         self.coinCount.incrementCount(n)
@@ -312,5 +316,6 @@ class Ulmo(Player):
             imagePath = os.path.join(SPRITES_FOLDER, "ulmo-frames.png")
             Ulmo.framesImage = view.loadScaledImage(imagePath, None)
         animationFrames = view.processMovementFrames(Ulmo.framesImage)
-        Player.__init__(self, "ulmo", registry, animationFrames, (1, 4))
+        spriteFrames = DirectionalFrames(animationFrames, 6)
+        Player.__init__(self, "ulmo", registry, spriteFrames, (1, 4))
         

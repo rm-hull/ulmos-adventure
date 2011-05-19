@@ -2,6 +2,7 @@
 
 from sprites import *
 from spritemovement import RobotMovementStrategy
+from spriteframes import StaticFrames
 
 """
 Defines a sprite that doesn't move independently, although (unlike FixedSprite)
@@ -9,15 +10,10 @@ it does move with the view.
 """
 class OtherSprite(MaskSprite):
     
-    def __init__(self, uid, registry, animationFrames, position = (0, 0)):
-        MaskSprite.__init__(self, uid, registry, 6, position)
-        # self.direction = DOWN
-        self.virginAnimationFrames = animationFrames
-        self.animationFrames = view.copyStaticFrames(animationFrames)    
-        self.numFrames = len(animationFrames)
-        # additional animation properties
-        self.lastImageInfo = self.animFrameCount # might need to add direction here
-        self.image = self.animationFrames[self.animFrameCount]
+    def __init__(self, uid, registry, spriteFrames, position = (0, 0)):
+        MaskSprite.__init__(self, uid, registry, spriteFrames, position)
+        #self.spriteFrames = spriteFrames
+        #self.image = self.spriteFrames.getCurrentFrame()
     
     def setMovement(self, tilePoints, level):
         self.movement = RobotMovementStrategy(tilePoints, self.position);
@@ -29,13 +25,12 @@ class OtherSprite(MaskSprite):
         if self.toRemove:
             self.remove(gameSprites)
         else:
-            self.advanceFrame(increment)
+            self.image = self.spriteFrames.advanceFrame(increment)
             px, py = self.movement.getMovement(self.mapRect.topleft)            
             self.doMove(px, py)
             # make self.rect relative to the view
             self.rect.topleft = (self.mapRect.left - viewRect.left,
                                  self.mapRect.top - viewRect.top)
-            self.lastImageInfo = self.animFrameCount
         if self.mapRect.colliderect(viewRect):
             if not self.active:
                 self.active = True
@@ -45,18 +40,9 @@ class OtherSprite(MaskSprite):
             self.active = False
             self.remove(visibleSprites)
             
-    def advanceFrame(self, increment):
-        if increment:
-            self.frameCount = (self.frameCount + increment) % self.frameSkip
-            if self.frameCount == 0:
-                self.animFrameCount = (self.animFrameCount + 1) % self.numFrames       
-                self.image = self.animationFrames[self.animFrameCount]
-
     # overidden  
     def repairImage(self):
-        animFrameCount = self.lastImageInfo
-        lastImage = self.animationFrames[animFrameCount]
-        lastImage.blit(self.virginAnimationFrames[animFrameCount], (0, 0))
+        self.spriteFrames.repairLastFrame()
             
 class Baddie(OtherSprite):
     
@@ -67,7 +53,8 @@ class Baddie(OtherSprite):
             imagePath = os.path.join(SPRITES_FOLDER, "flame-frames.png")
             Baddie.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(Baddie.framesImage)
-        OtherSprite.__init__(self, uid, registry, animationFrames, (4, 2))
+        spriteFrames = StaticFrames(animationFrames, 6)
+        OtherSprite.__init__(self, uid, registry, spriteFrames, (4, 2))
         self.rpgMap = rpgMap
 
     def processCollision(self, player):

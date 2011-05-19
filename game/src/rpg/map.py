@@ -158,14 +158,14 @@ class RpgMap:
                                   baseRect.top, baseRect.bottom)
 
     """
-    The given spriteInfo must contain mapRect, level and z attributes.  Typically this
+    The given sprite must contain mapRect, level and z attributes.  Typically this
     object will be the sprite itself, but for ease of unit testing it can be anything.
     """
-    def getMasks(self, spriteInfo):
-        spriteTiles = self.getSpanTiles(spriteInfo.mapRect)
+    def getMasks(self, sprite):
+        spriteTiles = self.getSpanTiles(sprite.mapRect)
         masks = {}
         for tile in spriteTiles:
-            tileMasks = tile.getMasks(spriteInfo.level, spriteInfo.z)
+            tileMasks = tile.getMasks(sprite.level, sprite.z)
             if tileMasks:
                 masks[(tile.x, tile.y)] = tileMasks
         return masks
