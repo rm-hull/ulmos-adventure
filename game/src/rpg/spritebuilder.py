@@ -1,15 +1,16 @@
 #! /usr/bin/env python
 
-from othersprites import Baddie, MyFlames, MyCoin, MyKey
-
 import pygame
+
+from othersprites import Baddie
+from staticsprites import Flames, Coin, Key, Door
 
 # map of sprite classes keyed on type
 spriteClasses = {}
-spriteClasses["flames"] = MyFlames
-spriteClasses["coin"] = MyCoin
-spriteClasses["key"] = MyKey
-#spriteClasses["door"] = Door
+spriteClasses["flames"] = Flames
+spriteClasses["coin"] = Coin
+spriteClasses["key"] = Key
+spriteClasses["door"] = Door
 spriteClasses["baddie"] = Baddie
 
 """

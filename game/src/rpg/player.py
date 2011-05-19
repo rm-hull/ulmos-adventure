@@ -32,23 +32,15 @@ def getMovement(directionBits):
 An animated player controlled sprite.  This provides movement + masking by
 extending MaskSprite, but all animation functionality is encapsulated here.
 """        
-class Player(MaskSprite):
+class Player(RpgSprite):
     
     def __init__(self, uid, registry, spriteFrames, position = (0, 0)):
-        MaskSprite.__init__(self, uid, registry, None, spriteFrames, position)
+        RpgSprite.__init__(self, uid, registry, None, spriteFrames, position)
         # view rect is the scrolling window onto the map
         self.viewRect = Rect((0, 0), pygame.display.get_surface().get_size())
-        # animation frames
-        #self.direction = DOWN
-        #self.virginAnimationFrames = animationFrames
-        #self.animationFrames = view.copyMovementFrames(animationFrames)    
-        #self.numFrames = len(animationFrames[self.direction])
-        # additional animation properties
-        #self.lastImageInfo = (self.direction, self.animFrameCount)
-        #self.image = self.animationFrames[self.direction][self.animFrameCount]
-        #self.image = self.spriteFrames.getCurrentFrame()
-        # sprite state
+        # movement
         self.movement = None
+        # counters
         self.coinCount = None
         self.keyCount = None
     
@@ -188,14 +180,8 @@ class Player(MaskSprite):
         self.level = level
         self.spriteFrames.direction = direction
         self.image = self.spriteFrames.advanceFrame(1)
-        #self.frameCount = (self.frameCount + 1) % self.frameSkip
-        #if self.frameCount == 0:
-        #    self.animFrameCount = (self.animFrameCount + 1) % self.numFrames    
-        #self.image = self.animationFrames[self.direction][self.animFrameCount]
         # move the sprite to its new location
         self.doMove(px, py)
-        # keep this information for next time
-        # self.lastImageInfo = (self.direction, self.animFrameCount)
     
     """
     Sets the direction without moving anywhere.
@@ -288,13 +274,6 @@ class Player(MaskSprite):
     def handleAction(self, sprites):
         self.processActions(sprites)
                     
-    # overidden  
-    """def repairImage(self):
-        direction, animFrameCount = self.lastImageInfo
-        lastImage = self.animationFrames[direction][animFrameCount]
-        lastImage.blit(self.virginAnimationFrames[direction][animFrameCount], (0, 0))
-        self.lastImageInfo = (self.direction, self.animFrameCount)"""
-
     def incrementCoinCount(self, n = 1):
         self.coinCount.incrementCount(n)
         

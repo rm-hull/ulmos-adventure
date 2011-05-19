@@ -6,6 +6,7 @@ import view
 
 from pygame.locals import Rect
 from view import SCALAR, TILE_SIZE
+from rpg.spritemovement import NoMovementStrategy, RobotMovementStrategy
 
 MOVE_UNIT = 1 * SCALAR
 NO_BOUNDARY = 0
@@ -21,19 +22,19 @@ Base sprite class.
 """
 class RpgSprite(pygame.sprite.Sprite):
 
-    def __init__(self, uid, registry, spriteFrames, position = (0, 0)):
+    def __init__(self, uid, registry, rpgMap, spriteFrames, position = (0, 0)):
         pygame.sprite.Sprite.__init__(self)
         # properties common to all RpgSprites
         self.uid = uid
         self.registry = registry
+        self.rpgMap = rpgMap
         self.spriteFrames = spriteFrames
-        self.image = self.spriteFrames.getCurrentFrame()
-        #self.frameSkip = frameSkip
         self.position = [i * SCALAR for i in position]
-        #self.animFrameCount = 0
-        #self.frameCount = 0
+        self.image = self.spriteFrames.getCurrentFrame()
         # indicates if this sprite is currently visible
         self.active = False
+        # indicates if this sprite is currently masked by any map tiles
+        self.masked = False
         # indicates if this sprite should be removed on next update
         self.toRemove = False
 
@@ -55,12 +56,6 @@ class RpgSprite(pygame.sprite.Sprite):
         if px > 0 or py > 0:
             self.doMove(px, py)
         
-    def doMove(self, px, py):
-        self.mapRect.move_ip(px, py)
-        self.baseRect.move_ip(px, py)
-        # pseudo z order that is used to test if one sprite is behind another
-        self.z = int(self.mapRect.bottom + self.level * TILE_SIZE)
-
     def initBaseRect(self):
         myBaseRectWidth = self.mapRect.width 
         if hasattr(self, "baseRectWidth"):
@@ -73,32 +68,13 @@ class RpgSprite(pygame.sprite.Sprite):
         self.baseRect = Rect(baseRectLeft, baseRectTop, myBaseRectWidth, myBaseRectHeight)
         # print self.uid, self.baseRect.width, self.baseRect.height
 
-    def isIntersecting(self, sprite):
-        if self != sprite and self.level == sprite.level and self.baseRect.colliderect(sprite.baseRect):
-            return True
-        return False;
-        
-    def processCollision(self, player):
-        pass
-    
-    def processAction(self, player):
-        pass
-
-"""
-Sprite that supports being masked by tile images that are 'closer' to the viewer
-than the sprite.
-"""
-class MaskSprite(RpgSprite):
-    
-    def __init__(self, uid, registry, rpgMap, spriteFrames, position = (0, 0)):
-        RpgSprite.__init__(self, uid, registry, spriteFrames, position)
-        self.rpgMap = rpgMap
-        self.masked = False
-
     def doMove(self, px, py):
-        RpgSprite.doMove(self, px, py)
-        self.applyMasks() # decouple this from the move method?
-        
+        self.mapRect.move_ip(px, py)
+        self.baseRect.move_ip(px, py)
+        # pseudo z order that is used to test if one sprite is behind another
+        self.z = int(self.mapRect.bottom + self.level * TILE_SIZE)
+        self.applyMasks()
+
     def applyMasks(self):
         # clear any existing masking first
         if self.masked:
@@ -112,14 +88,57 @@ class MaskSprite(RpgSprite):
                 px = tilePoint[0] * view.TILE_SIZE - self.mapRect.left
                 py = tilePoint[1] * view.TILE_SIZE - self.mapRect.top
                 [self.image.blit(mask, (px, py)) for mask in masks[tilePoint]]
+
+    def isIntersecting(self, sprite):
+        if self != sprite and self.level == sprite.level and self.baseRect.colliderect(sprite.baseRect):
+            return True
+        return False;
+        
+    def processCollision(self, player):
+        pass
     
-    """
-    Override this method - this needs to repair the previous image used by the
-    sprite since we have just drawn a piece of the background over it.
-    """
-    def repairImage(self):
+    def processAction(self, player):
         pass
 
+"""
+Base class for any sprites that aren't either the player or a fixed sprite.
+"""
+class OtherSprite(RpgSprite):
+    
+    def __init__(self, uid, registry, rpgMap, spriteFrames, position = (0, 0)):
+        RpgSprite.__init__(self, uid, registry, rpgMap, spriteFrames, position)
+    
+    def setMovement(self, tilePoints, level):
+        if len(tilePoints) == 1:
+            self.movement = NoMovementStrategy()
+        else:
+            self.movement = RobotMovementStrategy(tilePoints, self.position)
+        # use the first tile point to set the position
+        x, y = tilePoints[0][0], tilePoints[0][1]    
+        self.setPosition(x, y, level)
+    
+    def update(self, viewRect, gameSprites, visibleSprites, increment):
+        if self.toRemove:
+            self.remove(gameSprites)
+        else:
+            self.image = self.spriteFrames.advanceFrame(increment)
+            px, py = self.movement.getMovement(self.mapRect.topleft)            
+            self.doMove(px, py)
+            # make self.rect relative to the view
+            self.rect.topleft = (self.mapRect.left - viewRect.left,
+                                 self.mapRect.top - viewRect.top)
+            if self.mapRect.colliderect(viewRect):
+                if not self.active:
+                    self.active = True
+                    self.add(visibleSprites)
+                return
+        if self.active:
+            self.active = False
+            self.remove(visibleSprites)
+            
+    # overidden  
+    def repairImage(self):
+        self.spriteFrames.repairLastFrame()
                        
 """
 Sprite group that ensures pseudo z ordering for the sprites.  This works

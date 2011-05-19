@@ -5,40 +5,7 @@ from sprites import *
 from spritemetadata import KeyMetadata, CoinMetadata, DoorMetadata
 from spriteframes import StaticFrames
 
-"""
-Defines a sprite that doesn't move independently, although (unlike FixedSprite)
-it does move with the view.
-"""
-class StaticSprite(RpgSprite):
-    
-    def __init__(self, uid, registry, spriteFrames, position = (0, 0)):
-        RpgSprite.__init__(self, uid, registry, spriteFrames, position)
-
-    def update(self, viewRect, gameSprites, visibleSprites, increment):
-        if self.toRemove:
-            self.remove(gameSprites)
-        elif self.mapRect.colliderect(viewRect):
-            # some part of this sprite is in the current view
-            self.image = self.spriteFrames.advanceFrame(increment)
-            # make self.rect relative to the view
-            self.rect.topleft = (self.mapRect.left - viewRect.left,
-                                 self.mapRect.top - viewRect.top)
-            if not self.active:
-                self.active = True
-                self.add(visibleSprites)
-            return
-        if self.active:
-            self.active = False
-            self.remove(visibleSprites)
-            
-    """def advanceFrame(self, increment):
-        if increment:
-            self.frameCount = (self.frameCount + increment) % self.frameSkip
-            if self.frameCount == 0:
-                self.animFrameCount = (self.animFrameCount + 1) % self.numFrames       
-                self.image = self.animationFrames[self.animFrameCount]"""
-            
-class Flames(StaticSprite):
+class Flames(OtherSprite):
     
     framesImage = None
     
@@ -48,9 +15,9 @@ class Flames(StaticSprite):
             Flames.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(Flames.framesImage)
         spriteFrames = StaticFrames(animationFrames, 6)
-        StaticSprite.__init__(self, uid, registry, spriteFrames, (4, 2))
+        OtherSprite.__init__(self, uid, registry, rpgMap, spriteFrames, (4, 2))
 
-class Coin(StaticSprite):
+class Coin(OtherSprite):
     
     baseRectWidth = 8 * SCALAR    
     framesImage = None
@@ -61,7 +28,7 @@ class Coin(StaticSprite):
             Coin.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(Coin.framesImage)
         spriteFrames = StaticFrames(animationFrames, 6)
-        StaticSprite.__init__(self, uid, registry, spriteFrames, (2, 2))
+        OtherSprite.__init__(self, uid, registry, rpgMap, spriteFrames, (2, 2))
         
     def processCollision(self, player):
         metadata = CoinMetadata(self.uid)
@@ -69,7 +36,7 @@ class Coin(StaticSprite):
         player.incrementCoinCount()
         self.toRemove = True
 
-class Key(StaticSprite):
+class Key(OtherSprite):
     
     baseRectWidth = 8 * SCALAR    
     framesImage = None
@@ -80,7 +47,7 @@ class Key(StaticSprite):
             Key.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(Key.framesImage, 6)
         spriteFrames = StaticFrames(animationFrames, 6)
-        StaticSprite.__init__(self, uid, registry, spriteFrames, (2, 2))
+        OtherSprite.__init__(self, uid, registry, rpgMap, spriteFrames, (2, 2))
         
     def processCollision(self, player):
         metadata = KeyMetadata(self.uid)
@@ -88,7 +55,7 @@ class Key(StaticSprite):
         player.incrementKeyCount()
         self.toRemove = True
 
-class Door(StaticSprite):
+class Door(OtherSprite):
     
     baseRectWidth = 4 * SCALAR    
     framesImage = None
@@ -101,7 +68,7 @@ class Door(StaticSprite):
         self.additionalFrames = view.copyStaticFrames(additionalFrames)
         animationFrames = [additionalFrames[0]]
         spriteFrames = StaticFrames(animationFrames, 6)
-        StaticSprite.__init__(self, uid, registry, spriteFrames, (0, 0))
+        OtherSprite.__init__(self, uid, registry, rpgMap, spriteFrames)
         self.rpgMap = rpgMap
         self.opening = False
         
