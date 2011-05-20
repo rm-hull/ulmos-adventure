@@ -34,8 +34,8 @@ extending MaskSprite, but all animation functionality is encapsulated here.
 """        
 class Player(RpgSprite):
     
-    def __init__(self, uid, registry, spriteFrames, position = (0, 0)):
-        RpgSprite.__init__(self, uid, registry, None, spriteFrames, position)
+    def __init__(self, spriteFrames, position = (0, 0)):
+        RpgSprite.__init__(self, None, spriteFrames, position)
         # view rect is the scrolling window onto the map
         self.viewRect = Rect((0, 0), pygame.display.get_surface().get_size())
         # movement
@@ -226,14 +226,14 @@ class Player(RpgSprite):
         return boundary
 
     def getTileRange(self, boundary):
-        x1, y1 = self.convertPixelPoint(self.baseRect.left, self.baseRect.top)
-        x2, y2 = self.convertPixelPoint(self.baseRect.right - 1, self.baseRect.bottom - 1)
-        print "(%s, %s) -> (%s, %s)" % (x1, y1, x2, y2)
+        tx1, ty1 = self.getTilePoint(self.baseRect.left, self.baseRect.top)
+        tx2, ty2 = self.getTilePoint(self.baseRect.right - 1, self.baseRect.bottom - 1)
+        print "(%s, %s) -> (%s, %s)" % (tx1, ty1, tx2, ty2)
         if boundary == UP or boundary == DOWN:
-            return range(x1, x2 + 1)
-        return range(y1, y2 + 1)
+            return range(tx1, tx2 + 1)
+        return range(ty1, ty2 + 1)
     
-    def convertPixelPoint(self, px, py):
+    def getTilePoint(self, px, py):
         return px // TILE_SIZE, py // TILE_SIZE
             
     """
@@ -292,11 +292,11 @@ class Ulmo(Player):
     
     framesImage = None
     
-    def __init__(self, registry):
+    def __init__(self):
         if Ulmo.framesImage is None:          
             imagePath = os.path.join(SPRITES_FOLDER, "ulmo-frames.png")
             Ulmo.framesImage = view.loadScaledImage(imagePath, None)
         animationFrames = view.processMovementFrames(Ulmo.framesImage)
         spriteFrames = DirectionalFrames(animationFrames, 6)
-        Player.__init__(self, "ulmo", registry, spriteFrames, (1, 4))
+        Player.__init__(self, spriteFrames, (1, 4))
         

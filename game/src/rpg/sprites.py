@@ -22,11 +22,9 @@ Base sprite class that supports being masked by the map.
 """
 class RpgSprite(pygame.sprite.Sprite):
 
-    def __init__(self, uid, registry, rpgMap, spriteFrames, position = (0, 0)):
+    def __init__(self, rpgMap, spriteFrames, position = (0, 0)):
         pygame.sprite.Sprite.__init__(self)
         # properties common to all RpgSprites
-        self.uid = uid
-        self.registry = registry
         self.rpgMap = rpgMap
         self.spriteFrames = spriteFrames
         self.position = [i * SCALAR for i in position]
@@ -37,14 +35,18 @@ class RpgSprite(pygame.sprite.Sprite):
         self.masked = False
         # indicates if this sprite should be removed on next update
         self.toRemove = False
+        
+    def setUniqueIdentifier(self, uid, registry):
+        self.uid = uid
+        self.registry = registry
+        
+    def setTilePosition(self, tx, ty, level):
+        self.x, self.y = tx, ty
+        self.setPixelPosition(tx * TILE_SIZE + self.position[0],
+                              ty * TILE_SIZE + self.position[1],
+                              level)
 
-    def setPosition(self, x, y, level):
-        self.x, self.y = x, y
-        self.resetPosition(x * TILE_SIZE + self.position[0],
-                           y * TILE_SIZE + self.position[1],
-                           level)
-
-    def resetPosition(self, px = 0, py = 0, level = None):
+    def setPixelPosition(self, px = 0, py = 0, level = None):
         # main rect
         self.rect = self.image.get_rect()
         # other rectangles as required by the game engine
@@ -57,21 +59,20 @@ class RpgSprite(pygame.sprite.Sprite):
             self.doMove(px, py)
         
     def initBaseRect(self):
-        myBaseRectWidth = self.mapRect.width 
-        if hasattr(self, "baseRectWidth"):
-            myBaseRectWidth = self.baseRectWidth
-        myBaseRectHeight = BASE_RECT_HEIGHT
-        if hasattr(self, "baseRectHeight"):
-            myBaseRectHeight = self.baseRectHeight
-        baseRectTop = self.mapRect.bottom + BASE_RECT_EXTEND - myBaseRectHeight
-        baseRectLeft = (self.mapRect.width - myBaseRectWidth) / 2
-        self.baseRect = Rect(baseRectLeft, baseRectTop, myBaseRectWidth, myBaseRectHeight)
+        baseRectWidth = self.mapRect.width 
+        baseRectHeight = BASE_RECT_HEIGHT
+        if hasattr(self, "baseRectSize"):
+            baseRectWidth = self.baseRectSize[0]
+            baseRectHeight = self.baseRectSize[1]
+        baseRectTop = self.mapRect.bottom + BASE_RECT_EXTEND - baseRectHeight
+        baseRectLeft = (self.mapRect.width - baseRectWidth) / 2
+        self.baseRect = Rect(baseRectLeft, baseRectTop, baseRectWidth, baseRectHeight)
         # print self.uid, self.baseRect.width, self.baseRect.height
 
     def doMove(self, px, py):
         self.mapRect.move_ip(px, py)
         self.baseRect.move_ip(px, py)
-        # pseudo z order that is used to test if one sprite is behind another
+        # a pseudo z order is used to test if one sprite is behind another
         self.z = int(self.mapRect.bottom + self.level * TILE_SIZE)
 
     def clearMasks(self):
@@ -108,8 +109,8 @@ Base class for any sprites that aren't either the player or a fixed sprite.
 """
 class OtherSprite(RpgSprite):
     
-    def __init__(self, uid, registry, rpgMap, spriteFrames, position = (0, 0)):
-        RpgSprite.__init__(self, uid, registry, rpgMap, spriteFrames, position)
+    def __init__(self, rpgMap, spriteFrames, position = (0, 0)):
+        RpgSprite.__init__(self, rpgMap, spriteFrames, position)
     
     def setMovement(self, tilePoints, level):
         if len(tilePoints) == 1:
@@ -117,8 +118,8 @@ class OtherSprite(RpgSprite):
         else:
             self.movement = RobotMovementStrategy(tilePoints, self.position)
         # use the first tile point to set the position
-        x, y = tilePoints[0][0], tilePoints[0][1]    
-        self.setPosition(x, y, level)
+        tx, ty = tilePoints[0][0], tilePoints[0][1]    
+        self.setTilePosition(tx, ty, level)
     
     def update(self, viewRect, gameSprites, visibleSprites, increment):
         if self.toRemove:

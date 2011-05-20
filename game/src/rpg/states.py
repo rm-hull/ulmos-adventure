@@ -39,7 +39,7 @@ fixedSprites.add(fixedCoin, coinCount, keyCount)
 registry = registry.Registry()
 
 # create player
-player = player.Ulmo(registry)
+player = player.Ulmo()
 player.coinCount = coinCount
 player.keyCount = keyCount
 
@@ -47,7 +47,7 @@ def startGame():
     # create the map
     player.rpgMap = parser.loadRpgMap("start")
     # set the start position
-    player.setPosition(30, 5, 3)
+    player.setTilePosition(30, 5, 3)
     # return the play state
     return PlayState()
 
@@ -66,7 +66,7 @@ def hidePlayer(boundary, mapRect, modifier = None):
         px = mapRect.right
     else: # boundary == RIGHT
         px = 0 - playerRect.width             
-    player.resetPosition(px, py)
+    player.setPixelPosition(px, py)
 
 class PlayState:
     
@@ -197,14 +197,14 @@ class TransitionState:
             player.rpgMap = nextRpgMap
             # set player position
             if self.event.type == REPLAY_EVENT:
-                player.resetPosition(self.event.pixelPosition[0],
-                                     self.event.pixelPosition[1],
-                                     self.event.level)
+                player.setPixelPosition(self.event.pixelPosition[0],
+                                        self.event.pixelPosition[1],
+                                        self.event.level)
                 # player is already hidden
             else: # self.event.type == TRANSITION_EVENT    
-                player.setPosition(self.event.tilePosition[0],
-                                   self.event.tilePosition[1],
-                                   self.event.level)
+                player.setTilePosition(self.event.tilePosition[0],
+                                       self.event.tilePosition[1],
+                                       self.event.level)
                 if self.event.boundary:
                     hidePlayer(self.event.boundary, nextRpgMap.mapRect)
             # setting the direction will also apply masks

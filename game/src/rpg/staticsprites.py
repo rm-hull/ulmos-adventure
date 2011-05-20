@@ -9,26 +9,27 @@ class Flames(OtherSprite):
     
     framesImage = None
     
-    def __init__(self, uid, registry, rpgMap):
+    def __init__(self, rpgMap):
         if Flames.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "flame-frames.png")
             Flames.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(Flames.framesImage)
         spriteFrames = StaticFrames(animationFrames, 6)
-        OtherSprite.__init__(self, uid, registry, rpgMap, spriteFrames, (4, 2))
+        OtherSprite.__init__(self, rpgMap, spriteFrames, (4, 2))
 
 class Coin(OtherSprite):
     
-    baseRectWidth = 8 * SCALAR    
     framesImage = None
     
-    def __init__(self, uid, registry, rpgMap):
+    baseRectSize = (8 * SCALAR, BASE_RECT_HEIGHT)
+        
+    def __init__(self, rpgMap):
         if Coin.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "coin-frames.png")
             Coin.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(Coin.framesImage)
         spriteFrames = StaticFrames(animationFrames, 6)
-        OtherSprite.__init__(self, uid, registry, rpgMap, spriteFrames, (2, 2))
+        OtherSprite.__init__(self, rpgMap, spriteFrames, (2, 2))
         
     def processCollision(self, player):
         metadata = CoinMetadata(self.uid)
@@ -38,16 +39,17 @@ class Coin(OtherSprite):
 
 class Key(OtherSprite):
     
-    baseRectWidth = 8 * SCALAR    
     framesImage = None
     
-    def __init__(self, uid, registry, rpgMap):
+    baseRectSize = (8 * SCALAR, BASE_RECT_HEIGHT)
+        
+    def __init__(self, rpgMap):
         if Key.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "key-frames.png")
             Key.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(Key.framesImage, 6)
         spriteFrames = StaticFrames(animationFrames, 6)
-        OtherSprite.__init__(self, uid, registry, rpgMap, spriteFrames, (2, 2))
+        OtherSprite.__init__(self, rpgMap, spriteFrames, (2, 2))
         
     def processCollision(self, player):
         metadata = KeyMetadata(self.uid)
@@ -57,19 +59,17 @@ class Key(OtherSprite):
 
 class Door(OtherSprite):
     
-    baseRectWidth = 4 * SCALAR    
     framesImage = None
     
-    def __init__(self, uid, registry, rpgMap):
+    baseRectSize = (4 * SCALAR, BASE_RECT_HEIGHT)    
+
+    def __init__(self, rpgMap):
         if Door.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "door-frames.png")
             Door.framesImage = view.loadScaledImage(imagePath, None)
         animationFrames = view.processStaticFrames(Door.framesImage, 8)
         spriteFrames = StaticFrames(animationFrames, 6)
-        #additionalFrames = view.processStaticFrames(Door.framesImage, 8)        
-        #self.additionalFrames = view.copyStaticFrames(additionalFrames)
-        #spriteFrames = StaticFrames([additionalFrames[0]], 6)
-        OtherSprite.__init__(self, uid, registry, rpgMap, spriteFrames)
+        OtherSprite.__init__(self, rpgMap, spriteFrames)
         self.opening = False
         self.frameCount = 0
         self.frameIndex = 0

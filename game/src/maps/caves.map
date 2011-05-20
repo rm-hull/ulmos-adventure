@@ -27,7 +27,7 @@
 9,1 dungeon:dark dungeon:m2
 10,1 dungeon:dark dungeon:m2
 11,1 dungeon:dark dungeon:m1
-12,1 dungeon:dark dungeon:mrs objects:skull_top
+12,1 dungeon:dark dungeon:mrs objects:skull_ftop
 13,1 dungeon:dark dungeon:wl1
 14,1
 15,1
@@ -69,7 +69,7 @@
 0,4
 1,4
 2,4 dungeon:dark dungeon:wr2 dungeon:lb
-3,4 dungeon:dark dungeon:mls objects:skull_top
+3,4 dungeon:dark dungeon:mls objects:skull_ftop
 4,4 dungeon:dark dungeon:mr
 5,4 [1] dungeon:ms
 6,4 [1] dungeon:ms
@@ -177,7 +177,7 @@
 6,10 dungeon:light dungeon:wl1
 7,10 dungeon:dark dungeon:wr1 dungeon:lb
 8,10 dungeon:dark dungeon:mrls
-9,10 [1] dungeon:ms objects:skull_top:V2
+9,10 [1] dungeon:ms objects:skull_ftop:V2
 10,10 [1] dungeon:nrs
 11,10 [1] dungeon:n5
 12,10 [1] dungeon:n1
