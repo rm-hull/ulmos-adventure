@@ -27,9 +27,8 @@ def createSprite(rpgMap, registry, mapSprite):
             return None
     if mapSprite.type in spriteClasses:
         spriteClass = spriteClasses[mapSprite.type]
-        sprite = spriteClass(mapSprite.uid, rpgMap, registry)
-        tilePoints = mapSprite.tilePoints
-        sprite.setMovement(tilePoints, mapSprite.level)
+        sprite = spriteClass(mapSprite.uid, registry, rpgMap)
+        sprite.setMovement(mapSprite.tilePoints, mapSprite.level)
         return sprite
     return None
 

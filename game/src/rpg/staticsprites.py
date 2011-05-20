@@ -9,7 +9,7 @@ class Flames(OtherSprite):
     
     framesImage = None
     
-    def __init__(self, uid, rpgMap, registry):
+    def __init__(self, uid, registry, rpgMap):
         if Flames.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "flame-frames.png")
             Flames.framesImage = view.loadScaledImage(imagePath, None)        
@@ -22,7 +22,7 @@ class Coin(OtherSprite):
     baseRectWidth = 8 * SCALAR    
     framesImage = None
     
-    def __init__(self, uid, rpgMap, registry):
+    def __init__(self, uid, registry, rpgMap):
         if Coin.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "coin-frames.png")
             Coin.framesImage = view.loadScaledImage(imagePath, None)        
@@ -41,7 +41,7 @@ class Key(OtherSprite):
     baseRectWidth = 8 * SCALAR    
     framesImage = None
     
-    def __init__(self, uid, rpgMap, registry):
+    def __init__(self, uid, registry, rpgMap):
         if Key.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "key-frames.png")
             Key.framesImage = view.loadScaledImage(imagePath, None)        
@@ -60,28 +60,30 @@ class Door(OtherSprite):
     baseRectWidth = 4 * SCALAR    
     framesImage = None
     
-    def __init__(self, uid, rpgMap, registry):
+    def __init__(self, uid, registry, rpgMap):
         if Door.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "door-frames.png")
             Door.framesImage = view.loadScaledImage(imagePath, None)
-        additionalFrames = view.processStaticFrames(Door.framesImage, 8)        
-        self.additionalFrames = view.copyStaticFrames(additionalFrames)
-        animationFrames = [additionalFrames[0]]
+        animationFrames = view.processStaticFrames(Door.framesImage, 8)
         spriteFrames = StaticFrames(animationFrames, 6)
+        #additionalFrames = view.processStaticFrames(Door.framesImage, 8)        
+        #self.additionalFrames = view.copyStaticFrames(additionalFrames)
+        #spriteFrames = StaticFrames([additionalFrames[0]], 6)
         OtherSprite.__init__(self, uid, registry, rpgMap, spriteFrames)
-        self.rpgMap = rpgMap
         self.opening = False
+        self.frameCount = 0
+        self.frameIndex = 0
         
     # override
     def advanceFrame(self, increment):
         if increment and self.opening:
-            self.frameCount = (self.frameCount + increment) % self.frameSkip
+            self.frameCount = (self.frameCount + increment) % self.spriteFrames.frameSkip
             if self.frameCount == 0:
-                self.animFrameCount = (self.animFrameCount + 1) % 8       
-                if self.animFrameCount == 0:
+                self.frameIndex += 1       
+                if self.frameIndex == self.spriteFrames.numFrames:
                     self.opened()
                 else:
-                    self.image = self.additionalFrames[self.animFrameCount]
+                    self.image = self.spriteFrames.animationFrames[self.frameIndex]
     
     def opened(self):
         metadata = DoorMetadata(self.uid, self.x, self.y, self.level)

@@ -116,7 +116,7 @@
 16,3 earth:dark grass:rj
 17,3 earth:trls
 18,3 grass:dark earth:brls
-19,3 [3] grass:sarch
+19,3 grass:sarch
 20,3 grass:dark earth:bl
 21,3 grass:dark earth:br
 22,3 [3] grass:rs
@@ -527,9 +527,9 @@
 31,15 water:w2
 
 #sprite coin 2 7,4
-sprite coin 3 30,5
+sprite key 3 30,5
 sprite baddie 3 24,3 24,6
-#sprite door 3 19,2
+sprite door 3 19,2
 
 event tile 23,7 1 | transition caves 11,14 1 up up
 event tile 19,2 3 | transition caves 4,14 1 up up

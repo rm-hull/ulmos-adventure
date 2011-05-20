@@ -18,7 +18,7 @@ BASE_RECT_EXTEND = 1 * SCALAR
 SPRITES_FOLDER = "sprites"
 
 """
-Base sprite class.
+Base sprite class that supports being masked by the map.
 """
 class RpgSprite(pygame.sprite.Sprite):
 
@@ -88,7 +88,10 @@ class RpgSprite(pygame.sprite.Sprite):
                 px = tilePoint[0] * view.TILE_SIZE - self.mapRect.left
                 py = tilePoint[1] * view.TILE_SIZE - self.mapRect.top
                 [self.image.blit(mask, (px, py)) for mask in masks[tilePoint]]
-
+                
+    def advanceFrame(self, increment):
+        self.image = self.spriteFrames.advanceFrame(increment)
+        
     def isIntersecting(self, sprite):
         if self != sprite and self.level == sprite.level and self.baseRect.colliderect(sprite.baseRect):
             return True
@@ -130,7 +133,7 @@ class OtherSprite(RpgSprite):
             if self.mapRect.colliderect(viewRect):
                 # some part of this sprite is in the view
                 self.clearMasks()
-                self.image = self.spriteFrames.advanceFrame(increment)
+                self.advanceFrame(increment)
                 self.applyMasks()
                 if not self.active:
                     self.active = True
@@ -139,11 +142,7 @@ class OtherSprite(RpgSprite):
         if self.active:
             self.active = False
             self.remove(visibleSprites)
-            
-    # overidden  
-    def cles(self):
-        self.spriteFrames.repairLastFrame()
-                       
+                                   
 """
 Sprite group that ensures pseudo z ordering for the sprites.  This works
 because internally AbstractGroup calls self.sprites() to get a list of sprites

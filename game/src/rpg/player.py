@@ -4,7 +4,7 @@ import events
 
 from sprites import *
 from view import UP, DOWN, LEFT, RIGHT
-from rpg.spriteframes import StaticFrames, DirectionalFrames
+from spriteframes import DirectionalFrames
 
 DUMMY_EVENT = events.DummyEvent()
 
