@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from view import SCALAR, TILE_SIZE
+from view import SCALAR, TILE_SIZE, NONE, UP, DOWN, LEFT, RIGHT
 
 class MovementStrategy:
     
@@ -10,7 +10,7 @@ class MovementStrategy:
 class NoMovementStrategy(MovementStrategy):
     
     def getMovement(self, currentPosition):
-        return 0, 0
+        return 0, 0, NONE
         
 class RobotMovementStrategy(MovementStrategy):
     
@@ -31,13 +31,13 @@ class RobotMovementStrategy(MovementStrategy):
             self.currentPathPoint = self.pathPoints[self.pathPointIndex]
             x = self.currentPathPoint[0] - currentPosition[0]
             y = self.currentPathPoint[1] - currentPosition[1]
-        px, py = 0, 0
+        px, py, direction = 0, 0, NONE
         if x > 0:
-            px = 1 * SCALAR
+            px, direction = 1 * SCALAR, RIGHT
         elif x < 0:
-            px = -1 * SCALAR
+            px, direction = -1 * SCALAR, LEFT
         if y > 0:
-            py = 1 * SCALAR
+            py, direction = 1 * SCALAR, DOWN
         elif y < 0:
-            py = -1 * SCALAR
-        return px, py
+            py, direction = -1 * SCALAR, UP
+        return px, py, direction

@@ -8,9 +8,7 @@ from spriteframes import DirectionalFrames
 
 DUMMY_EVENT = events.DummyEvent()
 
-# ====================
-# == MODULE METHODS ==
-# ====================
+DIAGONAL_TICK = 3
 
 # valid movement combinations - movement is keyed on direction bits and is
 # stored as a tuple (px, py, direction, diagonal) 
@@ -43,13 +41,16 @@ class Player(RpgSprite):
         # counters
         self.coinCount = None
         self.keyCount = None
+        self.ticks = 0
     
     """
     The view rect is entirely determined by what the main sprite is doing.  Sometimes
     we move the view, sometimes we move the sprite - it just depends where the main
     sprite is on the map.
     """
-    def getViewRect(self):
+    def getViewRect(self, useCurrentView = False):
+        if useCurrentView:
+            return self.viewRect
         # centre self.rect in the view
         px, py = (self.viewRect.width - self.rect.width) // 2, (self.viewRect.height - self.rect.height) // 2
         self.rect.topleft = (px, py)
@@ -81,35 +82,45 @@ class Player(RpgSprite):
     > If still not valid, check for a change in direction.
     """
     def handleMovement(self, directionBits):
-        useCurrentView, boundary = True, NO_BOUNDARY
+        boundary, useCurrentView = NO_BOUNDARY, True
         movement = getMovement(directionBits)
-        if movement:
-            # check for deferred movement first
-            if movement == self.movement:
+        # no movement
+        if not movement:
+            return boundary, self.viewRect
+        # deferred movement
+        if movement == self.movement:
+            self.ticks = (self.ticks + 1) % DIAGONAL_TICK
+            if self.deferredMovement:
                 level, direction, px, py = self.deferredMovement
                 useCurrentView = self.wrapMovement(level, direction, px, py)
+                return boundary, self.getViewRect(useCurrentView)
+        else:
+            self.ticks = 0
+        # otherwise normal movement
+        self.movement = movement
+        px, py, direction, diagonal = movement
+        boundary = self.getBoundaryEvent(px, py)
+        if not boundary:
+            # we're within the boundary, but is it valid?
+            newBaseRect = self.baseRect.move(px, py)
+            valid, level = self.rpgMap.isMoveValid(self.level, newBaseRect)
+            if valid:
+                # if movement diagonal we only move 2 out of 3 ticks
+                if diagonal and self.ticks == 0:
+                    self.deferMovement(level, direction, px, py)
+                else:
+                    useCurrentView = self.wrapMovement(level, direction, px, py)
             else:
-                # normal movement
-                px, py, direction, diagonal = movement
-                boundary = self.getBoundaryEvent(px, py)
-                if not boundary:
-                    # we're within the boundary, but is it valid?
-                    newBaseRect = self.baseRect.move(px, py)
-                    valid, level = self.rpgMap.isMoveValid(self.level, newBaseRect)
-                    if valid:
-                        useCurrentView = self.wrapMovement(level, direction, px, py)
-                    else:
-                        if diagonal:
-                            valid = self.slide(movement)
-                        else:
-                            valid = self.shuffle(movement)
-                        # apply a stationary change of direction if required
-                        if not valid and self.spriteFrames.direction != direction:
-                            self.setDirection(direction);
+                # movement invalid but we might be able to slide or shuffle
+                if diagonal:
+                    valid = self.slide(movement)
+                else:
+                    valid = self.shuffle(movement)
+                # apply a stationary change of direction if required
+                if not valid and self.spriteFrames.direction != direction:
+                    self.setDirection(direction);
         # return
-        if useCurrentView:
-            return boundary, self.viewRect
-        return boundary, self.getViewRect()
+        return boundary, self.getViewRect(useCurrentView)
     
     """
     Slides the player. If the player is attempting to move diagonally, but is
@@ -122,14 +133,14 @@ class Player(RpgSprite):
         xBaseRect = self.baseRect.move(px, 0)
         valid, level = self.rpgMap.isMoveValid(self.level, xBaseRect)
         if valid:
-            self.movement = movement
+            #self.movement = movement
             self.deferMovement(level, direction, px, 0)
             return valid
         # check if we can slide vertically
         yBaseRect = self.baseRect.move(0, py)
         valid, level = self.rpgMap.isMoveValid(self.level, yBaseRect)                
         if valid:
-            self.movement = movement
+            #self.movement = movement
             self.deferMovement(level, direction, 0, py)
         return valid
         
@@ -145,13 +156,13 @@ class Player(RpgSprite):
         if px == 0:
             valid, level, shuffle = self.rpgMap.isVerticalValid(self.level, self.baseRect)
             if valid:
-                self.movement = movement
+                #self.movement = movement
                 self.deferMovement(level, direction, px + shuffle * MOVE_UNIT, 0)
             return valid
         # check if we can shuffle vertically
         valid, level, shuffle = self.rpgMap.isHorizontalValid(self.level, self.baseRect)
         if valid:
-            self.movement = movement
+            #self.movement = movement
             self.deferMovement(level, direction, 0, py + shuffle * MOVE_UNIT)
         return valid
     
@@ -160,7 +171,8 @@ class Player(RpgSprite):
     """      
     def wrapMovement(self, level, direction, px, py):
         self.applyMovement(level, direction, px, py)
-        self.movement = None
+        self.deferredMovement = None
+        # self.movement = None
         return False
     
     """
@@ -168,7 +180,7 @@ class Player(RpgSprite):
     'running on the spot' effect.
     """
     def deferMovement(self, level, direction, px, py):
-        # store the deferred movement 
+        # store the deferred movement
         self.deferredMovement = (level, direction, px, py)
         self.applyMovement(level, direction, 0, 0)
     
@@ -182,7 +194,7 @@ class Player(RpgSprite):
         # animate the player
         self.clearMasks()
         self.spriteFrames.direction = direction
-        self.image = self.spriteFrames.advanceFrame(1)
+        self.image = self.spriteFrames.advanceFrame()
         self.applyMasks()
     
     """

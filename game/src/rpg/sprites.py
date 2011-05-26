@@ -90,7 +90,9 @@ class RpgSprite(pygame.sprite.Sprite):
                 py = tilePoint[1] * view.TILE_SIZE - self.mapRect.top
                 [self.image.blit(mask, (px, py)) for mask in masks[tilePoint]]
                 
-    def advanceFrame(self, increment):
+    def advanceFrame(self, increment, direction = None):
+        if direction:
+            self.spriteFrames.direction = direction
         self.image = self.spriteFrames.advanceFrame(increment)
         
     def isIntersecting(self, sprite):
@@ -126,7 +128,7 @@ class OtherSprite(RpgSprite):
             self.remove(gameSprites)
         else:
             # apply movement
-            px, py = self.movement.getMovement(self.mapRect.topleft)            
+            px, py, direction = self.movement.getMovement(self.mapRect.topleft)            
             self.doMove(px, py)
             # make self.rect relative to the view
             self.rect.topleft = (self.mapRect.left - viewRect.left,
@@ -134,7 +136,7 @@ class OtherSprite(RpgSprite):
             if self.mapRect.colliderect(viewRect):
                 # some part of this sprite is in the view
                 self.clearMasks()
-                self.advanceFrame(increment)
+                self.advanceFrame(increment, direction)
                 self.applyMasks()
                 if not self.active:
                     self.active = True
