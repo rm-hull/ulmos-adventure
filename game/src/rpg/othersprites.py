@@ -11,7 +11,7 @@ class Baddie(OtherSprite):
 
     def __init__(self, rpgMap):
         if Baddie.framesImage is None:    
-            imagePath = os.path.join(SPRITES_FOLDER, "beetle-frames3.png")
+            imagePath = os.path.join(SPRITES_FOLDER, "beetle-frames.png")
             Baddie.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processMovementFrames(Baddie.framesImage)
         spriteFrames = DirectionalFrames(animationFrames, 12)
