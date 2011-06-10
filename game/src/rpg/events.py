@@ -3,51 +3,71 @@
 from pygame.locals import Rect
 from view import TILE_SIZE
 
-TILE_TRIGGER = 1
-BOUNDARY_TRIGGER = 2
-
 DUMMY_EVENT = 0
-TRANSITION_EVENT = 1
-REPLAY_EVENT = 2
-BOUNDARY_EVENT = 3
+TILE_EVENT = 1
+BOUNDARY_EVENT = 2
+
+SCENE_TRANSITION = 1
+REPLAY_TRANSITION = 2
+BOUNDARY_TRANSITION = 3
 
 EMPTY_LIST = []
 
-class Trigger:
-    def __init__(self, event, type):
-        self.event = event
+"""
+Event base class.  There are two parts to each event:
+1. The event itself, eg. a BoundaryEvent indicates that the player has breached a
+boundary.
+2. A transition that describes what happens next, eg. a SceneTransition indicates
+that we need to replace the current map with another map. 
+"""
+class Event:
+    def __init__(self, type, transition = None):
         self.type = type
+        self.transition = transition
 
-class TileTrigger(Trigger):
-    def __init__(self, event, x, y, level):
-        Trigger.__init__(self, event, TILE_TRIGGER)
+"""
+Defines an event that doesn't do anything.
+"""
+class DummyEvent(Event):
+    def __init__(self):
+        Event.__init__(self, DUMMY_EVENT)
+
+"""
+Defines an event that occurs when the player steps on a listed tile.
+"""
+class TileEvent(Event):
+    def __init__(self, transition, x, y, level):
+        Event.__init__(self, TILE_EVENT, transition)
         self.rect = Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
         self.level = level
-        
-class BoundaryTrigger(Trigger):
-    def __init__(self, event, boundary, min, max = None):
-        Trigger.__init__(self, event, BOUNDARY_TRIGGER)
+
+"""
+Defines an event that occurs when the player walks off the edge of the map.
+"""        
+class BoundaryEvent(Event):
+    def __init__(self, transition, boundary, min, max = None):
+        Event.__init__(self, BOUNDARY_EVENT, transition)
         self.boundary = boundary
         if max:
             self.range = range(min, max + 1)
         else:
             self.range = [min]
 
-class Event:
-    def __init__(self, type):
+"""
+Transition base class.
+"""
+class Transition:
+    def __init__(self, type, mapName = None):
         self.type = type
-
-class DummyEvent(Event):
-    def __init__(self):
-        Event.__init__(self, DUMMY_EVENT)
+        self.mapName = mapName
 
 """
-Describes a transition event that can occur when the player hits a tile/boundary trigger.
+Defines a transition that occurs when we switch from one scene to another, eg.
+when the player walks through a doorway.
 """            
-class TransitionEvent(Event):
+class SceneTransition(Transition):
     def __init__(self, mapName, x, y, level, direction, boundary = None):
-        Event.__init__(self, TRANSITION_EVENT)
-        self.mapName = mapName
+        Transition.__init__(self, SCENE_TRANSITION, mapName)
         self.tilePosition = (x, y)
         self.level = level
         self.direction = direction
@@ -55,13 +75,12 @@ class TransitionEvent(Event):
         self.firstMap = False
 
 """
-Very similar to transition event, but describes a replay event that occurs when
-the player loses a life and the scene is reset.
+Defines a transition that occurs when the player loses a life and the scene is
+reset.  Note that this is very similar to a scene transition.
 """        
-class ReplayEvent(Event):
+class ReplayTransition(Transition):
     def __init__(self, mapName, px, py, level, direction, boundary = None):
-        Event.__init__(self, REPLAY_EVENT)
-        self.mapName = mapName
+        Transition.__init__(self, REPLAY_TRANSITION, mapName)
         self.pixelPosition = (px, py)
         self.level = level
         self.direction = direction
@@ -69,12 +88,11 @@ class ReplayEvent(Event):
         self.firstMap = False
 
 """
-Describes a boundary event that occurs when the player walks off the edge of
-one map and onto another.
+Defines a transition that occurs when the player walks off the edge of one map
+and onto another.
 """        
-class BoundaryEvent(Event):
+class BoundaryTransition(Transition):
     def __init__(self, mapName, boundary, modifier = 0):
-        Event.__init__(self, BOUNDARY_EVENT)
-        self.mapName = mapName
+        Transition.__init__(self, BOUNDARY_TRANSITION, mapName)
         self.boundary = boundary
         self.modifier = modifier

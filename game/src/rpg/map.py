@@ -21,29 +21,29 @@ and mapTriggers will be populated from the named map file.
 """
 class RpgMap:
     
-    def __init__(self, name, mapTiles, mapSprites, mapTriggers):
+    def __init__(self, name, mapTiles, mapSprites, mapEvents):
         self.name = name
         self.mapTiles = mapTiles
         self.mapSprites = mapSprites
         self.cols = len(self.mapTiles)
         self.rows = len(self.mapTiles[0])
-        self.initialiseTriggers(mapTriggers)
+        self.initialiseEvents(mapEvents)
         self.initialiseMapImage()
         
-    def initialiseTriggers(self, mapTriggers):
-        self.boundaryTriggers = {}
-        self.tileTriggers = {}
-        for trigger in mapTriggers:
-            if trigger.type == events.BOUNDARY_TRIGGER:
-                if trigger.boundary in self.boundaryTriggers:
-                    self.boundaryTriggers[trigger.boundary].append(trigger)
+    def initialiseEvents(self, mapEvents):
+        self.boundaryEvents = {}
+        self.tileEvents = {}
+        for event in mapEvents:
+            if event.type == events.BOUNDARY_EVENT:
+                if event.boundary in self.boundaryEvents:
+                    self.boundaryEvents[event.boundary].append(event)
                 else:
-                    self.boundaryTriggers[trigger.boundary] = [trigger]
-            elif trigger.type == events.TILE_TRIGGER:
-                if trigger.level in self.tileTriggers:
-                    self.tileTriggers[trigger.level].append(trigger)
+                    self.boundaryEvents[event.boundary] = [event]
+            elif event.type == events.TILE_EVENT:
+                if event.level in self.tileEvents:
+                    self.tileEvents[event.level].append(event)
                 else:
-                    self.tileTriggers[trigger.level] = [trigger]
+                    self.tileEvents[event.level] = [event]
                 
     def initialiseMapImage(self):
         self.mapImage = view.createRectangle((self.cols * view.TILE_SIZE,
@@ -62,7 +62,7 @@ class RpgMap:
         return self.mapImage.subsurface(viewRect)
     
     """
-    The map restricts movement via the following system.
+    The map restricts movement via the following system:
 
     Each tile has 0 or more levels that determine if a sprite can move onto them.
     At its most basic, if the sprite is at level 1 they will be blocked if they
@@ -305,7 +305,7 @@ class MaskInfo:
         self.z = (y + 1) * TILE_SIZE + level * TILE_SIZE - 1
 
 """
-Sprite placeholder that is used to construct a real sprite
+Sprite placeholder that is later used to construct a real sprite.
 """        
 class MapSprite:
     def __init__(self, type, uid, level, tilePoints):

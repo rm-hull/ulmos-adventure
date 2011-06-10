@@ -4,7 +4,7 @@ from pygame.locals import *
 
 from view import NONE, UP, DOWN, LEFT, RIGHT, TILE_SIZE, VIEW_WIDTH, VIEW_HEIGHT
 from sprites import MOVE_UNIT
-from events import DUMMY_EVENT, TRANSITION_EVENT, REPLAY_EVENT, BOUNDARY_EVENT
+from events import SCENE_TRANSITION, REPLAY_TRANSITION, BOUNDARY_TRANSITION
 
 import pygame
 import parser
@@ -71,7 +71,7 @@ def hidePlayer(boundary, mapRect, modifier = None):
 class PlayState:
     
     def __init__(self, lastEvent = None):
-        # we might need this if the player loses a life
+        # we need this if the player loses a life
         self.lastEvent = lastEvent
         if lastEvent == None:
             self.lastEvent = self.createReplayEvent()
@@ -117,26 +117,29 @@ class PlayState:
         
     def handleEvents(self):
         event = player.processEvents()
-        if event and event.type > DUMMY_EVENT:
-            print "event: %s" % event.__class__.__name__
-            return TransitionState(event)
+        if event: #and event.type > DUMMY_EVENT:
+            transition = event.transition
+            print "event: %s" % transition.__class__.__name__
+            return SceneTransitionState(transition)
         return None
     
     def handleCollisions(self):
         # have we collided with any sprites?
         if player.processCollisions(self.visibleSprites.sprites()):
-            return TransitionState(self.lastEvent)
+            return SceneTransitionState(self.lastEvent)
     
     def handleMovement(self, directionBits):
         if directionBits > 0:
-            event, self.viewRect = player.handleMovement(directionBits)
-            if event:
-                # we've hit a boundary - change states to swap the map
-                print "event: %s" % event.__class__.__name__
-                if event.type == BOUNDARY_EVENT:
-                    return BoundaryState(event)
-                if event.type == TRANSITION_EVENT:
-                    return TransitionState(event)
+            boundaryEvent, self.viewRect = player.handleMovement(directionBits)
+            if boundaryEvent:
+                # we've hit a boundary - change to a transitional state to swap the map
+                transition = boundaryEvent.transition
+                if transition:
+                    print "transition: %s" % transition.__class__.__name__
+                    if transition.type == BOUNDARY_TRANSITION:
+                        return BoundaryTransitionState(transition)
+                    if transition.type == SCENE_TRANSITION:
+                        return SceneTransitionState(transition)
         return None
     
     def handleAction(self, action):
@@ -161,16 +164,16 @@ class PlayState:
         self.drawMapView(screen, 0)
 
     def createReplayEvent(self):
-        replayEvent = events.ReplayEvent(player.rpgMap.name,
-                                         player.mapRect.left,
-                                         player.mapRect.top,
-                                         player.level,
-                                         player.spriteFrames.direction)
+        replayEvent = events.ReplayTransition(player.rpgMap.name,
+                                              player.mapRect.left,
+                                              player.mapRect.top,
+                                              player.level,
+                                              player.spriteFrames.direction)
         replayEvent.firstMap = True
         return replayEvent
         
                         
-class TransitionState:
+class SceneTransitionState:
     
     tickTargets = {UP: 16, DOWN: 16, LEFT: 16, RIGHT: 16}
     
@@ -196,7 +199,7 @@ class TransitionState:
             nextRpgMap = parser.loadRpgMap(self.event.mapName)
             player.rpgMap = nextRpgMap
             # set player position
-            if self.event.type == REPLAY_EVENT:
+            if self.event.type == REPLAY_TRANSITION:
                 player.setPixelPosition(self.event.pixelPosition[0],
                                         self.event.pixelPosition[1],
                                         self.event.level)
@@ -229,7 +232,7 @@ class TransitionState:
         self.ticks += 1
         return None
 
-class BoundaryState:
+class BoundaryTransitionState:
     
     def __init__(self, boundaryEvent):
         self.event = boundaryEvent
@@ -273,12 +276,12 @@ class BoundaryState:
         return None
     
     def createReplayEvent(self):
-        return events.ReplayEvent(self.event.mapName,
-                                  player.mapRect.left,
-                                  player.mapRect.top,
-                                  player.level,
-                                  player.spriteFrames.direction,
-                                  self.boundary)
+        return events.ReplayTransition(self.event.mapName,
+                                       player.mapRect.left,
+                                       player.mapRect.top,
+                                       player.level,
+                                       player.spriteFrames.direction,
+                                       self.boundary)
         
 class ShowPlayerState:
     

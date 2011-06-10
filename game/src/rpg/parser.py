@@ -38,7 +38,7 @@ def loadRpgMap(name):
     # tileData is keyed on an x,y tuple
     tileData = {}
     spriteData = []
-    triggerData = []
+    eventData = []
     # parse map file - each line represents one map tile        
     mapPath = os.path.join(MAPS_FOLDER, name + ".map")
     print "loading: %s" % mapPath
@@ -56,7 +56,7 @@ def loadRpgMap(name):
                                 spriteData.append(bits[1:])
                         elif bits[0] == TRIGGER:
                             if len(bits) > 1:
-                                triggerData.append(bits[1:])
+                                eventData.append(bits[1:])
                         else:                          
                             tilePoint = bits[0]
                             #print "%s -> %s" % (tileRef, tileName)
@@ -69,9 +69,9 @@ def loadRpgMap(name):
     # create map tiles
     mapTiles = createMapTiles(maxX + 1, maxY + 1, tileData)
     mapSprites = createMapSprites(spriteData, name)
-    mapTriggers = createMapTriggers(triggerData)
+    mapEvents = createMapEvents(eventData)
     # create map and return
-    return map.RpgMap(name, mapTiles, mapSprites, mapTriggers)
+    return map.RpgMap(name, mapTiles, mapSprites, mapEvents)
 
 def createMapTiles(cols, rows, tileData):
     mapTiles = [[None] * (rows) for i in range(cols)]
@@ -100,7 +100,6 @@ def createMapTiles(cols, rows, tileData):
                 if tileSetName in tileSets:
                     tileSet = tileSets[tileSetName]
                 else:
-                    # tileSet = TileSet(tileSetName)
                     tileSet = loadTileSet(tileSetName)
                     tileSets[tileSetName] = tileSet
                 tileName = tileBits[1]
@@ -162,70 +161,70 @@ def createMapSprites(spriteData, mapName):
             mapSprites.append(mapSprite)
     return mapSprites
             
-def createMapTriggers(triggerData):
-    mapTriggers = []
-    for triggerBits in triggerData:
+def createMapEvents(eventData):
+    mapEvents = []
+    for eventDataBits in eventData:
         eventBits = None
+        transitionBits = None
         try:
-            eventIndex = triggerBits.index(PIPE) + 1
-            eventBits = triggerBits[eventIndex:]
-            triggerBits = triggerBits[0:eventIndex]
+            eventIndex = eventDataBits.index(PIPE)
+            eventBits = eventDataBits[0:eventIndex]
+            transitionBits = eventDataBits[eventIndex + 1:]
         except (ValueError, IndexError):
             pass
-        if eventBits:
-            event = None
-            eventType = eventBits[0]
-            if eventType == "boundary":
-                event = createBoundaryEvent(eventBits)
-            elif eventType == "transition":
-                event = createTransitionEvent(eventBits)
-            if event and triggerBits:
-                trigger = None
-                triggerType = triggerBits[0]
-                if triggerType == "boundary":
-                    trigger = createBoundaryTrigger(triggerBits, event)
-                elif triggerType == "tile":
-                    trigger = createTileTrigger(triggerBits, event)
-                if trigger:
-                    mapTriggers.append(trigger)
-    return mapTriggers
+        if transitionBits:
+            transition = None
+            transitionType = transitionBits[0]
+            if transitionType == "boundary":
+                transition = createBoundaryTransition(transitionBits)
+            elif transitionType == "transition":
+                transition = createSceneTransition(transitionBits)
+            if transition and eventBits:
+                event = None
+                eventType = eventBits[0]
+                if eventType == "boundary":
+                    event = createBoundaryEvent(eventBits, transition)
+                elif eventType == "tile":
+                    event = createTileEvent(eventBits, transition)
+                if event:
+                    mapEvents.append(event)
+    return mapEvents
                             
-def createBoundaryEvent(eventBits):
+def createBoundaryTransition(transitionBits):
+    if len(transitionBits) < 3:
+        return None
+    mapName = transitionBits[1]
+    boundary = BOUNDARIES[transitionBits[2]]
+    if len(transitionBits) > 3:
+        modifier = int(transitionBits[3])
+        return events.BoundaryTransition(mapName, boundary, modifier)
+    return events.BoundaryTransition(mapName, boundary)
+
+def createSceneTransition(transitionBits):
+    if len(transitionBits) < 5:
+        return None
+    mapName = transitionBits[1]
+    x, y = getXY(transitionBits[2])
+    level = int(transitionBits[3])
+    direction = BOUNDARIES[transitionBits[4]]
+    if len(transitionBits) > 5:
+        boundary = BOUNDARIES[transitionBits[5]]
+        return events.SceneTransition(mapName, x, y, level, direction, boundary)
+    return events.SceneTransition(mapName, x, y, level, direction)
+    
+def createBoundaryEvent(eventBits, transition):
     if len(eventBits) < 3:
         return None
-    mapName = eventBits[1]
-    boundary = BOUNDARIES[eventBits[2]]
-    if len(eventBits) > 3:
-        modifier = int(eventBits[3])
-        return events.BoundaryEvent(mapName, boundary, modifier)
-    return events.BoundaryEvent(mapName, boundary)
-
-def createTransitionEvent(eventBits):
-    if len(eventBits) < 5:
-        return None
-    mapName = eventBits[1]
-    x, y = getXY(eventBits[2])
-    level = int(eventBits[3])
-    direction = BOUNDARIES[eventBits[4]]
-    if len(eventBits) > 5:
-        boundary = BOUNDARIES[eventBits[5]]
-        return events.TransitionEvent(mapName, x, y, level, direction, boundary)
-    return events.TransitionEvent(mapName, x, y, level, direction)
-    
-def createBoundaryTrigger(triggerBits, event):
-    if len(triggerBits) < 3:
-        return None
-    boundary = BOUNDARIES[triggerBits[1]]
-    range = triggerBits[2]
+    boundary = BOUNDARIES[eventBits[1]]
+    range = eventBits[2]
     if DASH in range:
         min, max = getXY(range, DASH)
-        return events.BoundaryTrigger(event, boundary, min, max)
-    return events.BoundaryTrigger(event, boundary, int(range))
+        return events.BoundaryEvent(transition, boundary, min, max)
+    return events.BoundaryEvent(transition, boundary, int(range))
 
-def createTileTrigger(triggerBits, event):
-    if len(triggerBits) < 3:
+def createTileEvent(eventBits, transition):
+    if len(eventBits) < 3:
         return None
-    x, y = getXY(triggerBits[1])
-    level = int(triggerBits[2])
-    return events.TileTrigger(event, x, y, level)
-    return None
+    x, y = getXY(eventBits[1])
+    level = int(eventBits[2])
+    return events.TileEvent(transition, x, y, level)

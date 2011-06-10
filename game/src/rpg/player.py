@@ -10,8 +10,10 @@ DUMMY_EVENT = events.DummyEvent()
 
 DIAGONAL_TICK = 3
 
-# valid movement combinations - movement is keyed on direction bits and is
-# stored as a tuple (px, py, direction, diagonal) 
+"""
+Valid movement combinations - movement is keyed on direction bits and is stored
+as a tuple (px, py, direction, diagonal)
+""" 
 MOVEMENT = {UP: (0, -MOVE_UNIT, UP, False),
             DOWN: (0, MOVE_UNIT, DOWN, False),
             LEFT: (-MOVE_UNIT, 0, LEFT, False),
@@ -82,25 +84,25 @@ class Player(RpgSprite):
     > If still not valid, check for a change in direction.
     """
     def handleMovement(self, directionBits):
-        boundary, useCurrentView = NO_BOUNDARY, True
+        boundaryEvent, useCurrentView = None, True
         movement = getMovement(directionBits)
         # no movement
         if not movement:
-            return boundary, self.viewRect
+            return boundaryEvent, self.viewRect
         # deferred movement
         if movement == self.movement:
             self.ticks = (self.ticks + 1) % DIAGONAL_TICK
             if self.deferredMovement:
                 level, direction, px, py = self.deferredMovement
                 useCurrentView = self.wrapMovement(level, direction, px, py)
-                return boundary, self.getViewRect(useCurrentView)
+                return boundaryEvent, self.getViewRect(useCurrentView)
         else:
             self.ticks = 0
         # otherwise normal movement
         self.movement = movement
         px, py, direction, diagonal = movement
-        boundary = self.getBoundaryEvent(px, py)
-        if not boundary:
+        boundaryEvent = self.getBoundaryEvent(px, py)
+        if not boundaryEvent:
             # we're within the boundary, but is it valid?
             newBaseRect = self.baseRect.move(px, py)
             valid, level = self.rpgMap.isMoveValid(self.level, newBaseRect)
@@ -120,7 +122,7 @@ class Player(RpgSprite):
                 if not valid and self.spriteFrames.direction != direction:
                     self.setDirection(direction);
         # return
-        return boundary, self.getViewRect(useCurrentView)
+        return boundaryEvent, self.getViewRect(useCurrentView)
     
     """
     Slides the player. If the player is attempting to move diagonally, but is
@@ -213,12 +215,12 @@ class Player(RpgSprite):
             # we're within the boundary
             return None
         boundary = self.getBoundary(testMapRect)
-        if boundary in self.rpgMap.boundaryTriggers:
+        if boundary in self.rpgMap.boundaryEvents:
             tileRange = self.getTileRange(boundary)
-            for trigger in self.rpgMap.boundaryTriggers[boundary]:
-                testList = [i in trigger.range for i in tileRange]
+            for event in self.rpgMap.boundaryEvents[boundary]:
+                testList = [i in event.range for i in tileRange]
                 if all(testList):
-                    return trigger.event
+                    return event
         return DUMMY_EVENT
     
     """
@@ -252,10 +254,10 @@ class Player(RpgSprite):
     Processes events triggered via event tiles.
     """
     def processEvents(self):
-        if self.level in self.rpgMap.tileTriggers:
-            for trigger in self.rpgMap.tileTriggers[self.level]:
-                if self.baseRect.colliderect(trigger.rect):
-                    return trigger.event
+        if self.level in self.rpgMap.tileEvents:
+            for event in self.rpgMap.tileEvents[self.level]:
+                if self.baseRect.colliderect(event.rect):
+                    return event
         return None
     
     """
