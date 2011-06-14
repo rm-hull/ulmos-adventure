@@ -30,10 +30,11 @@ screen = pygame.display.set_mode(DIMENSIONS)
 
 # create fixed sprites
 fixedSprites = pygame.sprite.Group()
-fixedCoin = fixedsprites.FixedCoin((3, 3))
-coinCount = fixedsprites.CoinCount(0, (14, 3))
+fixedCoin = fixedsprites.FixedCoin((27, 3))
+coinCount = fixedsprites.CoinCount(0, (38, 3))
 keyCount = fixedsprites.KeyCount(0, (VIEW_WIDTH - 3, 3))
-fixedSprites.add(fixedCoin, coinCount, keyCount)
+lives = fixedsprites.Lives(2, (3, 3))
+fixedSprites.add(fixedCoin, lives, coinCount, keyCount)
 
 # create registry
 registry = registry.Registry()
@@ -42,6 +43,7 @@ registry = registry.Registry()
 player = player.Ulmo()
 player.coinCount = coinCount
 player.keyCount = keyCount
+player.lives = lives
 
 def startGame():
     # create the map

@@ -14,11 +14,15 @@ BOUNDARY_TRANSITION = 3
 EMPTY_LIST = []
 
 """
-Event base class.  There are two parts to each event:
+There are two parts to each event:
 1. The event itself, eg. a BoundaryEvent indicates that the player has breached a
 boundary.
 2. A transition that describes what happens next, eg. a SceneTransition indicates
-that we need to replace the current map with another map. 
+that we need to replace the current map with another map.
+
+For example, a BoundaryEvent might result in a BoundaryTransition, when the
+player walks off the edge of one map and onto another, OR a SceneTransition,
+when the player walks out of a cave for example. 
 """
 class Event:
     def __init__(self, type, transition = None):
@@ -63,7 +67,7 @@ class Transition:
 
 """
 Defines a transition that occurs when we switch from one scene to another, eg.
-when the player walks through a doorway.
+when the player walks into a cave.
 """            
 class SceneTransition(Transition):
     def __init__(self, mapName, x, y, level, direction, boundary = None):

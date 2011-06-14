@@ -64,7 +64,6 @@ class KeyCount(FixedSprite):
     initialImage = None
     
     def __init__(self, count = 0, position = (0, 0)):
-        # FixedSprite.__init__(self, registry, view.createTransparentRect((0, 8)), position)
         if KeyCount.initialImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "small-key.png")
             KeyCount.initialImage = view.loadScaledImage(imagePath, None)
@@ -87,4 +86,34 @@ class KeyCount(FixedSprite):
         self.count += n
         self.newImage()
         print "keys:", self.count
+
+class Lives(FixedSprite):
+    
+    initialImage = None
+    
+    def __init__(self, count = 0, position = (0, 0)):
+        if Lives.initialImage is None:    
+            imagePath = os.path.join(SPRITES_FOLDER, "life.png")
+            Lives.initialImage = view.loadScaledImage(imagePath, None)
+        self.livesImage = view.createDuplicateSpriteImage(Lives.initialImage)
+        FixedSprite.__init__(self, position)
+        self.count = count
+        self.newImage()
+        
+    def newImage(self):
+        dimensions = (self.count * 8 * SCALAR, 8 * SCALAR)
+        newImage = view.createTransparentRect(dimensions)
+        px = 0;
+        for n in range(self.count):
+            newImage.blit(self.livesImage, (px, 0))
+            px += 8 * SCALAR
+        self.setImage(newImage)
+
+    def incrementCount(self, n = 1):
+        self.count += n
+        if (self.count < 0):
+            print "GAME OVER"
+            self.count = 0 # temporary hack
+        self.newImage()
+        print "lives:", self.count
    

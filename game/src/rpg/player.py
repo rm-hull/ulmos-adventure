@@ -43,6 +43,7 @@ class Player(RpgSprite):
         # counters
         self.coinCount = None
         self.keyCount = None
+        self.lives = None
         self.ticks = 0
     
     """
@@ -295,6 +296,9 @@ class Player(RpgSprite):
         
     def incrementKeyCount(self, n = 1):
         self.keyCount.incrementCount(n)
+        
+    def loseLife(self, n = -1):
+        self.lives.incrementCount(n)
         
     def getKeyCount(self):
         return self.keyCount.count;

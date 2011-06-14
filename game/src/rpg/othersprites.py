@@ -7,11 +7,11 @@ class Baddie(OtherSprite):
     
     framesImage = None
     
-    baseRectSize = (8 * SCALAR, 12 * SCALAR)    
+    baseRectSize = (9 * SCALAR, 12 * SCALAR)    
 
     def __init__(self, rpgMap):
         if Baddie.framesImage is None:    
-            imagePath = os.path.join(SPRITES_FOLDER, "beetle-frames.png")
+            imagePath = os.path.join(SPRITES_FOLDER, "beetle-frames2.png")
             Baddie.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processMovementFrames(Baddie.framesImage, 2)
         spriteFrames = DirectionalFrames(animationFrames, 12)
@@ -19,5 +19,6 @@ class Baddie(OtherSprite):
 
     def processCollision(self, player):
         print "life lost!"
+        player.loseLife()
         return True
 
