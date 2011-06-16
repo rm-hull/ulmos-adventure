@@ -22,7 +22,8 @@ Y_MULT = VIEW_HEIGHT // 64
 DIMENSIONS = (VIEW_WIDTH, VIEW_HEIGHT)
 
 # number of frames required to bring the player into view from an off-screen position
-TICK_TARGETS = {UP: 24, DOWN: 24, LEFT: 14, RIGHT: 14}
+BOUNDARY_TICKS = {UP: 24, DOWN: 24, LEFT: 14, RIGHT: 14}
+DOORWAY_TICKS = {UP: 16, DOWN: 16, LEFT: 16, RIGHT: 16}
 
 # initialise pygame
 pygame.init()
@@ -86,14 +87,61 @@ class PlayState:
         self.gameSprites = spritebuilder.createSpritesForMap(self.rpgMap, registry)
              
     def execute(self, keyPresses):
+        transition = self.getNextTransition(keyPresses)
+        if transition:
+            print "transition: %s" % transition.__class__.__name__
+            if transition.type == BOUNDARY_TRANSITION:
+                return BoundaryTransitionState(transition)
+            if transition.type == SCENE_TRANSITION:
+                return SceneTransitionState(transition)
+            if transition.type == REPLAY_TRANSITION:
+                return SceneTransitionState(transition)
+        # draw the map view to the screen
+        self.drawMapView(screen)
+        pygame.display.flip()
+        return None
+    
+    def getNextTransition(self, keyPresses):
         # have we triggered any events?
-        transitionState = self.handleEvents()
-        if transitionState:
-            return transitionState
+        transition = self.handleEvents()
+        if transition:
+            return transition
         # have we collided with any sprites?
-        transitionState = self.handleCollisions()
-        if transitionState:
-            return transitionState
+        transition = self.handleCollisions()
+        if transition:
+            return transition
+        directionBits, action = self.processKeyPresses(keyPresses)
+        # have we hit any boundaries?
+        transition = self.handleMovement(directionBits)
+        if transition:
+            return transition
+        # handle actions
+        self.handleAction(action)
+            
+    def handleEvents(self):
+        event = player.processEvents()
+        if event:
+            return event.transition
+        return None
+    
+    def handleCollisions(self):
+        if player.processCollisions(self.visibleSprites.sprites()):
+            return self.lastTransition
+        return None
+    
+    def handleMovement(self, directionBits):
+        if directionBits > 0:
+            boundaryEvent, self.viewRect = player.handleMovement(directionBits)
+            if boundaryEvent:
+                # we've hit a boundary - return the associated transition
+                return boundaryEvent.transition
+        return None
+    
+    def handleAction(self, action):
+        if action:
+            player.handleAction(self.visibleSprites.sprites())
+
+    def processKeyPresses(self, keyPresses):
         directionBits = NONE
         action = False
         if keyPresses[K_UP]:
@@ -106,47 +154,7 @@ class PlayState:
             directionBits += RIGHT
         if keyPresses[K_SPACE]:
             action = True
-        # handle movement + check for boundaries/transitions
-        transitionState = self.handleMovement(directionBits)
-        if transitionState:
-            return transitionState
-        # handle actions
-        self.handleAction(action)
-        # draw the map view to the screen
-        self.drawMapView(screen)
-        pygame.display.flip()
-        return None
-        
-    def handleEvents(self):
-        event = player.processEvents()
-        if event:
-            transition = event.transition
-            print "transition: %s" % transition.__class__.__name__
-            return SceneTransitionState(transition)
-        return None
-    
-    def handleCollisions(self):
-        # have we collided with any sprites?
-        if player.processCollisions(self.visibleSprites.sprites()):
-            return SceneTransitionState(self.lastTransition)
-    
-    def handleMovement(self, directionBits):
-        if directionBits > 0:
-            boundaryEvent, self.viewRect = player.handleMovement(directionBits)
-            if boundaryEvent:
-                # we've hit a boundary - change to a transitional state to swap the map
-                transition = boundaryEvent.transition
-                if transition:
-                    print "transition: %s" % transition.__class__.__name__
-                    if transition.type == BOUNDARY_TRANSITION:
-                        return BoundaryTransitionState(transition)
-                    if transition.type == SCENE_TRANSITION:
-                        return SceneTransitionState(transition)
-        return None
-    
-    def handleAction(self, action):
-        if action:
-            player.handleAction(self.visibleSprites.sprites())
+        return directionBits, action
     
     def drawMapView(self, surface, increment = 1):
         surface.blit(self.rpgMap.getMapView(self.viewRect), ORIGIN)
@@ -177,8 +185,6 @@ class PlayState:
                         
 class SceneTransitionState:
     
-    tickTargets = {UP: 16, DOWN: 16, LEFT: 16, RIGHT: 16}
-    
     def __init__(self, transition):
         self.transition = transition
         #self.showPlayerState = showPlayerState
@@ -206,7 +212,7 @@ class SceneTransitionState:
                                         self.transition.pixelPosition[1],
                                         self.transition.level)
                 # player is already hidden
-            else: # self.transition.type == TRANSITION_EVENT    
+            else: # self.transition.type == SCENE_TRANSITION    
                 player.setTilePosition(self.transition.tilePosition[0],
                                        self.transition.tilePosition[1],
                                        self.transition.level)
@@ -228,9 +234,10 @@ class SceneTransitionState:
         else:
             if self.transition.firstMap:
                 return self.nextState
+            direction = player.spriteFrames.direction
             if self.transition.boundary:
-                return ShowPlayerState(player.spriteFrames.direction, self.nextState)
-            return ShowPlayerState(player.spriteFrames.direction, self.nextState, self.tickTargets)
+                return ShowPlayerState(direction, self.nextState, BOUNDARY_TICKS[direction])
+            return ShowPlayerState(direction, self.nextState, DOORWAY_TICKS[direction])
         self.ticks += 1
         return None
 
@@ -272,7 +279,7 @@ class BoundaryTransitionState:
                 screen.blit(self.nextImage.subsurface(0, 0, xSlice, VIEW_HEIGHT), (VIEW_WIDTH - xSlice, 0))                
             pygame.display.flip()
         else:
-            return ShowPlayerState(self.boundary, self.nextState)
+            return ShowPlayerState(self.boundary, self.nextState, BOUNDARY_TICKS[self.boundary])
             # return self.nextState
         self.ticks += 1
         return None
@@ -287,14 +294,14 @@ class BoundaryTransitionState:
         
 class ShowPlayerState:
     
-    def __init__(self, boundary, nextState, tickTargets = TICK_TARGETS):
+    def __init__(self, boundary, nextState, tickTarget):
         self.boundary = boundary
         self.nextState = nextState
-        self.tickTargets = tickTargets
+        self.tickTarget = tickTarget
         self.ticks = 0
         
     def execute(self, keyPresses):
-        if self.ticks > self.tickTargets[self.boundary]:
+        if self.ticks > self.tickTarget:
             return self.nextState
         px, py = 0, 0
         if self.boundary == UP:
