@@ -20,7 +20,7 @@ COLON = ":"
 COMMA = ","
 SPRITE = "sprite"
 TRIGGER = "event"
-PIPE = "|"
+#PIPE = "|"
 DASH = "-"
 
 BOUNDARIES = {"up": UP, "down": DOWN, "left": LEFT, "right": RIGHT}
@@ -148,16 +148,25 @@ def createMapSprites(spriteData, mapName):
     typeCounts = {}
     for spriteBits in spriteData:
         if len(spriteBits) > 2:
+            # create unique ID for this sprite
             type = spriteBits[0]
-            level = int(spriteBits[1])
-            tilePoints = getTilePoints(spriteBits[2:])
             if type in typeCounts:
                 typeCounts[type] += 1
             else:
                 typeCounts[type] = 0
             typeCount = typeCounts[type]
             uid = mapName + COLON + type + COLON + str(typeCount)
-            mapSprite = map.MapSprite(type, uid, level, tilePoints)
+            # extract movement info
+            movement, level, tilePoints = None, None, None
+            if spriteBits[1] == COLON:
+                movement = spriteBits[2]
+                level = int(spriteBits[3])
+                tilePoints = getTilePoints(spriteBits[4:])
+            else:
+                movement = "none"
+                level = int(spriteBits[1])
+                tilePoints = getTilePoints(spriteBits[2:])
+            mapSprite = map.MapSprite(type, uid, movement, level, tilePoints)
             mapSprites.append(mapSprite)
     return mapSprites
             
@@ -167,7 +176,7 @@ def createMapEvents(eventData):
         eventBits = None
         transitionBits = None
         try:
-            eventIndex = eventDataBits.index(PIPE)
+            eventIndex = eventDataBits.index(COLON)
             eventBits = eventDataBits[0:eventIndex]
             transitionBits = eventDataBits[eventIndex + 1:]
         except (ValueError, IndexError):

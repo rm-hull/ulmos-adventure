@@ -528,9 +528,9 @@
 
 #sprite coin 2 7,4
 sprite key 3 30,5
-sprite baddie 3 24,3 24,6
+sprite beetle : robot 3 24,3 24,6
 sprite door 3 19,2
 
-event tile 23,7 1 | transition caves 11,14 1 up up
-event tile 19,2 3 | transition caves 4,14 1 up up
-event boundary right 3-7 | boundary east right
+event tile 23,7 1 : transition caves 11,14 1 up up
+event tile 19,2 3 : transition caves 4,14 1 up up
+event boundary right 3-7 : boundary east right

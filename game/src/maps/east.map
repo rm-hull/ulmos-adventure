@@ -270,6 +270,7 @@
 14,15 water:w2
 15,15 water:w1
 
-sprite baddie 1 4,4 9,4
+sprite key 3 2,4
+sprite beetle : robot 1 4,4 9,4
 
-event boundary left 3-7 | boundary start left
+event boundary left 3-7 : boundary start left

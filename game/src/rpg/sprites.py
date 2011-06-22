@@ -6,7 +6,7 @@ import view
 
 from pygame.locals import Rect
 from view import SCALAR, TILE_SIZE
-from rpg.spritemovement import NoMovementStrategy, RobotMovementStrategy
+from rpg.spritemovement import NoMovement, RobotMovement
 
 MOVE_UNIT = 1 * SCALAR
 NO_BOUNDARY = 0
@@ -114,13 +114,10 @@ class OtherSprite(RpgSprite):
     def __init__(self, rpgMap, spriteFrames, position = (0, 0)):
         RpgSprite.__init__(self, rpgMap, spriteFrames, position)
     
-    def setMovement(self, tilePoints, level):
-        if len(tilePoints) == 1:
-            self.movement = NoMovementStrategy()
-        else:
-            self.movement = RobotMovementStrategy(tilePoints, self.position)
-        # use the first tile point to set the position
-        tx, ty = tilePoints[0][0], tilePoints[0][1]    
+    def setMovement(self, movement):
+        self.movement = movement
+        # the movement strategy also supplies the initial position
+        tx, ty, level = movement.getInitialTilePosition()    
         self.setTilePosition(tx, ty, level)
     
     def update(self, viewRect, gameSprites, visibleSprites, increment):

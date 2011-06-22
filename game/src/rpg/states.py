@@ -110,13 +110,11 @@ class PlayState:
         transition = self.handleCollisions()
         if transition:
             return transition
-        directionBits, action = self.processKeyPresses(keyPresses)
         # have we hit any boundaries?
-        transition = self.handleMovement(directionBits)
+        transition = self.handleInput(keyPresses)
         if transition:
             return transition
-        # handle actions
-        self.handleAction(action)
+        return None
             
     def handleEvents(self):
         event = player.processEvents()
@@ -129,18 +127,17 @@ class PlayState:
             return self.lastTransition
         return None
     
-    def handleMovement(self, directionBits):
+    def handleInput(self, keyPresses):
+        directionBits, action = self.processKeyPresses(keyPresses)
         if directionBits > 0:
             boundaryEvent, self.viewRect = player.handleMovement(directionBits)
             if boundaryEvent:
                 # we've hit a boundary - return the associated transition
                 return boundaryEvent.transition
-        return None
-    
-    def handleAction(self, action):
         if action:
             player.handleAction(self.visibleSprites.sprites())
-
+        return None
+    
     def processKeyPresses(self, keyPresses):
         directionBits = NONE
         action = False

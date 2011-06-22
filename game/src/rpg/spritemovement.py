@@ -4,17 +4,28 @@ from view import SCALAR, TILE_SIZE, NONE, UP, DOWN, LEFT, RIGHT
 
 class MovementStrategy:
     
+    def __init__(self, level, tilePoints):
+        self.level = level
+        self.tilePoints = tilePoints
+        
+    def getInitialTilePosition(self):
+        return self.tilePoints[0][0], self.tilePoints[0][1], self.level
+
     def getMovement(self, currentPosition):
         pass
 
-class NoMovementStrategy(MovementStrategy):
-    
+class NoMovement(MovementStrategy):
+
+    def __init__(self, level, tilePoints, position = (0, 0)):
+        MovementStrategy.__init__(self, level, tilePoints)
+        
     def getMovement(self, currentPosition):
         return 0, 0, NONE
         
-class RobotMovementStrategy(MovementStrategy):
+class RobotMovement(MovementStrategy):
     
-    def __init__(self, tilePoints, position = (0, 0)):
+    def __init__(self, level, tilePoints, position = (0, 0)):
+        MovementStrategy.__init__(self, level, tilePoints)
         self.pathPoints = []
         for tilePoint in tilePoints:
             self.pathPoints.append((tilePoint[0] * TILE_SIZE + position[0],
@@ -41,3 +52,12 @@ class RobotMovementStrategy(MovementStrategy):
         elif y < 0:
             py, direction = -1 * SCALAR, UP
         return px, py, direction
+
+class ZoomMovement(MovementStrategy):
+
+    def __init__(self, level, tilePoints, position = (0, 0)):
+        MovementStrategy.__init__(self, level, tilePoints)
+    
+    def getMovement(self, currentPosition):
+        return 0, 0, NONE
+        
