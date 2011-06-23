@@ -84,7 +84,7 @@ class PlayState:
         # add the player to the visible group
         self.visibleSprites = sprites.RpgSprites(player)
         # create more sprites
-        self.gameSprites = spritebuilder.createSpritesForMap(self.rpgMap, registry)
+        self.gameSprites = spritebuilder.createSpritesForMap(self.rpgMap, registry, player)
              
     def execute(self, keyPresses):
         transition = self.getNextTransition(keyPresses)

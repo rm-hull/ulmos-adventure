@@ -35,34 +35,33 @@ def createSprite(rpgMap, registry, mapSprite):
         spriteClass = spriteClasses[mapSprite.type]
         sprite = spriteClass(rpgMap)
         sprite.setUniqueIdentifier(mapSprite.uid, registry)
-        movement = createSpriteMovement(sprite, mapSprite)
-        if movement:
-            sprite.setMovement(movement)
-            return sprite
-    print "sprite type not found: %s", mapSprite.type 
+        return sprite
+    print "sprite type not found: %s" % mapSprite.type 
     return None
 
 """
 Returns a movement strategy instance based on the movement type contained in
 the given mapSprite.
 """
-def createSpriteMovement(sprite, mapSprite):
+def createSpriteMovement(player, sprite, mapSprite):
     if mapSprite.movement in movementClasses:
         movementClass = movementClasses[mapSprite.movement]
-        movement = movementClass(mapSprite.level, mapSprite.tilePoints, sprite.position)
+        movement = movementClass(sprite, mapSprite.level, mapSprite.tilePoints, player)
         return movement
-    print "movement type not found: %s", mapSprite.movement
+    print "movement type not found: %s" % mapSprite.movement
     return None
 
 """
 Returns a sprite group for the given map.  This excludes any sprites that are
 removed from the map.
 """
-def createSpritesForMap(rpgMap, registry):
+def createSpritesForMap(rpgMap, registry, player):
     gameSprites = pygame.sprite.Group()
     if rpgMap.mapSprites:
         for mapSprite in rpgMap.mapSprites:
             sprite = createSprite(rpgMap, registry, mapSprite)
             if sprite:
-                gameSprites.add(sprite)
+                movement = createSpriteMovement(player, sprite, mapSprite)
+                if movement:
+                    gameSprites.add(sprite)
     return gameSprites

@@ -1,35 +1,39 @@
 #!/usr/bin/env python
 
-from view import SCALAR, TILE_SIZE, NONE, UP, DOWN, LEFT, RIGHT
+from view import NONE, UP, DOWN, LEFT, RIGHT, SCALAR, TILE_SIZE, VIEW_WIDTH, VIEW_HEIGHT
+
+from pygame.locals import Rect
 
 class MovementStrategy:
     
-    def __init__(self, level, tilePoints):
+    def __init__(self, sprite, level, tilePoints):
+        # initialise the sprite
+        sprite.setTilePosition(tilePoints[0][0], tilePoints[0][1], level)
+        sprite.movement = self
+        # keep these for later
+        self.sprite = sprite
         self.level = level
         self.tilePoints = tilePoints
         
-    def getInitialTilePosition(self):
-        return self.tilePoints[0][0], self.tilePoints[0][1], self.level
-
     def getMovement(self, currentPosition):
         pass
 
 class NoMovement(MovementStrategy):
 
-    def __init__(self, level, tilePoints, position = (0, 0)):
-        MovementStrategy.__init__(self, level, tilePoints)
+    def __init__(self, sprite, level, tilePoints, player):
+        MovementStrategy.__init__(self, sprite, level, tilePoints)
         
     def getMovement(self, currentPosition):
         return 0, 0, NONE
         
 class RobotMovement(MovementStrategy):
     
-    def __init__(self, level, tilePoints, position = (0, 0)):
-        MovementStrategy.__init__(self, level, tilePoints)
+    def __init__(self, sprite, level, tilePoints, player):
+        MovementStrategy.__init__(self, sprite, level, tilePoints)
         self.pathPoints = []
         for tilePoint in tilePoints:
-            self.pathPoints.append((tilePoint[0] * TILE_SIZE + position[0],
-                                    tilePoint[1] * TILE_SIZE + position[1]))
+            self.pathPoints.append((tilePoint[0] * TILE_SIZE + sprite.position[0],
+                                    tilePoint[1] * TILE_SIZE + sprite.position[1]))
         self.numPoints = len(tilePoints)
         self.currentPathPoint = self.pathPoints[0]
         self.pathPointIndex = 0
@@ -55,9 +59,25 @@ class RobotMovement(MovementStrategy):
 
 class ZoomMovement(MovementStrategy):
 
-    def __init__(self, level, tilePoints, position = (0, 0)):
-        MovementStrategy.__init__(self, level, tilePoints)
+    def __init__(self, sprite, level, tilePoints, player):
+        MovementStrategy.__init__(self, sprite, level, tilePoints)
+        self.player = player
+        # self.state = "waiting"
+        spriteRect = self.sprite.baseRect
+        self.upRect = Rect(spriteRect.left, spriteRect.top - VIEW_HEIGHT, spriteRect.width, VIEW_HEIGHT)
+        self.downRect = Rect(spriteRect.left, spriteRect.bottom, spriteRect.width, VIEW_HEIGHT)
+        self.leftRect = Rect(spriteRect.left - VIEW_WIDTH, spriteRect.top, VIEW_WIDTH, spriteRect.height)
+        self.rightRect = Rect(spriteRect.right, spriteRect.top, VIEW_WIDTH, spriteRect.height)
     
     def getMovement(self, currentPosition):
+        if self.level == self.player.level:
+            if self.leftRect.colliderect(self.player.baseRect):
+                return 0, 0, LEFT
+            if self.rightRect.colliderect(self.player.baseRect):
+                return 0, 0, RIGHT
+            if self.upRect.colliderect(self.player.baseRect):
+                return 0, 0, UP
+            if self.downRect.colliderect(self.player.baseRect):
+                return 0, 0, DOWN
         return 0, 0, NONE
         

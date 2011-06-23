@@ -113,12 +113,7 @@ class OtherSprite(RpgSprite):
     
     def __init__(self, rpgMap, spriteFrames, position = (0, 0)):
         RpgSprite.__init__(self, rpgMap, spriteFrames, position)
-    
-    def setMovement(self, movement):
-        self.movement = movement
-        # the movement strategy also supplies the initial position
-        tx, ty, level = movement.getInitialTilePosition()    
-        self.setTilePosition(tx, ty, level)
+        self.movement = None
     
     def update(self, viewRect, gameSprites, visibleSprites, increment):
         if self.toRemove:

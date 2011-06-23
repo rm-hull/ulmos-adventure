@@ -271,6 +271,7 @@
 15,15 water:w1
 
 sprite key 3 2,4
-sprite beetle : robot 1 4,4 9,4
+#sprite beetle : robot 1 4,4 9,4
+sprite beetle : zoom 1 9,4
 
 event boundary left 3-7 : boundary start left
