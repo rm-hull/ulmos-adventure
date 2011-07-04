@@ -529,7 +529,7 @@
 #sprite coin 2 7,4
 sprite key 3 30,5
 #sprite beetle : robot 3 24,3 24,6
-sprite beetle : zoom 3 24,4
+sprite wasp : zoom 3 24,4
 sprite door 3 19,2
 
 event tile 23,7 1 : transition caves 11,14 1 up up

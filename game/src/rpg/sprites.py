@@ -30,7 +30,7 @@ class RpgSprite(pygame.sprite.Sprite):
         self.position = [i * SCALAR for i in position]
         self.image = self.spriteFrames.getCurrentFrame()
         # indicates if this sprite is currently visible
-        self.active = False
+        self.inView = False
         # indicates if this sprite is currently masked by any map tiles
         self.masked = False
         # indicates if this sprite should be removed on next update
@@ -116,26 +116,33 @@ class OtherSprite(RpgSprite):
         self.movement = None
     
     def update(self, viewRect, gameSprites, visibleSprites, increment):
+        # remove the sprite if required
         if self.toRemove:
+            self.remove(visibleSprites)
             self.remove(gameSprites)
-        else:
-            # apply movement
-            px, py, direction = self.movement.getMovement(self.mapRect.topleft)            
-            self.doMove(px, py)
-            # make self.rect relative to the view
-            self.rect.topleft = (self.mapRect.left - viewRect.left,
-                                 self.mapRect.top - viewRect.top)
-            if self.mapRect.colliderect(viewRect):
-                # some part of this sprite is in the view
-                self.clearMasks()
-                self.advanceFrame(increment, direction)
-                self.applyMasks()
-                if not self.active:
-                    self.active = True
-                    self.add(visibleSprites)
-                return
-        if self.active:
-            self.active = False
+            return
+        # otherwise apply movement
+        px, py, direction = self.movement.getMovement(self.mapRect.topleft)            
+        self.doMove(px, py)
+        # make self.rect relative to the view
+        self.rect.topleft = (self.mapRect.left - viewRect.left,
+                             self.mapRect.top - viewRect.top)
+        if self.mapRect.colliderect(viewRect):
+            # some part of this sprite is in view
+            self.clearMasks()
+            self.advanceFrame(increment, direction)
+            self.applyMasks()
+            if not self.inView:
+                self.inView = True
+                self.add(visibleSprites)
+            return
+        # test if the sprite has exited the map completely
+        if not self.mapRect.colliderect(self.rpgMap.mapRect):
+            self.toRemove = True
+            return
+        # at this point we know the sprite is on the map but out of view 
+        if self.inView:
+            self.inView = False
             self.remove(visibleSprites)
                                    
 """

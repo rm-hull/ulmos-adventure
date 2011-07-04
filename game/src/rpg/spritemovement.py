@@ -4,6 +4,11 @@ from view import NONE, UP, DOWN, LEFT, RIGHT, SCALAR, TILE_SIZE, VIEW_WIDTH, VIE
 
 from pygame.locals import Rect
 
+ZOOM_MOVEMENT = {UP: (0, -2 * SCALAR, UP),
+                 DOWN: (0, 2 * SCALAR, DOWN),
+                 LEFT: (-2 * SCALAR, 0, LEFT),
+                 RIGHT: (2 * SCALAR, 0, RIGHT) }
+
 class MovementStrategy:
     
     def __init__(self, sprite, level, tilePoints):
@@ -58,26 +63,34 @@ class RobotMovement(MovementStrategy):
         return px, py, direction
 
 class ZoomMovement(MovementStrategy):
-
+    
+    
     def __init__(self, sprite, level, tilePoints, player):
         MovementStrategy.__init__(self, sprite, level, tilePoints)
         self.player = player
-        # self.state = "waiting"
         spriteRect = self.sprite.baseRect
         self.upRect = Rect(spriteRect.left, spriteRect.top - VIEW_HEIGHT, spriteRect.width, VIEW_HEIGHT)
         self.downRect = Rect(spriteRect.left, spriteRect.bottom, spriteRect.width, VIEW_HEIGHT)
         self.leftRect = Rect(spriteRect.left - VIEW_WIDTH, spriteRect.top, VIEW_WIDTH, spriteRect.height)
         self.rightRect = Rect(spriteRect.right, spriteRect.top, VIEW_WIDTH, spriteRect.height)
+        self.countdown = 8;
+        self.direction = NONE
     
     def getMovement(self, currentPosition):
-        if self.level == self.player.level:
+        if self.countdown == 0:
+            print "zooming"
+            return ZOOM_MOVEMENT[self.direction]
+        if self.sprite.inView and self.direction == NONE and self.level == self.player.level:
             if self.leftRect.colliderect(self.player.baseRect):
-                return 0, 0, LEFT
+                self.direction = LEFT
             if self.rightRect.colliderect(self.player.baseRect):
-                return 0, 0, RIGHT
+                self.direction = RIGHT
             if self.upRect.colliderect(self.player.baseRect):
-                return 0, 0, UP
+                self.direction = UP
             if self.downRect.colliderect(self.player.baseRect):
-                return 0, 0, DOWN
+                self.direction = DOWN
+            return 0, 0, self.direction
+        if self.direction != NONE:
+            self.countdown -= 1
         return 0, 0, NONE
         

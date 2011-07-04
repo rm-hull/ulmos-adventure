@@ -2,7 +2,7 @@
 
 import pygame
 
-from othersprites import Beetle
+from othersprites import Beetle, Wasp
 from staticsprites import Flames, Coin, Key, Door
 from spritemovement import NoMovement, RobotMovement, ZoomMovement
 
@@ -13,6 +13,7 @@ spriteClasses["coin"] = Coin
 spriteClasses["key"] = Key
 spriteClasses["door"] = Door
 spriteClasses["beetle"] = Beetle
+spriteClasses["wasp"] = Wasp
 
 movementClasses = {}
 movementClasses["none"] = NoMovement
