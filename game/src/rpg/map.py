@@ -165,9 +165,10 @@ class RpgMap:
         spriteTiles = self.getSpanTiles(sprite.mapRect)
         masks = {}
         for tile in spriteTiles:
-            tileMasks = tile.getMasks(sprite.level, sprite.z)
-            if tileMasks:
-                masks[(tile.x, tile.y)] = tileMasks
+            if tile:
+                tileMasks = tile.getMasks(sprite.level, sprite.z)
+                if tileMasks:
+                    masks[(tile.x, tile.y)] = tileMasks
         return masks
     
     """

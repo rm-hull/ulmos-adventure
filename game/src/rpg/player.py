@@ -10,6 +10,8 @@ DUMMY_EVENT = events.DummyEvent()
 
 DIAGONAL_TICK = 3
 
+NO_METADATA = {}
+
 """
 Valid movement combinations - movement is keyed on direction bits and is stored
 as a tuple (px, py, direction, diagonal)
@@ -197,7 +199,7 @@ class Player(RpgSprite):
         # animate the player
         self.clearMasks()
         self.spriteFrames.direction = direction
-        self.image = self.spriteFrames.advanceFrame()
+        self.image = self.spriteFrames.advanceFrame(NO_METADATA)
         self.applyMasks()
     
     """

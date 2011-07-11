@@ -4,10 +4,24 @@ from view import NONE, UP, DOWN, LEFT, RIGHT, SCALAR, TILE_SIZE, VIEW_WIDTH, VIE
 
 from pygame.locals import Rect
 
-ZOOM_MOVEMENT = {UP: (0, -2 * SCALAR, UP),
-                 DOWN: (0, 2 * SCALAR, DOWN),
-                 LEFT: (-2 * SCALAR, 0, LEFT),
-                 RIGHT: (2 * SCALAR, 0, RIGHT) }
+DIRECTION = "direction"
+
+"""
+Metadata is used to provide a loose coupling between the sprite movement and
+the sprite frames.  Anything the sprite frames might be interested in, eg. the
+direction, can be passed through.
+""" 
+NO_METADATA = {}
+
+UP_METADATA = {DIRECTION: UP}
+DOWN_METADATA = {DIRECTION: DOWN}
+LEFT_METADATA = {DIRECTION: LEFT}
+RIGHT_METADATA = {DIRECTION: RIGHT}
+
+ZOOM_MOVEMENT = {UP: (0, -2 * SCALAR, UP_METADATA),
+                 DOWN: (0, 2 * SCALAR, DOWN_METADATA),
+                 LEFT: (-2 * SCALAR, 0, LEFT_METADATA),
+                 RIGHT: (2 * SCALAR, 0, RIGHT_METADATA)}
 
 class MovementStrategy:
     
@@ -29,7 +43,7 @@ class NoMovement(MovementStrategy):
         MovementStrategy.__init__(self, sprite, level, tilePoints)
         
     def getMovement(self, currentPosition):
-        return 0, 0, NONE
+        return 0, 0, NO_METADATA
         
 class RobotMovement(MovementStrategy):
     
@@ -51,19 +65,18 @@ class RobotMovement(MovementStrategy):
             self.currentPathPoint = self.pathPoints[self.pathPointIndex]
             x = self.currentPathPoint[0] - currentPosition[0]
             y = self.currentPathPoint[1] - currentPosition[1]
-        px, py, direction = 0, 0, NONE
+        px, py, metadata = 0, 0, NO_METADATA
         if x > 0:
-            px, direction = 1 * SCALAR, RIGHT
+            px, metadata = 1 * SCALAR, RIGHT_METADATA
         elif x < 0:
-            px, direction = -1 * SCALAR, LEFT
+            px, metadata = -1 * SCALAR, LEFT_METADATA
         if y > 0:
-            py, direction = 1 * SCALAR, DOWN
+            py, metadata = 1 * SCALAR, DOWN_METADATA
         elif y < 0:
-            py, direction = -1 * SCALAR, UP
-        return px, py, direction
+            py, metadata = -1 * SCALAR, UP_METADATA
+        return px, py, metadata
 
 class ZoomMovement(MovementStrategy):
-    
     
     def __init__(self, sprite, level, tilePoints, player):
         MovementStrategy.__init__(self, sprite, level, tilePoints)
@@ -74,23 +87,24 @@ class ZoomMovement(MovementStrategy):
         self.leftRect = Rect(spriteRect.left - VIEW_WIDTH, spriteRect.top, VIEW_WIDTH, spriteRect.height)
         self.rightRect = Rect(spriteRect.right, spriteRect.top, VIEW_WIDTH, spriteRect.height)
         self.countdown = 8;
-        self.direction = NONE
+        self.direction = None # this is also used to detect if the sprite has 'seen' the player
     
     def getMovement(self, currentPosition):
         if self.countdown == 0:
             print "zooming"
             return ZOOM_MOVEMENT[self.direction]
-        if self.sprite.inView and self.direction == NONE and self.level == self.player.level:
+        if self.sprite.inView and self.level == self.player.level and not self.direction:
+            metadata = NO_METADATA
             if self.leftRect.colliderect(self.player.baseRect):
-                self.direction = LEFT
-            if self.rightRect.colliderect(self.player.baseRect):
-                self.direction = RIGHT
-            if self.upRect.colliderect(self.player.baseRect):
-                self.direction = UP
-            if self.downRect.colliderect(self.player.baseRect):
-                self.direction = DOWN
-            return 0, 0, self.direction
-        if self.direction != NONE:
+                self.direction, metadata = LEFT, LEFT_METADATA
+            elif self.rightRect.colliderect(self.player.baseRect):
+                self.direction, metadata = RIGHT, RIGHT_METADATA
+            elif self.upRect.colliderect(self.player.baseRect):
+                self.direction, metadata = UP, UP_METADATA
+            elif self.downRect.colliderect(self.player.baseRect):
+                self.direction, metadata = DOWN, DOWN_METADATA
+            return 0, 0, metadata
+        if self.direction:
             self.countdown -= 1
-        return 0, 0, NONE
+        return 0, 0, NO_METADATA
         

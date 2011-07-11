@@ -6,7 +6,7 @@ import view
 
 from pygame.locals import Rect
 from view import SCALAR, TILE_SIZE
-from rpg.spritemovement import NoMovement, RobotMovement
+from spritemovement import NoMovement, RobotMovement, NO_METADATA
 
 MOVE_UNIT = 1 * SCALAR
 NO_BOUNDARY = 0
@@ -28,7 +28,7 @@ class RpgSprite(pygame.sprite.Sprite):
         self.rpgMap = rpgMap
         self.spriteFrames = spriteFrames
         self.position = [i * SCALAR for i in position]
-        self.image = self.spriteFrames.getCurrentFrame()
+        self.image = self.spriteFrames.advanceFrame(NO_METADATA, 0)
         # indicates if this sprite is currently visible
         self.inView = False
         # indicates if this sprite is currently masked by any map tiles
@@ -90,10 +90,8 @@ class RpgSprite(pygame.sprite.Sprite):
                 py = tilePoint[1] * view.TILE_SIZE - self.mapRect.top
                 [self.image.blit(mask, (px, py)) for mask in masks[tilePoint]]
                 
-    def advanceFrame(self, increment, direction = None):
-        if direction:
-            self.spriteFrames.direction = direction
-        self.image = self.spriteFrames.advanceFrame(increment)
+    def advanceFrame(self, metadata, increment):
+        self.image = self.spriteFrames.advanceFrame(metadata, increment)
         
     def isIntersecting(self, sprite):
         if self != sprite and self.level == sprite.level and self.baseRect.colliderect(sprite.baseRect):
@@ -122,7 +120,7 @@ class OtherSprite(RpgSprite):
             self.remove(gameSprites)
             return
         # otherwise apply movement
-        px, py, direction = self.movement.getMovement(self.mapRect.topleft)            
+        px, py, metadata = self.movement.getMovement(self.mapRect.topleft)            
         self.doMove(px, py)
         # make self.rect relative to the view
         self.rect.topleft = (self.mapRect.left - viewRect.left,
@@ -130,7 +128,7 @@ class OtherSprite(RpgSprite):
         if self.mapRect.colliderect(viewRect):
             # some part of this sprite is in view
             self.clearMasks()
-            self.advanceFrame(increment, direction)
+            self.advanceFrame(metadata, increment)
             self.applyMasks()
             if not self.inView:
                 self.inView = True

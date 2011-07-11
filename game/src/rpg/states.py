@@ -49,8 +49,10 @@ player.lives = lives
 def startGame():
     # create the map
     player.rpgMap = parser.loadRpgMap("start")
+    #player.rpgMap = parser.loadRpgMap("test1")
     # set the start position
     player.setTilePosition(30, 5, 3)
+    #player.setTilePosition(6, 4, 2)
     # return the play state
     return PlayState()
 
