@@ -10,7 +10,15 @@ DUMMY_EVENT = events.DummyEvent()
 
 DIAGONAL_TICK = 3
 
-NO_METADATA = {}
+#NO_METADATA = {}
+
+METADATA = {UP: {DIRECTION: UP},
+            DOWN: {DIRECTION: DOWN},
+            LEFT: {DIRECTION: LEFT},
+            RIGHT: {DIRECTION: RIGHT}}
+
+lifeLostSoundPath = os.path.join(SOUNDS_FOLDER, "lifelost.wav")
+lifeLostSound = pygame.mixer.Sound(lifeLostSoundPath)
 
 """
 Valid movement combinations - movement is keyed on direction bits and is stored
@@ -198,8 +206,7 @@ class Player(RpgSprite):
         self.doMove(px, py)
         # animate the player
         self.clearMasks()
-        self.spriteFrames.direction = direction
-        self.image = self.spriteFrames.advanceFrame(NO_METADATA)
+        self.image = self.spriteFrames.advanceFrame(METADATA[direction])
         self.applyMasks()
     
     """
@@ -300,6 +307,7 @@ class Player(RpgSprite):
         self.keyCount.incrementCount(n)
         
     def loseLife(self, n = -1):
+        lifeLostSound.play()
         self.lives.incrementCount(n)
         
     def getKeyCount(self):

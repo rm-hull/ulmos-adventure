@@ -5,8 +5,10 @@ import pygame
 import view
 
 from pygame.locals import Rect
+from spriteframes import DIRECTION
 from view import SCALAR, TILE_SIZE
-from spritemovement import NoMovement, RobotMovement, NO_METADATA
+
+pygame.mixer.init()
 
 MOVE_UNIT = 1 * SCALAR
 NO_BOUNDARY = 0
@@ -16,6 +18,9 @@ BASE_RECT_HEIGHT = 9 * SCALAR
 BASE_RECT_EXTEND = 1 * SCALAR
 
 SPRITES_FOLDER = "sprites"
+SOUNDS_FOLDER = "sounds"
+
+NO_METADATA = {}
 
 """
 Base sprite class that supports being masked by the map.
@@ -120,7 +125,7 @@ class OtherSprite(RpgSprite):
             self.remove(gameSprites)
             return
         # otherwise apply movement
-        px, py, metadata = self.movement.getMovement(self.mapRect.topleft)            
+        px, py, metadata = self.getMovement()            
         self.doMove(px, py)
         # make self.rect relative to the view
         self.rect.topleft = (self.mapRect.left - viewRect.left,
@@ -142,6 +147,17 @@ class OtherSprite(RpgSprite):
         if self.inView:
             self.inView = False
             self.remove(visibleSprites)
+    
+    # initialises sprite movement and sets the tile position        
+    def initMovement(self, level, tilePoints, player):
+        self.setTilePosition(tilePoints[0][0], tilePoints[0][1], level)
+        self.level = level
+        self.tilePoints = tilePoints
+        self.player = player
+            
+    # base movement method - this is sufficient for static sprites only        
+    def getMovement(self):
+        return 0, 0, NO_METADATA
                                    
 """
 Sprite group that ensures pseudo z ordering for the sprites.  This works

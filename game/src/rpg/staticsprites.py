@@ -5,6 +5,12 @@ from sprites import *
 from spritemetadata import KeyMetadata, CoinMetadata, DoorMetadata
 from spriteframes import StaticFrames
 
+pickupSoundPath = os.path.join(SOUNDS_FOLDER, "pickup.wav")
+pickupSound = pygame.mixer.Sound(pickupSoundPath)
+
+doorSoundPath = os.path.join(SOUNDS_FOLDER, "door.wav")
+doorSound = pygame.mixer.Sound(doorSoundPath)
+
 class Flames(OtherSprite):
     
     framesImage = None
@@ -32,6 +38,7 @@ class Coin(OtherSprite):
         OtherSprite.__init__(self, rpgMap, spriteFrames, (2, 2))
         
     def processCollision(self, player):
+        pickupSound.play()
         metadata = CoinMetadata(self.uid)
         self.registry.registerMetadata(metadata)
         player.incrementCoinCount()
@@ -52,6 +59,7 @@ class Key(OtherSprite):
         OtherSprite.__init__(self, rpgMap, spriteFrames, (2, 2))
         
     def processCollision(self, player):
+        pickupSound.play()
         metadata = KeyMetadata(self.uid)
         self.registry.registerMetadata(metadata)
         player.incrementKeyCount()
@@ -95,3 +103,4 @@ class Door(OtherSprite):
         if player.getKeyCount() > 0 and not self.opening:
             player.incrementKeyCount(-1)
             self.opening = True
+            doorSound.play()

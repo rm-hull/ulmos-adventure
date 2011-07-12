@@ -3,7 +3,8 @@
 import view
 
 from view import DOWN
-from spritemovement import DIRECTION
+
+DIRECTION = "direction"
 
 class SpriteFrames:
     
@@ -17,6 +18,8 @@ class SpriteFrames:
             self.frameCount = (self.frameCount + increment) % self.frameSkip
             if self.frameCount == 0:
                 self.frameIndex = (self.frameIndex + 1) % self.numFrames
+                return True
+        return False
     
     def repairCurrentFrame(self):
         pass

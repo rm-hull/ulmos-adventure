@@ -4,7 +4,6 @@ import pygame
 
 from othersprites import Beetle, Wasp
 from staticsprites import Flames, Coin, Key, Door
-from spritemovement import NoMovement, RobotMovement, ZoomMovement
 
 # map of sprite classes keyed on type
 spriteClasses = {}
@@ -14,11 +13,6 @@ spriteClasses["key"] = Key
 spriteClasses["door"] = Door
 spriteClasses["beetle"] = Beetle
 spriteClasses["wasp"] = Wasp
-
-movementClasses = {}
-movementClasses["none"] = NoMovement
-movementClasses["robot"] = RobotMovement
-movementClasses["zoom"] = ZoomMovement
 
 """
 Returns a sprite instance based on the given mapSprite.  If the registry
@@ -41,18 +35,6 @@ def createSprite(rpgMap, registry, mapSprite):
     return None
 
 """
-Returns a movement strategy instance based on the movement type contained in
-the given mapSprite.
-"""
-def createSpriteMovement(player, sprite, mapSprite):
-    if mapSprite.movement in movementClasses:
-        movementClass = movementClasses[mapSprite.movement]
-        movement = movementClass(sprite, mapSprite.level, mapSprite.tilePoints, player)
-        return movement
-    print "movement type not found: %s" % mapSprite.movement
-    return None
-
-"""
 Returns a sprite group for the given map.  This excludes any sprites that are
 removed from the map.
 """
@@ -62,7 +44,6 @@ def createSpritesForMap(rpgMap, registry, player):
         for mapSprite in rpgMap.mapSprites:
             sprite = createSprite(rpgMap, registry, mapSprite)
             if sprite:
-                movement = createSpriteMovement(player, sprite, mapSprite)
-                if movement:
-                    gameSprites.add(sprite)
+                sprite.initMovement(mapSprite.level, mapSprite.tilePoints, player)
+                gameSprites.add(sprite)
     return gameSprites
