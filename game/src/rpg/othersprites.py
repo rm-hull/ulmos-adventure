@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 from sprites import *
-from spriteframes import DirectionalFrames
+from spriteframes import DirectionalFrames, DIRECTION
 from view import UP, DOWN, LEFT, RIGHT, VIEW_WIDTH, VIEW_HEIGHT
 
 """
@@ -13,6 +13,11 @@ UP_METADATA = {DIRECTION: UP}
 DOWN_METADATA = {DIRECTION: DOWN}
 LEFT_METADATA = {DIRECTION: LEFT}
 RIGHT_METADATA = {DIRECTION: RIGHT}
+
+MOVEMENT = {UP: (0, -1 * SCALAR, UP_METADATA),
+            DOWN: (0, 1 * SCALAR, DOWN_METADATA),
+            LEFT: (-1 * SCALAR, 0, LEFT_METADATA),
+            RIGHT: (1 * SCALAR, 0, RIGHT_METADATA)}
 
 ZOOM_MOVEMENT = {UP: (0, -2 * SCALAR, UP_METADATA),
                  DOWN: (0, 2 * SCALAR, DOWN_METADATA),
@@ -61,16 +66,16 @@ class Beetle(OtherSprite):
             self.currentPathPoint = self.pathPoints[self.pathPointIndex]
             x = self.currentPathPoint[0] - currentPosition[0]
             y = self.currentPathPoint[1] - currentPosition[1]
-        px, py, metadata = 0, 0, NO_METADATA
+        if x < 0:
+            return MOVEMENT[LEFT]
         if x > 0:
-            px, metadata = 1 * SCALAR, RIGHT_METADATA
-        elif x < 0:
-            px, metadata = -1 * SCALAR, LEFT_METADATA
+            return MOVEMENT[RIGHT]
+        if y < 0:
+            return MOVEMENT[UP]
         if y > 0:
-            py, metadata = 1 * SCALAR, DOWN_METADATA
-        elif y < 0:
-            py, metadata = -1 * SCALAR, UP_METADATA
-        return px, py, metadata
+            return MOVEMENT[DOWN]
+        # otherwise there is nowhere to move to
+        return NO_MOVEMENT
 
 class Wasp(OtherSprite):
     
@@ -91,9 +96,9 @@ class Wasp(OtherSprite):
         player.loseLife()
         return True
     
+    # initialises a 'zoom' movement strategy - zooming towards the player vertically/horizontally
     def initMovement(self, level, tilePoints, player):
         OtherSprite.initMovement(self, level, tilePoints, player)
-        #self.baseRect = self.baseRect
         self.upRect = Rect(self.baseRect.left, self.baseRect.top - VIEW_HEIGHT, self.baseRect.width, VIEW_HEIGHT)
         self.downRect = Rect(self.baseRect.left, self.baseRect.bottom, self.baseRect.width, VIEW_HEIGHT)
         self.leftRect = Rect(self.baseRect.left - VIEW_WIDTH, self.baseRect.top, VIEW_WIDTH, self.baseRect.height)
@@ -117,10 +122,11 @@ class Wasp(OtherSprite):
             elif self.downRect.colliderect(self.player.baseRect):
                 self.direction, metadata = DOWN, DOWN_METADATA
             return 0, 0, metadata
+        # if direction is set, the sprite has 'seen' the player - countdown begins
         if self.direction:
             self.countdown -= 1
             if self.countdown == 0:
                 self.zooming = True
                 waspSound.play()
-        return 0, 0, NO_METADATA
+        return NO_MOVEMENT
     

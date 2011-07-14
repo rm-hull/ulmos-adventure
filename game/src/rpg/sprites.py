@@ -5,7 +5,6 @@ import pygame
 import view
 
 from pygame.locals import Rect
-from spriteframes import DIRECTION
 from view import SCALAR, TILE_SIZE
 
 pygame.mixer.init()
@@ -21,6 +20,7 @@ SPRITES_FOLDER = "sprites"
 SOUNDS_FOLDER = "sounds"
 
 NO_METADATA = {}
+NO_MOVEMENT = (0, 0, NO_METADATA)
 
 """
 Base sprite class that supports being masked by the map.
@@ -33,7 +33,7 @@ class RpgSprite(pygame.sprite.Sprite):
         self.rpgMap = rpgMap
         self.spriteFrames = spriteFrames
         self.position = [i * SCALAR for i in position]
-        self.image = self.spriteFrames.advanceFrame(NO_METADATA, 0)
+        self.image = self.spriteFrames.advanceFrame(0)
         # indicates if this sprite is currently visible
         self.inView = False
         # indicates if this sprite is currently masked by any map tiles
@@ -96,7 +96,7 @@ class RpgSprite(pygame.sprite.Sprite):
                 [self.image.blit(mask, (px, py)) for mask in masks[tilePoint]]
                 
     def advanceFrame(self, metadata, increment):
-        self.image = self.spriteFrames.advanceFrame(metadata, increment)
+        self.image = self.spriteFrames.advanceFrame(increment, **metadata)
         
     def isIntersecting(self, sprite):
         if self != sprite and self.level == sprite.level and self.baseRect.colliderect(sprite.baseRect):
@@ -157,7 +157,7 @@ class OtherSprite(RpgSprite):
             
     # base movement method - this is sufficient for static sprites only        
     def getMovement(self):
-        return 0, 0, NO_METADATA
+        return NO_MOVEMENT
                                    
 """
 Sprite group that ensures pseudo z ordering for the sprites.  This works

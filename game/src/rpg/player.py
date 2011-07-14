@@ -10,13 +10,6 @@ DUMMY_EVENT = events.DummyEvent()
 
 DIAGONAL_TICK = 3
 
-#NO_METADATA = {}
-
-METADATA = {UP: {DIRECTION: UP},
-            DOWN: {DIRECTION: DOWN},
-            LEFT: {DIRECTION: LEFT},
-            RIGHT: {DIRECTION: RIGHT}}
-
 lifeLostSoundPath = os.path.join(SOUNDS_FOLDER, "lifelost.wav")
 lifeLostSound = pygame.mixer.Sound(lifeLostSoundPath)
 
@@ -200,13 +193,13 @@ class Player(RpgSprite):
     """
     Applies valid movement.
     """
-    def applyMovement(self, level, direction, px, py):
+    def applyMovement(self, level, myDirection, px, py):
         # move the player to its new location
         self.level = level
         self.doMove(px, py)
         # animate the player
         self.clearMasks()
-        self.image = self.spriteFrames.advanceFrame(METADATA[direction])
+        self.image = self.spriteFrames.advanceFrame(direction = myDirection)
         self.applyMasks()
     
     """
@@ -276,12 +269,11 @@ class Player(RpgSprite):
     def processCollisions(self, sprites):
         # if there are less than two sprites then self is the only sprite
         if len(sprites) < 2:
-            return None
+            return False
         for sprite in sprites:
             if sprite.isIntersecting(self):
-                if sprite.processCollision(self):
-                    return True
-        return None
+                return sprite.processCollision(self)
+        return False
 
     """
     Processes interactions with other sprites in the given sprite collection.
