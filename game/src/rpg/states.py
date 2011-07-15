@@ -2,17 +2,18 @@
 
 from pygame.locals import *
 
+from events import SCENE_TRANSITION, REPLAY_TRANSITION, BOUNDARY_TRANSITION, GAME_OVER_TRANSITION
 from view import NONE, UP, DOWN, LEFT, RIGHT, TILE_SIZE, VIEW_WIDTH, VIEW_HEIGHT
 from sprites import MOVE_UNIT
-from events import SCENE_TRANSITION, REPLAY_TRANSITION, BOUNDARY_TRANSITION
+
+from fixedsprites import FixedCoin, CoinCount, KeyCount, Lives
+from registry import Registry
+from player import Ulmo
 
 import pygame
 import parser
 import sprites
-import fixedsprites
-import player
 import view
-import registry
 import spritebuilder
 import events
 
@@ -29,30 +30,37 @@ DOORWAY_TICKS = {UP: 16, DOWN: 16, LEFT: 16, RIGHT: 16}
 pygame.init()
 screen = pygame.display.set_mode(DIMENSIONS)
 
-# create fixed sprites
-fixedSprites = pygame.sprite.Group()
-fixedCoin = fixedsprites.FixedCoin((27, 3))
-coinCount = fixedsprites.CoinCount(0, (38, 3))
-keyCount = fixedsprites.KeyCount(0, (VIEW_WIDTH - 3, 3))
-lives = fixedsprites.Lives(2, (3, 3))
-fixedSprites.add(fixedCoin, lives, coinCount, keyCount)
-
-# create registry
-registry = registry.Registry()
-
-# create player
-player = player.Ulmo()
-player.coinCount = coinCount
-player.keyCount = keyCount
-player.lives = lives
+fixedSprites = None
+player = None
+registry = None
 
 def startGame():
+    # create fixed sprites
+    global fixedSprites
+    fixedSprites = pygame.sprite.Group()
+    fixedCoin = FixedCoin((27, 3))
+    coinCount = CoinCount(0, (38, 3))
+    keyCount = KeyCount(0, (VIEW_WIDTH - 3, 3))
+    lives = Lives(2, (3, 3))
+    fixedSprites.add(fixedCoin, lives, coinCount, keyCount)
+    
+    # create player
+    global player
+    player = Ulmo()
+    player.coinCount = coinCount
+    player.keyCount = keyCount
+    player.lives = lives
     # create the map
     player.rpgMap = parser.loadRpgMap("start")
     #player.rpgMap = parser.loadRpgMap("test1")
     # set the start position
     player.setTilePosition(30, 5, 3)
     #player.setTilePosition(6, 4, 2)
+
+    # create registry
+    global registry
+    registry = Registry()
+    
     # return the play state
     return PlayState()
 
@@ -98,6 +106,8 @@ class PlayState:
                 return SceneTransitionState(transition)
             if transition.type == REPLAY_TRANSITION:
                 return SceneTransitionState(transition)
+            if transition.type == GAME_OVER_TRANSITION:
+                return GameOverTransitionState(transition)
         # draw the map view to the screen
         self.drawMapView(screen)
         pygame.display.flip()
@@ -125,7 +135,10 @@ class PlayState:
         return None
     
     def handleCollisions(self):
+        # the processCollision method returns True to indicate that the player lost a life
         if player.processCollisions(self.visibleSprites.sprites()):
+            if player.gameOver():
+                return events.GameOverTransition()
             return self.lastTransition
         return None
     
@@ -157,8 +170,7 @@ class PlayState:
     
     def drawMapView(self, surface, increment = 1):
         surface.blit(self.rpgMap.getMapView(self.viewRect), ORIGIN)
-        # if the sprite being updated is visible in the view it will be added to
-        # the visibleSprites group as a side-effect
+        # if the sprite being updated is in view it will be added to visibleSprites as a side-effect
         self.gameSprites.update(self.viewRect, self.gameSprites, self.visibleSprites, increment)
         self.visibleSprites.draw(surface)
         if increment:
@@ -181,12 +193,10 @@ class PlayState:
         self.viewRect = player.getViewRect()
         self.drawMapView(screen, 0)
 
-                        
 class SceneTransitionState:
     
     def __init__(self, transition):
         self.transition = transition
-        #self.showPlayerState = showPlayerState
         self.screenImage = screen.copy()
         self.blackRect = view.createRectangle(DIMENSIONS)
         self.nextState = None
@@ -290,6 +300,29 @@ class BoundaryTransitionState:
                                        player.level,
                                        player.spriteFrames.direction,
                                        self.boundary)
+
+class GameOverTransitionState:
+    
+    def __init__(self, transition):
+        self.transition = transition
+        self.screenImage = screen.copy()
+        self.blackRect = view.createRectangle(DIMENSIONS)
+        self.nextState = None
+        self.ticks = 0
+             
+    def execute(self, keyPresses):
+        if self.ticks < 32:
+            xBorder, yBorder = (self.ticks + 1) * X_MULT, (self.ticks + 1) * Y_MULT
+            screen.blit(self.blackRect, ORIGIN)
+            extract = self.screenImage.subsurface(xBorder, yBorder,
+                                                  VIEW_WIDTH - xBorder * 2,
+                                                  VIEW_HEIGHT - yBorder * 2)
+            screen.blit(extract, (xBorder, yBorder))
+            pygame.display.flip()
+            self.ticks += 1
+        else:
+            if keyPresses[K_SPACE]:
+                return startGame()
         
 class ShowPlayerState:
     

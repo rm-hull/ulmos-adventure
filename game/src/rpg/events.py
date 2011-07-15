@@ -10,6 +10,7 @@ BOUNDARY_EVENT = 2
 SCENE_TRANSITION = 1
 REPLAY_TRANSITION = 2
 BOUNDARY_TRANSITION = 3
+GAME_OVER_TRANSITION = 4
 
 EMPTY_LIST = []
 
@@ -100,3 +101,7 @@ class BoundaryTransition(Transition):
         Transition.__init__(self, BOUNDARY_TRANSITION, mapName)
         self.boundary = boundary
         self.modifier = modifier
+        
+class GameOverTransition(Transition):
+    def __init__(self):
+        Transition.__init__(self, GAME_OVER_TRANSITION)

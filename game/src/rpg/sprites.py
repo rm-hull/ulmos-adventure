@@ -95,7 +95,7 @@ class RpgSprite(pygame.sprite.Sprite):
                 py = tilePoint[1] * view.TILE_SIZE - self.mapRect.top
                 [self.image.blit(mask, (px, py)) for mask in masks[tilePoint]]
                 
-    def advanceFrame(self, metadata, increment):
+    def advanceFrame(self, increment, metadata):
         self.image = self.spriteFrames.advanceFrame(increment, **metadata)
         
     def isIntersecting(self, sprite):
@@ -133,7 +133,7 @@ class OtherSprite(RpgSprite):
         if self.mapRect.colliderect(viewRect):
             # some part of this sprite is in view
             self.clearMasks()
-            self.advanceFrame(metadata, increment)
+            self.advanceFrame(increment, metadata)
             self.applyMasks()
             if not self.inView:
                 self.inView = True

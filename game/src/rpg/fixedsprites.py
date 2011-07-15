@@ -111,9 +111,12 @@ class Lives(FixedSprite):
 
     def incrementCount(self, n = 1):
         self.count += n
+        # temporary hack 
         if (self.count < 0):
-            print "GAME OVER"
-            self.count = 0 # temporary hack
+            return
         self.newImage()
         print "lives:", self.count
+        
+    def noneLeft(self):
+        return self.count < 0
    

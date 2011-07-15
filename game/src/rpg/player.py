@@ -298,13 +298,16 @@ class Player(RpgSprite):
     def incrementKeyCount(self, n = 1):
         self.keyCount.incrementCount(n)
         
+    def getKeyCount(self):
+        return self.keyCount.count;
+
     def loseLife(self, n = -1):
         lifeLostSound.play()
         self.lives.incrementCount(n)
         
-    def getKeyCount(self):
-        return self.keyCount.count;
-
+    def gameOver(self):
+        return self.lives.noneLeft()
+        
 """
 Extends the player sprite by defining a set of frame images.
 """    

@@ -14,15 +14,15 @@ DOWN_METADATA = {DIRECTION: DOWN}
 LEFT_METADATA = {DIRECTION: LEFT}
 RIGHT_METADATA = {DIRECTION: RIGHT}
 
-MOVEMENT = {UP: (0, -1 * SCALAR, UP_METADATA),
-            DOWN: (0, 1 * SCALAR, DOWN_METADATA),
-            LEFT: (-1 * SCALAR, 0, LEFT_METADATA),
-            RIGHT: (1 * SCALAR, 0, RIGHT_METADATA)}
+MOVEMENT = {UP: (0, -MOVE_UNIT, UP_METADATA),
+            DOWN: (0, MOVE_UNIT, DOWN_METADATA),
+            LEFT: (-MOVE_UNIT, 0, LEFT_METADATA),
+            RIGHT: (MOVE_UNIT, 0, RIGHT_METADATA)}
 
-ZOOM_MOVEMENT = {UP: (0, -2 * SCALAR, UP_METADATA),
-                 DOWN: (0, 2 * SCALAR, DOWN_METADATA),
-                 LEFT: (-2 * SCALAR, 0, LEFT_METADATA),
-                 RIGHT: (2 * SCALAR, 0, RIGHT_METADATA)}
+ZOOM_MOVEMENT = {UP: (0, -2 * MOVE_UNIT, UP_METADATA),
+                 DOWN: (0, 2 * MOVE_UNIT, DOWN_METADATA),
+                 LEFT: (-2 * MOVE_UNIT, 0, LEFT_METADATA),
+                 RIGHT: (2 * MOVE_UNIT, 0, RIGHT_METADATA)}
 
 waspSoundPath = os.path.join(SOUNDS_FOLDER, "wasp.wav")
 waspSound = pygame.mixer.Sound(waspSoundPath)
@@ -46,7 +46,7 @@ class Beetle(OtherSprite):
         player.loseLife()
         return True
     
-    # initialises a 'robot' movement strategy - moving along a list of tiles
+    # initialises a 'robot' movement strategy - moving along the given list of tiles
     def initMovement(self, level, tilePoints, player):
         OtherSprite.initMovement(self, level, tilePoints, player)
         self.pathPoints = []
