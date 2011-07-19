@@ -106,11 +106,20 @@
 6,11 trees1
 7,11 trees2
 
-0,12
-1,12
+0,12 treel1
+1,12 treer1
 2,12 treels2
 3,12 treers2
 4,12 treelds2
 5,12 treerds2
-6,12
-7,12
+6,12 treel2
+7,12 treer2
+
+0,13 treelj1
+1,13 treerj1
+2,13 
+3,13 
+4,13 
+5,13 
+6,13 treelj2
+7,13 treerj2
