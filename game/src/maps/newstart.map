@@ -116,7 +116,7 @@
 16,3 earth:trls
 17,3 grass:dark earth:bls
 18,3 grass:dark earth:br
-19,3 grass:sarch
+19,3 [3] grass:sarch
 20,3 grass:dark earth:bl
 21,3 grass:dark earth:br
 22,3 [3] grass:rs
@@ -525,4 +525,10 @@
 29,15 water:w2
 30,15 water:w2
 31,15 water:w2
+
+sprite beetle : robot 3 13,7 16,7 16,5 17,5 16,5 16,7
+
+event tile 23,7 1 : transition newcaves 11,14 1 up up
+event tile 19,2 3 : transition newcaves 4,14 1 up up
+event boundary right 3-7 : boundary east right
 
