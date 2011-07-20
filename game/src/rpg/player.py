@@ -54,16 +54,17 @@ class Player(RpgSprite):
     we move the view, sometimes we move the sprite - it just depends where the main
     sprite is on the map.
     """
-    def getViewRect(self, useCurrentView = False):
-        if useCurrentView:
-            return self.viewRect
+    def updateViewRect(self):
+        #if not playerMoved:
+        #    return self.viewRect
         # centre self.rect in the view
         px, py = (self.viewRect.width - self.rect.width) // 2, (self.viewRect.height - self.rect.height) // 2
         self.rect.topleft = (px, py)
         self.viewRect.topleft = (self.mapRect.left - px, self.mapRect.top - py)
         rpgMapRect = self.rpgMap.mapRect
         if rpgMapRect.contains(self.viewRect):
-            return self.viewRect
+            #return self.viewRect
+            return
         # the requested view falls partially outside the map - we need to move
         # the sprite instead of the view
         px, py = 0, 0
@@ -77,56 +78,51 @@ class Player(RpgSprite):
             py = self.viewRect.bottom - rpgMapRect.bottom
         self.rect.move_ip(px, py)
         self.viewRect.move_ip(-px, -py)
-        return self.viewRect
+        #return self.viewRect
     
     """
-    Moves the player / view rect.  The control flow is as follows:
+    Moves the player + updates the view rect.  The control flow is as follows:
     > Check for deferred movement and apply if necessary.
-    > Otherwise, check the requested movement falls within the boundary.
-    > If it does, attempt to apply the requested movement.
-    > If not valid, attempt to shuffle the player.
+    > Otherwise, check the requested movement is valid.
+    > If valid, apply the requested movement.
+    > If not valid, attempt to slide/shuffle the player.
     > If still not valid, check for a change in direction.
     """
     def handleMovement(self, directionBits):
-        boundaryEvent, useCurrentView = None, True
         movement = getMovement(directionBits)
         # no movement
         if not movement:
-            return boundaryEvent, self.viewRect
-        # deferred movement
+            return self.viewRect
+        # check for deferred movement
         if movement == self.movement:
             self.ticks = (self.ticks + 1) % DIAGONAL_TICK
             if self.deferredMovement:
                 level, direction, px, py = self.deferredMovement
-                useCurrentView = self.wrapMovement(level, direction, px, py)
-                return boundaryEvent, self.getViewRect(useCurrentView)
+                self.wrapMovement(level, direction, px, py)
+                return
         else:
             self.ticks = 0
-        # otherwise normal movement
+        # otherwise apply normal movement
         self.movement = movement
         px, py, direction, diagonal = movement
-        boundaryEvent = self.getBoundaryEvent(px, py)
-        if not boundaryEvent:
-            # we're within the boundary, but is it valid?
-            newBaseRect = self.baseRect.move(px, py)
-            valid, level = self.rpgMap.isMoveValid(self.level, newBaseRect)
-            if valid:
-                # if movement diagonal we only move 2 out of 3 ticks
-                if diagonal and self.ticks == 0:
-                    self.deferMovement(level, direction, px, py)
-                else:
-                    useCurrentView = self.wrapMovement(level, direction, px, py)
+        # is the requested movement valid?
+        newBaseRect = self.baseRect.move(px, py)
+        valid, level = self.rpgMap.isMoveValid(self.level, newBaseRect)
+        if valid:
+            # if movement diagonal we only move 2 out of 3 ticks
+            if diagonal and self.ticks == 0:
+                self.deferMovement(level, direction, px, py)
             else:
-                # movement invalid but we might be able to slide or shuffle
-                if diagonal:
-                    valid = self.slide(movement)
-                else:
-                    valid = self.shuffle(movement)
-                # apply a stationary change of direction if required
-                if not valid and self.spriteFrames.direction != direction:
-                    self.setDirection(direction);
-        # return
-        return boundaryEvent, self.getViewRect(useCurrentView)
+                self.wrapMovement(level, direction, px, py)
+            return
+        # movement invalid but we might be able to slide or shuffle
+        if diagonal:
+            valid = self.slide(movement)
+        else:
+            valid = self.shuffle(movement)
+        # movement invalid - apply a stationary change of direction if required
+        if not valid and self.spriteFrames.direction != direction:
+            self.setDirection(direction);
     
     """
     Slides the player. If the player is attempting to move diagonally, but is
@@ -154,7 +150,7 @@ class Player(RpgSprite):
     Shuffles the player.  Eg. if the player is attempting to move up, but is
     blocked, we will 'shuffle' the player left/right if there is valid movement
     available to the left/right.  This helps to align the player with steps,
-    archways, etc.
+    doorways, etc.
     """
     def shuffle(self, movement):
         px, py, direction, diagonal = movement
@@ -176,10 +172,9 @@ class Player(RpgSprite):
     Calls applyMovement and performs some additional operations.
     """      
     def wrapMovement(self, level, direction, px, py):
-        self.applyMovement(level, direction, px, py)
         self.deferredMovement = None
-        # self.movement = None
-        return False
+        self.applyMovement(level, direction, px, py)
+        self.updateViewRect()
     
     """
     Stores the deferred movement and calls applyMovement with px, py = 0 for a
@@ -212,33 +207,34 @@ class Player(RpgSprite):
     Checks the requested movement falls within the map boundary.  If not, returns
     a boundary event containing information on the breach. 
     """ 
-    def getBoundaryEvent(self, px, py):
-        testMapRect = self.mapRect.move(px, py)
-        if self.rpgMap.mapRect.contains(testMapRect):
+    def getBoundaryEvent(self):
+        #testMapRect = self.mapRect.move(px, py)
+        if self.rpgMap.mapRect.contains(self.mapRect):
             # we're within the boundary
             return None
-        boundary = self.getBoundary(testMapRect)
+        boundary = self.getBoundary()
         if boundary in self.rpgMap.boundaryEvents:
             tileRange = self.getTileRange(boundary)
             for event in self.rpgMap.boundaryEvents[boundary]:
                 testList = [i in event.range for i in tileRange]
                 if all(testList):
                     return event
+        print "boundary!"
         return DUMMY_EVENT
     
     """
     Returns the boundary that has been breached.
     """
-    def getBoundary(self, testMapRect):
+    def getBoundary(self):
         boundary = NO_BOUNDARY
         rpgMapRect = self.rpgMap.mapRect
-        if testMapRect.left < 0:
+        if self.mapRect.left < 0:
             boundary = LEFT
-        elif testMapRect.right > rpgMapRect.right:
+        elif self.mapRect.right > rpgMapRect.right:
             boundary = RIGHT
-        if testMapRect.top < 0:
+        if self.mapRect.top < 0:
             boundary = UP
-        elif testMapRect.bottom > rpgMapRect.bottom:
+        elif self.mapRect.bottom > rpgMapRect.bottom:
             boundary = DOWN
         return boundary
 

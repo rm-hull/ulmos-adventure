@@ -51,7 +51,7 @@ def startGame():
     player.keyCount = keyCount
     player.lives = lives
     # create the map
-    player.rpgMap = parser.loadRpgMap("start")
+    player.rpgMap = parser.loadRpgMap("newstart")
     #player.rpgMap = parser.loadRpgMap("test1")
     # set the start position
     player.setTilePosition(30, 5, 3)
@@ -90,7 +90,7 @@ class PlayState:
             self.lastTransition = self.createReplayTransition()
         # must set the player map + position before we create this state
         self.rpgMap = player.rpgMap
-        self.viewRect = player.getViewRect()
+        player.updateViewRect()
         # add the player to the visible group
         self.visibleSprites = sprites.RpgSprites(player)
         # create more sprites
@@ -107,7 +107,7 @@ class PlayState:
             if transition.type == REPLAY_TRANSITION:
                 return SceneTransitionState(transition)
             if transition.type == GAME_OVER_TRANSITION:
-                return GameOverTransitionState(transition)
+                return GameOverState(transition)
         # draw the map view to the screen
         self.drawMapView(screen)
         pygame.display.flip()
@@ -145,7 +145,8 @@ class PlayState:
     def handleInput(self, keyPresses):
         directionBits, action = self.processKeyPresses(keyPresses)
         if directionBits > 0:
-            boundaryEvent, self.viewRect = player.handleMovement(directionBits)
+            self.viewRect = player.handleMovement(directionBits)
+            boundaryEvent = player.getBoundaryEvent()
             if boundaryEvent:
                 # we've hit a boundary - return the associated transition
                 return boundaryEvent.transition
@@ -169,9 +170,9 @@ class PlayState:
         return directionBits, action
     
     def drawMapView(self, surface, increment = 1):
-        surface.blit(self.rpgMap.getMapView(self.viewRect), ORIGIN)
+        surface.blit(self.rpgMap.getMapView(player.viewRect), ORIGIN)
         # if the sprite being updated is in view it will be added to visibleSprites as a side-effect
-        self.gameSprites.update(self.viewRect, self.gameSprites, self.visibleSprites, increment)
+        self.gameSprites.update(player.viewRect, self.gameSprites, self.visibleSprites, increment)
         self.visibleSprites.draw(surface)
         if increment:
             fixedSprites.draw(surface)
@@ -187,10 +188,9 @@ class PlayState:
         
     # method required by the ShowPlayer state
     def showPlayer(self, px, py):
-        player.applyMovement(player.level,
-                             player.spriteFrames.direction,
-                             px, py)
-        self.viewRect = player.getViewRect()
+        player.wrapMovement(player.level,
+                            player.spriteFrames.direction,
+                            px, py)
         self.drawMapView(screen, 0)
 
 class SceneTransitionState:
@@ -301,7 +301,7 @@ class BoundaryTransitionState:
                                        player.spriteFrames.direction,
                                        self.boundary)
 
-class GameOverTransitionState:
+class GameOverState:
     
     def __init__(self, transition):
         self.transition = transition
@@ -321,7 +321,8 @@ class GameOverTransitionState:
             pygame.display.flip()
             self.ticks += 1
         else:
-            if keyPresses[K_SPACE]:
+            keysPressed = [key for key in keyPresses if key]
+            if len(keysPressed) > 0:
                 return startGame()
         
 class ShowPlayerState:

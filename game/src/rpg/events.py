@@ -34,8 +34,9 @@ class Event:
 Defines an event that doesn't do anything.
 """
 class DummyEvent(Event):
-    def __init__(self):
+    def __init__(self, boundary = None):
         Event.__init__(self, DUMMY_EVENT)
+        self.boundary = boundary
 
 """
 Defines an event that occurs when the player steps on a listed tile.

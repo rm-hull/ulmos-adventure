@@ -6,13 +6,12 @@ from othersprites import Beetle, Wasp
 from staticsprites import Flames, Coin, Key, Door
 
 # map of sprite classes keyed on type
-spriteClasses = {}
-spriteClasses["flames"] = Flames
-spriteClasses["coin"] = Coin
-spriteClasses["key"] = Key
-spriteClasses["door"] = Door
-spriteClasses["beetle"] = Beetle
-spriteClasses["wasp"] = Wasp
+spriteClasses = {"flames": Flames,
+                 "coin": Coin,
+                 "key": Key,
+                 "door": Door,
+                 "beetle": Beetle,
+                 "wasp": Wasp}
 
 """
 Returns a sprite instance based on the given mapSprite.  If the registry
@@ -31,7 +30,7 @@ def createSprite(rpgMap, registry, mapSprite):
         sprite = spriteClass(rpgMap)
         sprite.setUniqueIdentifier(mapSprite.uid, registry)
         return sprite
-    print "sprite type not found: %s" % mapSprite.type 
+    print "sprite type not found:", mapSprite.type 
     return None
 
 """

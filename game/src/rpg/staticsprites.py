@@ -83,7 +83,7 @@ class Door(OtherSprite):
         self.frameIndex = 0
         
     # override
-    def advanceFrame(self, metadata, increment):
+    def advanceFrame(self, increment, metadata):
         if increment and self.opening:
             self.frameCount = (self.frameCount + increment) % self.spriteFrames.frameSkip
             if self.frameCount == 0:
