@@ -118,19 +118,19 @@ class OtherSprite(RpgSprite):
         RpgSprite.__init__(self, rpgMap, spriteFrames, position)
         self.movement = None
     
-    def update(self, viewRect, gameSprites, visibleSprites, increment):
+    def update(self, player, gameSprites, visibleSprites, increment):
         # remove the sprite if required
         if self.toRemove:
             self.remove(visibleSprites)
             self.remove(gameSprites)
             return
         # otherwise apply movement
-        px, py, metadata = self.getMovement()            
+        px, py, metadata = self.getMovement(player)            
         self.doMove(px, py)
         # make self.rect relative to the view
-        self.rect.topleft = (self.mapRect.left - viewRect.left,
-                             self.mapRect.top - viewRect.top)
-        if self.mapRect.colliderect(viewRect):
+        self.rect.topleft = (self.mapRect.left - player.viewRect.left,
+                             self.mapRect.top - player.viewRect.top)
+        if self.mapRect.colliderect(player.viewRect):
             # some part of this sprite is in view
             self.clearMasks()
             self.advanceFrame(increment, metadata)
@@ -149,14 +149,13 @@ class OtherSprite(RpgSprite):
             self.remove(visibleSprites)
     
     # initialises sprite movement and sets the tile position        
-    def initMovement(self, level, tilePoints, player):
+    def initMovement(self, level, tilePoints):
         self.setTilePosition(tilePoints[0][0], tilePoints[0][1], level)
         self.level = level
         self.tilePoints = tilePoints
-        self.player = player
             
     # base movement method - this is sufficient for static sprites only        
-    def getMovement(self):
+    def getMovement(self, player):
         return NO_MOVEMENT
                                    
 """

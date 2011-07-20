@@ -272,5 +272,6 @@
 
 sprite key 3 2,4
 sprite beetle : robot 3 10,4 13,4 13,6 10,6
+sprite wasp : zoom 3 6,5
 
 event boundary left 3-7 : boundary start left

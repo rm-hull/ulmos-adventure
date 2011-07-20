@@ -47,8 +47,8 @@ class Beetle(OtherSprite):
         return True
     
     # initialises a 'robot' movement strategy - moving along the given list of tiles
-    def initMovement(self, level, tilePoints, player):
-        OtherSprite.initMovement(self, level, tilePoints, player)
+    def initMovement(self, level, tilePoints):
+        OtherSprite.initMovement(self, level, tilePoints)
         self.pathPoints = []
         for tilePoint in tilePoints:
             self.pathPoints.append((tilePoint[0] * TILE_SIZE + self.position[0],
@@ -57,7 +57,7 @@ class Beetle(OtherSprite):
         self.currentPathPoint = self.pathPoints[0]
         self.pathPointIndex = 0
             
-    def getMovement(self):
+    def getMovement(self, player):
         currentPosition = self.mapRect.topleft
         x = self.currentPathPoint[0] - currentPosition[0]
         y = self.currentPathPoint[1] - currentPosition[1]
@@ -97,8 +97,8 @@ class Wasp(OtherSprite):
         return True
     
     # initialises a 'zoom' movement strategy - zooming towards the player vertically/horizontally
-    def initMovement(self, level, tilePoints, player):
-        OtherSprite.initMovement(self, level, tilePoints, player)
+    def initMovement(self, level, tilePoints):
+        OtherSprite.initMovement(self, level, tilePoints)
         self.upRect = Rect(self.baseRect.left, self.baseRect.top - VIEW_HEIGHT, self.baseRect.width, VIEW_HEIGHT)
         self.downRect = Rect(self.baseRect.left, self.baseRect.bottom, self.baseRect.width, VIEW_HEIGHT)
         self.leftRect = Rect(self.baseRect.left - VIEW_WIDTH, self.baseRect.top, VIEW_WIDTH, self.baseRect.height)
@@ -107,19 +107,19 @@ class Wasp(OtherSprite):
         self.zooming = False
         self.direction = None # this is also used to detect if the sprite has 'seen' the player
     
-    def getMovement(self):
+    def getMovement(self, player):
         if self.zooming:
             print "zooming"
             return ZOOM_MOVEMENT[self.direction]
-        if self.inView and self.level == self.player.level and not self.direction:
+        if self.inView and self.level == player.level and not self.direction:
             metadata = NO_METADATA
-            if self.leftRect.colliderect(self.player.baseRect):
+            if self.leftRect.colliderect(player.baseRect):
                 self.direction, metadata = LEFT, LEFT_METADATA
-            elif self.rightRect.colliderect(self.player.baseRect):
+            elif self.rightRect.colliderect(player.baseRect):
                 self.direction, metadata = RIGHT, RIGHT_METADATA
-            elif self.upRect.colliderect(self.player.baseRect):
+            elif self.upRect.colliderect(player.baseRect):
                 self.direction, metadata = UP, UP_METADATA
-            elif self.downRect.colliderect(self.player.baseRect):
+            elif self.downRect.colliderect(player.baseRect):
                 self.direction, metadata = DOWN, DOWN_METADATA
             return 0, 0, metadata
         # if direction is set, the sprite has 'seen' the player - countdown begins

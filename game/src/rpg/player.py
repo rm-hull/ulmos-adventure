@@ -50,20 +50,17 @@ class Player(RpgSprite):
         self.ticks = 0
     
     """
-    The view rect is entirely determined by what the main sprite is doing.  Sometimes
-    we move the view, sometimes we move the sprite - it just depends where the main
-    sprite is on the map.
+    The view rect is entirely determined by what the player is doing.  Sometimes
+    we move the view, sometimes we move the player - it just depends where the
+    player is on the map.
     """
     def updateViewRect(self):
-        #if not playerMoved:
-        #    return self.viewRect
         # centre self.rect in the view
         px, py = (self.viewRect.width - self.rect.width) // 2, (self.viewRect.height - self.rect.height) // 2
         self.rect.topleft = (px, py)
         self.viewRect.topleft = (self.mapRect.left - px, self.mapRect.top - py)
         rpgMapRect = self.rpgMap.mapRect
         if rpgMapRect.contains(self.viewRect):
-            #return self.viewRect
             return
         # the requested view falls partially outside the map - we need to move
         # the sprite instead of the view
@@ -78,7 +75,6 @@ class Player(RpgSprite):
             py = self.viewRect.bottom - rpgMapRect.bottom
         self.rect.move_ip(px, py)
         self.viewRect.move_ip(-px, -py)
-        #return self.viewRect
     
     """
     Moves the player + updates the view rect.  The control flow is as follows:
@@ -281,7 +277,13 @@ class Player(RpgSprite):
         for sprite in sprites:
             if sprite.isIntersecting(self):
                 sprite.processAction(self)
-                    
+    
+    """
+    Gets the current view of the map.
+    """            
+    def getMapView(self):
+        return self.rpgMap.getMapView(self.viewRect)
+                        
     """
     Handles action input from the user.
     """

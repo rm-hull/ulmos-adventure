@@ -37,12 +37,12 @@ def createSprite(rpgMap, registry, mapSprite):
 Returns a sprite group for the given map.  This excludes any sprites that are
 removed from the map.
 """
-def createSpritesForMap(rpgMap, registry, player):
+def createSpritesForMap(rpgMap, registry):
     gameSprites = pygame.sprite.Group()
     if rpgMap.mapSprites:
         for mapSprite in rpgMap.mapSprites:
             sprite = createSprite(rpgMap, registry, mapSprite)
             if sprite:
-                sprite.initMovement(mapSprite.level, mapSprite.tilePoints, player)
+                sprite.initMovement(mapSprite.level, mapSprite.tilePoints)
                 gameSprites.add(sprite)
     return gameSprites

@@ -89,12 +89,11 @@ class PlayState:
         if lastTransition == None:
             self.lastTransition = self.createReplayTransition()
         # must set the player map + position before we create this state
-        self.rpgMap = player.rpgMap
         player.updateViewRect()
         # add the player to the visible group
         self.visibleSprites = sprites.RpgSprites(player)
         # create more sprites
-        self.gameSprites = spritebuilder.createSpritesForMap(self.rpgMap, registry, player)
+        self.gameSprites = spritebuilder.createSpritesForMap(player.rpgMap, registry)
              
     def execute(self, keyPresses):
         transition = self.getNextTransition(keyPresses)
@@ -170,9 +169,9 @@ class PlayState:
         return directionBits, action
     
     def drawMapView(self, surface, increment = 1):
-        surface.blit(self.rpgMap.getMapView(player.viewRect), ORIGIN)
+        surface.blit(player.getMapView(), ORIGIN)
         # if the sprite being updated is in view it will be added to visibleSprites as a side-effect
-        self.gameSprites.update(player.viewRect, self.gameSprites, self.visibleSprites, increment)
+        self.gameSprites.update(player, self.gameSprites, self.visibleSprites, increment)
         self.visibleSprites.draw(surface)
         if increment:
             fixedSprites.draw(surface)
