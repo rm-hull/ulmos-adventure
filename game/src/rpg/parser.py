@@ -157,16 +157,9 @@ def createMapSprites(spriteData, mapName):
             typeCount = typeCounts[type]
             uid = mapName + COLON + type + COLON + str(typeCount)
             # extract movement info
-            movement, level, tilePoints = None, None, None
-            if spriteBits[1] == COLON:
-                movement = spriteBits[2]
-                level = int(spriteBits[3])
-                tilePoints = getTilePoints(spriteBits[4:])
-            else:
-                movement = "none"
-                level = int(spriteBits[1])
-                tilePoints = getTilePoints(spriteBits[2:])
-            mapSprite = map.MapSprite(type, uid, movement, level, tilePoints)
+            level = int(spriteBits[1])
+            tilePoints = getTilePoints(spriteBits[2:])
+            mapSprite = map.MapSprite(type, uid, level, tilePoints)
             mapSprites.append(mapSprite)
     return mapSprites
             

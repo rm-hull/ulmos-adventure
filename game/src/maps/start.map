@@ -535,3 +535,4 @@ sprite door 3 19,2
 event tile 23,7 1 : transition caves 11,14 1 up up
 event tile 19,2 3 : transition caves 4,14 1 up up
 event boundary right 3-7 : boundary east right
+event boundary up 2-11 : boundary north up

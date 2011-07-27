@@ -43,6 +43,7 @@ class Player(RpgSprite):
         self.viewRect = Rect((0, 0), pygame.display.get_surface().get_size())
         # movement
         self.movement = None
+        self.deferredMovement = None
         # counters
         self.coinCount = None
         self.keyCount = None

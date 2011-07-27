@@ -309,10 +309,9 @@ class MaskInfo:
 Sprite placeholder that is later used to construct a real sprite.
 """        
 class MapSprite:
-    def __init__(self, type, uid, movement, level, tilePoints):
+    def __init__(self, type, uid, level, tilePoints):
         self.type = type
         self.uid = uid
         self.level = level
-        self.movement = movement
         self.tilePoints = tilePoints
             
