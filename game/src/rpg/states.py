@@ -16,6 +16,7 @@ import sprites
 import view
 import spritebuilder
 import events
+import font
 
 ORIGIN = (0, 0)
 X_MULT = VIEW_WIDTH // 64
@@ -54,8 +55,8 @@ def startGame():
     player.rpgMap = parser.loadRpgMap("central")
     #player.rpgMap = parser.loadRpgMap("test1")
     # set the start position
-    player.setTilePosition(30, 21, 3)
-    #player.setTilePosition(6, 22, 2)
+    #player.setTilePosition(30, 21, 3)
+    player.setTilePosition(6, 22, 2)
 
     # create registry
     global registry
@@ -308,6 +309,11 @@ class GameOverState:
         self.blackRect = view.createRectangle(DIMENSIONS)
         self.nextState = None
         self.ticks = 0
+        gameFont = font.GameFont()
+        self.topLine1 = gameFont.getTextImage("BRAVE ADVENTURER")
+        self.topLine2 = gameFont.getTextImage("YOU ARE DEAD")
+        self.lowLine1 = gameFont.getTextImage("PRESS ANY KEY")
+        self.lowLine2 = gameFont.getTextImage("TO PLAY AGAIN")
              
     def execute(self, keyPresses):
         if self.ticks < 32:
@@ -318,11 +324,23 @@ class GameOverState:
                                                   VIEW_HEIGHT - yBorder * 2)
             screen.blit(extract, (xBorder, yBorder))
             pygame.display.flip()
-            self.ticks += 1
-        else:
+        elif self.ticks == 32:
+            x, y = (VIEW_WIDTH - self.topLine1.get_width()) // 2, 20 * view.SCALAR
+            screen.blit(self.topLine1, (x, y))
+            x, y = (VIEW_WIDTH - self.topLine2.get_width()) // 2, 32 * view.SCALAR
+            screen.blit(self.topLine2, (x, y))
+            pygame.display.flip()
+        elif self.ticks == 64:
+            x, y = (VIEW_WIDTH - self.lowLine1.get_width()) // 2, VIEW_HEIGHT - 42 * view.SCALAR
+            screen.blit(self.lowLine1, (x, y))
+            x, y = (VIEW_WIDTH - self.lowLine2.get_width()) // 2, VIEW_HEIGHT - 30 * view.SCALAR
+            screen.blit(self.lowLine2, (x, y))
+            pygame.display.flip()
+        elif self.ticks > 64:
             keysPressed = [key for key in keyPresses if key]
             if len(keysPressed) > 0:
                 return startGame()
+        self.ticks += 1
         
 class ShowPlayerState:
     

@@ -15,7 +15,7 @@
 14,0 water:w2
 15,0 water:w6
 16,0 water:w2
-17,0 grass:l1
+17,0 water:dark grass:l1
 18,0 grass:n1
 19,0 grass:n1
 20,0 grass:n1
@@ -24,7 +24,7 @@
 23,0 grass:n1
 24,0 grass:n1
 25,0 grass:n1
-26,0 grass:r1
+26,0 water:dark grass:r1
 27,0 water:w2
 28,0 water:w5
 29,0 water:w2
@@ -48,7 +48,7 @@
 14,1 water:w2
 15,1 water:w2
 16,1 water:w2
-17,1 grass:l2
+17,1 water:dark grass:l2
 18,1 grass:n1
 19,1 grass:n1
 20,1 grass:n1
@@ -57,7 +57,7 @@
 23,1 grass:n1
 24,1 grass:n1
 25,1 grass:n1
-26,1 grass:r3
+26,1 water:dark grass:r3
 27,1 water:w2
 28,1 water:w2
 29,1 water:w2
@@ -774,7 +774,7 @@
 14,23 [3] grass:ls
 15,23 [3] grass:rs
 16,23 [3] earth:dark grass:r1
-17,23 earth:brls objects:tree_ml2
+17,23 grass:dark earth:brls objects:tree_ml2
 18,23 grass:ms grass:treelds1 objects:tree_bl2 objects:tree_mr2
 19,23 grass:ms grass:treerds1 objects:tree_br2 objects:tree_tl1
 20,23 grass:dark earth:brs objects:tree_tr1
@@ -833,7 +833,7 @@
 7,25 [S2] grass:bb
 8,25 [2] grass:n1 grass:r2
 9,25 [1] water:dark grass:tr1
-10,25 water:w5
+10,25 water:w9
 11,25 water:w4
 12,25 water:lrs
 13,25 earth:l
@@ -925,7 +925,7 @@
 0,28 water:w2
 1,28 water:w2
 2,28 water:w2
-3,28 water:w2
+3,28 water:w8
 4,28 water:tlrs
 5,28 [1] water:dark earth:td grass:lj
 6,28 [1] grass:n6
@@ -958,7 +958,7 @@
 0,29 water:w2
 1,29 water:w2
 2,29 water:w2
-3,29 water:w2
+3,29 water:w4
 4,29 water:w2
 5,29 water:tlrs
 6,29 [1] water:dark earth:td grass:lj
@@ -1065,5 +1065,5 @@ sprite wasp 3 18,12
 
 event tile 23,23 1 : transition newcaves 11,14 1 up up
 event tile 19,18 3 : transition newcaves 4,14 1 up up
-event boundary right 19-23 : boundary east right -16
+event boundary right 19-23 : boundary east right -15
 

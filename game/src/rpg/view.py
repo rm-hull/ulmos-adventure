@@ -102,4 +102,13 @@ def createTransparentRect(dimensions):
     transparentRect.set_colorkey(TRANSPARENT_COLOUR, RLEACCEL)
     return transparentRect
 
-    
+def processFontImage(fontImage, charWidth, rows = 1):
+    charImages = []
+    charHeight = fontImage.get_height() // rows
+    for i in range(rows):
+        x, y = 0, i * charHeight
+        while x < fontImage.get_width():
+            charImage = fontImage.subsurface((x, y), (charWidth, charHeight))
+            charImages.append(charImage)
+            x += charWidth
+    return charImages

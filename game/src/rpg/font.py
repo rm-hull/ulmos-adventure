@@ -1,0 +1,44 @@
+#! /usr/bin/env python
+
+import os
+import view
+
+from view import SCALAR
+
+FONT_FOLDER = "sprites"
+
+CHARS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
+         'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '.', ' ']
+
+"""
+Font class
+"""
+class Font:
+    
+    def __init__(self, supportedChars, charImages):
+        print "CHARS: ", len(charImages)
+        self.chars = {}
+        for i, char in enumerate(supportedChars):
+            print i
+            self.chars[char] = charImages[i]
+        self.charWidth = charImages[0].get_width()
+        self.charHeight = charImages[0].get_height()
+            
+    def getTextImage(self, text):
+        # filter out any unsupported chars
+        supportedText = [c for c in text if c in self.chars]
+        textImage = view.createTransparentRect((len(supportedText) * self.charWidth, self.charHeight))
+        for i, char in enumerate(supportedText):
+            textImage.blit(self.chars[char], (i * self.charWidth, 0))
+        return textImage
+            
+class GameFont(Font):
+
+    fontImage = None
+    
+    def __init__(self):
+        if GameFont.fontImage is None:    
+            imagePath = os.path.join(FONT_FOLDER, "font.png")
+            GameFont.fontImage = view.loadScaledImage(imagePath, None)        
+        charImages = view.processFontImage(GameFont.fontImage, 8 * SCALAR, 2)
+        Font.__init__(self, CHARS, charImages)

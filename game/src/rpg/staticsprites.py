@@ -41,7 +41,7 @@ class Coin(OtherSprite):
         pickupSound.play()
         metadata = CoinMetadata(self.uid)
         self.registry.registerMetadata(metadata)
-        player.incrementCoinCount()
+        player.incrementCoinCount(10)
         self.toRemove = True
 
 class Key(OtherSprite):
