@@ -10,6 +10,8 @@ DUMMY_EVENT = events.DummyEvent()
 
 DIAGONAL_TICK = 3
 
+NO_BOUNDARY = 0
+
 lifeLostSoundPath = os.path.join(SOUNDS_FOLDER, "lifelost.wav")
 lifeLostSound = pygame.mixer.Sound(lifeLostSoundPath)
 

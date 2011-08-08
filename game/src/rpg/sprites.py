@@ -7,10 +7,7 @@ import view
 from pygame.locals import Rect
 from view import SCALAR, TILE_SIZE
 
-pygame.mixer.init()
-
 MOVE_UNIT = 1 * SCALAR
-NO_BOUNDARY = 0
 
 # we may need to specify these on a sprite by sprite basis 
 BASE_RECT_HEIGHT = 9 * SCALAR

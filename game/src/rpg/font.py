@@ -10,6 +10,8 @@ FONT_FOLDER = "sprites"
 CHARS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
          'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '.', ' ']
 
+NUMBERS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+
 """
 Font class
 """
@@ -19,7 +21,6 @@ class Font:
         print "CHARS: ", len(charImages)
         self.chars = {}
         for i, char in enumerate(supportedChars):
-            print i
             self.chars[char] = charImages[i]
         self.charWidth = charImages[0].get_width()
         self.charHeight = charImages[0].get_height()
@@ -42,3 +43,14 @@ class GameFont(Font):
             GameFont.fontImage = view.loadScaledImage(imagePath, None)        
         charImages = view.processFontImage(GameFont.fontImage, 8 * SCALAR, 2)
         Font.__init__(self, CHARS, charImages)
+        
+class NumbersFont(Font):
+
+    fontImage = None
+    
+    def __init__(self):
+        if NumbersFont.fontImage is None:    
+            imagePath = os.path.join(FONT_FOLDER, "numbers.png")
+            NumbersFont.fontImage = view.loadScaledImage(imagePath, None)        
+        charImages = view.processFontImage(NumbersFont.fontImage, 8 * SCALAR)
+        Font.__init__(self, NUMBERS, charImages)

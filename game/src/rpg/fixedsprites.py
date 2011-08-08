@@ -4,6 +4,8 @@ from sprites import *
 
 from view import VIEW_WIDTH
 
+import font
+
 """
 Defines a sprite that is fixed on the game display.  Note that this class of
 sprite does not extend RpgSprite. 
@@ -32,26 +34,14 @@ class FixedCoin(FixedSprite):
 
 class CoinCount(FixedSprite):
     
-    initialImage = None
-    
     def __init__(self, count = 0, position = (0, 0)):
-        if CoinCount.initialImage is None:    
-            imagePath = os.path.join(SPRITES_FOLDER, "numbers.png")
-            CoinCount.initialImage = view.loadScaledImage(imagePath, None)
-        self.numbers = view.processStaticFrames(CoinCount.initialImage, 10)        
         FixedSprite.__init__(self, position)
+        self.font = font.NumbersFont()
         self.count = count;
         self.newImage()
                 
     def newImage(self):
-        countString = str(self.count)
-        dimensions = (len(countString) * 8 * SCALAR, 8 * SCALAR)
-        newImage = view.createTransparentRect(dimensions)
-        newImage.set_colorkey(view.TRANSPARENT_COLOUR, view.RLEACCEL)
-        px = 0;
-        for n in countString:
-            newImage.blit(self.numbers[int(n)], (px, 0))
-            px += 8 * SCALAR
+        newImage = self.font.getTextImage(str(self.count))
         self.setImage(newImage)
         
     def incrementCount(self, n = 1):
@@ -75,10 +65,9 @@ class KeyCount(FixedSprite):
     def newImage(self):
         dimensions = (self.count * 8 * SCALAR, 8 * SCALAR)
         newImage = view.createTransparentRect(dimensions)
-        px = 0;
-        for n in range(self.count):
+        for i, n in enumerate(range(self.count)):
+            px = i * 8 * SCALAR
             newImage.blit(self.keyImage, (px, 0))
-            px += 8 * SCALAR
         self.setImage(newImage)
         self.rect.left = VIEW_WIDTH - (3 + self.count * 8) * SCALAR
 
@@ -103,15 +92,13 @@ class Lives(FixedSprite):
     def newImage(self):
         dimensions = (self.count * 8 * SCALAR, 8 * SCALAR)
         newImage = view.createTransparentRect(dimensions)
-        px = 0;
-        for n in range(self.count):
+        for i, n in enumerate(range(self.count)):
+            px = i * 8 * SCALAR
             newImage.blit(self.livesImage, (px, 0))
-            px += 8 * SCALAR
         self.setImage(newImage)
 
     def incrementCount(self, n = 1):
         self.count += n
-        # temporary hack 
         if (self.count < 0):
             return
         self.newImage()

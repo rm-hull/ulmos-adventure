@@ -109,7 +109,7 @@ class Wasp(OtherSprite):
     
     def getMovement(self, player):
         if self.zooming:
-            print "zooming"
+            # print "zooming"
             return ZOOM_MOVEMENT[self.direction]
         if self.inView and self.level == player.level and not self.direction:
             metadata = NO_METADATA

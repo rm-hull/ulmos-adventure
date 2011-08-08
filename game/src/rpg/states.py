@@ -27,8 +27,6 @@ DIMENSIONS = (VIEW_WIDTH, VIEW_HEIGHT)
 BOUNDARY_TICKS = {UP: 24, DOWN: 24, LEFT: 14, RIGHT: 14}
 DOORWAY_TICKS = {UP: 16, DOWN: 16, LEFT: 16, RIGHT: 16}
 
-# initialise pygame
-pygame.init()
 screen = pygame.display.set_mode(DIMENSIONS)
 
 fixedSprites = None
@@ -55,8 +53,8 @@ def startGame():
     player.rpgMap = parser.loadRpgMap("central")
     #player.rpgMap = parser.loadRpgMap("test1")
     # set the start position
-    #player.setTilePosition(30, 21, 3)
-    player.setTilePosition(6, 22, 2)
+    player.setTilePosition(30, 21, 3)
+    #player.setTilePosition(6, 22, 2)
 
     # create registry
     global registry
