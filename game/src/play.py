@@ -3,11 +3,15 @@
 from pygame.locals import *
 
 import pygame
+
+# initialise pygame before we import anything else
+pygame.init()
+
 import rpg.states
 
 FRAMES_PER_SEC = 60
 
-def testMain():
+def playMain():
     # get the first state
     currentState = rpg.states.startGame()
     # start the main loop
@@ -25,5 +29,5 @@ def testMain():
         if newState:
             currentState = newState
 
-# this calls the 'main' function when this script is executed
-if __name__ == '__main__': testMain()
+# this calls the testMain function when this script is executed
+if __name__ == '__main__': playMain()
