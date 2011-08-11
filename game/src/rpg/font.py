@@ -13,12 +13,12 @@ CHARS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
 NUMBERS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
 """
-Font class
+Font class that maps a list of supported chars to their corresponding images.
+This is then used to get an image for a given piece of text.
 """
 class Font:
     
     def __init__(self, supportedChars, charImages):
-        print "CHARS: ", len(charImages)
         self.chars = {}
         for i, char in enumerate(supportedChars):
             self.chars[char] = charImages[i]
