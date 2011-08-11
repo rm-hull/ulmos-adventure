@@ -323,9 +323,9 @@ class GameOverState:
             screen.blit(extract, (xBorder, yBorder))
             pygame.display.flip()
         elif self.ticks == 32:
-            x, y = (VIEW_WIDTH - self.topLine1.get_width()) // 2, 20 * view.SCALAR
+            x, y = (VIEW_WIDTH - self.topLine1.get_width()) // 2, 32 * view.SCALAR
             screen.blit(self.topLine1, (x, y))
-            x, y = (VIEW_WIDTH - self.topLine2.get_width()) // 2, 32 * view.SCALAR
+            x, y = (VIEW_WIDTH - self.topLine2.get_width()) // 2, 44 * view.SCALAR
             screen.blit(self.topLine2, (x, y))
             pygame.display.flip()
         elif self.ticks == 64:
