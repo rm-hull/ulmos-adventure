@@ -3,12 +3,14 @@
 import pygame
 
 from othersprites import Beetle, Wasp
-from staticsprites import Flames, Coin, Key, Door
+from staticsprites import Flames, Coin, Key, Chest, Rock, Door
 
 # map of sprite classes keyed on type
 spriteClasses = {"flames": Flames,
                  "coin": Coin,
                  "key": Key,
+                 "chest": Chest,
+                 "rock": Rock,
                  "door": Door,
                  "beetle": Beetle,
                  "wasp": Wasp}

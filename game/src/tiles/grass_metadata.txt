@@ -84,7 +84,7 @@
 2,9 lbbrs
 3,9 rbbls
 4,9 cbbs
-5,9 os3
+5,9 
 6,9 lhn
 7,9 rhn
 
@@ -117,9 +117,9 @@
 
 0,13 treelj1
 1,13 treerj1
-2,13 rocklj
-3,13 rockrj
-4,13 rockls
-5,13 rockrs
+2,13 
+3,13 
+4,13 
+5,13 
 6,13 treelj2
 7,13 treerj2

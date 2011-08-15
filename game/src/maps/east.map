@@ -222,7 +222,7 @@
 0,13 water:w2
 1,13 water:w2
 2,13 water:w3
-3,13 [1] water:w2
+3,13 water:w2
 4,13 [1] water:dark grass:tl1
 5,13 [1] grass:tb
 6,13 [1] water:dark grass:t2
@@ -239,7 +239,7 @@
 0,14 water:w2
 1,14 water:w6
 2,14 water:w3
-3,14 [1] water:w2
+3,14 water:w2
 4,14 [1] water:dark grass:l2
 5,14 [1] grass:n6
 6,14 [1] grass:bb

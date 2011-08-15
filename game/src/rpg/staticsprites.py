@@ -65,6 +65,42 @@ class Key(OtherSprite):
         player.incrementKeyCount()
         self.toRemove = True
 
+class Chest(OtherSprite):
+    
+    framesImage = None
+    
+    baseRectSize = (8 * SCALAR, BASE_RECT_HEIGHT)
+        
+    def __init__(self, rpgMap):
+        if Chest.framesImage is None:    
+            imagePath = os.path.join(SPRITES_FOLDER, "chest.png")
+            Chest.framesImage = view.loadScaledImage(imagePath, None)        
+        animationFrames = view.processStaticFrames(Chest.framesImage, 1)
+        spriteFrames = StaticFrames(animationFrames, 6)
+        OtherSprite.__init__(self, rpgMap, spriteFrames)
+        
+    # override
+    def advanceFrame(self, increment, metadata):
+        pass
+                
+class Rock(OtherSprite):
+    
+    framesImage = None
+    
+    baseRectSize = (8 * SCALAR, BASE_RECT_HEIGHT)
+        
+    def __init__(self, rpgMap):
+        if Rock.framesImage is None:    
+            imagePath = os.path.join(SPRITES_FOLDER, "rock.png")
+            Rock.framesImage = view.loadScaledImage(imagePath, None)        
+        animationFrames = view.processStaticFrames(Rock.framesImage, 1)
+        spriteFrames = StaticFrames(animationFrames, 6)
+        OtherSprite.__init__(self, rpgMap, spriteFrames, (0, -4))
+        
+    # override
+    def advanceFrame(self, increment, metadata):
+        pass
+                
 class Door(OtherSprite):
     
     framesImage = None

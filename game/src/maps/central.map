@@ -380,9 +380,9 @@
 16,11 grass:dark earth:m1
 17,11 grass:dark earth:mr
 18,11 [3] grass:n1
-19,11 [3,5] grass:n1 grass:tl2:5 objects:rock_top2:V6
-20,11 [3,5] grass:tb:5 objects:rock_top1:V6
-21,11 [3,5] grass:n1 grass:tr1:5 objects:rock_top1:V6
+19,11 [3,5] grass:n1 grass:tl2:5
+20,11 [3,5] grass:tb:5
+21,11 [3,5] grass:n1 grass:tr2:5
 22,11 [3] grass:n1
 23,11 [3] grass:n1
 24,11 [3] water:dark grass:r2
@@ -413,9 +413,9 @@
 16,12 [3] grass:ms
 17,12 [3] grass:rs
 18,12 [3] grass:n1
-19,12 grass:n1 grass:rocklj objects:rock_base2
-20,12 grass:rockrs objects:rock_base1
-21,12 grass:n1 grass:rockrj objects:rock_base1
+19,12 grass:n1 grass:l1
+20,12 grass:n1
+21,12 grass:n1 grass:r3
 22,12 [3] grass:n1
 23,12 [3] earth:dark grass:rj
 24,12 earth:trls
@@ -446,9 +446,9 @@
 16,13 [3] grass:n1 grass:t2:5
 17,13 [3] grass:n1 grass:t3:5
 18,13 [3] grass:n1 grass:t2:5
-19,13 grass:n1 grass:os3
-20,13 grass:n5 grass:os2
-21,13 grass:n1 grass:r1 grass:os2
+19,13 grass:n1
+20,13 grass:n1
+21,13 grass:n1 grass:r2
 22,13 [3] grass:n1
 23,13 [3] earth:dark grass:r2
 24,13 earth:rls
@@ -516,7 +516,7 @@
 20,15 grass:n2
 21,15 grass:n1
 22,15 grass:n1 grass:r3
-23,15 [3] water:dark grass:r1 objects:rock_top1:V4
+23,15 [3] water:dark grass:r1
 24,15 water:w5
 25,15 water:w3
 26,15 water:w5
@@ -549,7 +549,7 @@
 20,16 grass:n1
 21,16 grass:n1
 22,16 grass:n1 grass:r2
-23,16 water:dark grass:rockrj objects:rock_base1
+23,16 water:dark grass:r3
 24,16 water:w3
 25,16 water:w4 water:w6 water:w2
 26,16 water:w4 water:w2
@@ -582,7 +582,7 @@
 20,17 grass:n5
 21,17 earth:dark grass:rj
 22,17 earth:trls
-23,17 [3] water:w4 grass:r1 grass:os2
+23,17 [3] water:w4 grass:r3
 24,17 water:w3
 25,17 water:w3
 26,17 water:w3
@@ -1062,6 +1062,11 @@ sprite beetle 3 13,23 16,23 16,21 17,21 16,21 16,23
 sprite beetle 4 12,6 12,8 9,8 12,8
 sprite beetle 4 6,5 6,9 8,9 8,8 6,8
 sprite wasp 3 18,12
+sprite chest 5 14,17
+sprite rock 5 19,12
+sprite rock 5 20,12
+sprite rock 5 21,12
+sprite rock 3 23,16
 
 event tile 23,23 1 : transition newcaves 11,14 1 up up
 event tile 19,18 3 : transition newcaves 4,14 1 up up
