@@ -46,7 +46,7 @@
 5,4 mls
 6,4
 7,4
-8,4
+8,4 crackn
 
 0,5 tel
 1,5 ter
@@ -56,7 +56,7 @@
 5,5 mer
 6,5 melrs
 7,5 merls
-8,5
+8,5 crackb
 
 0,6 dark
 1,6 lhd

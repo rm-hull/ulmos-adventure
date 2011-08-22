@@ -51,10 +51,9 @@ def startGame():
     player.lives = lives
     # create the map
     player.rpgMap = parser.loadRpgMap("central")
-    #player.rpgMap = parser.loadRpgMap("test1")
     # set the start position
-    player.setTilePosition(30, 21, 3)
-    #player.setTilePosition(6, 22, 2)
+    #player.setTilePosition(30, 21, 3)
+    player.setTilePosition(6, 22, 2)
 
     # create registry
     global registry
