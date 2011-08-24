@@ -117,6 +117,13 @@ class Door(OtherSprite):
         self.opening = False
         self.frameCount = 0
         self.frameIndex = 0
+
+    """
+    Base rect extends beyond the bottom of the sprite image so player's base
+    rect can intersect with it and allow it to be opened.
+    """
+    def getBaseRectTop(self, baseRectHeight):
+        return self.mapRect.bottom + BASE_RECT_EXTEND - baseRectHeight
         
     # override
     def advanceFrame(self, increment, metadata):

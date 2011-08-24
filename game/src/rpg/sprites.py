@@ -66,11 +66,14 @@ class RpgSprite(pygame.sprite.Sprite):
         if hasattr(self, "baseRectSize"):
             baseRectWidth = self.baseRectSize[0]
             baseRectHeight = self.baseRectSize[1]
-        baseRectTop = self.mapRect.bottom + BASE_RECT_EXTEND - baseRectHeight
+        baseRectTop = self.getBaseRectTop(baseRectHeight)
         baseRectLeft = (self.mapRect.width - baseRectWidth) / 2
         self.baseRect = Rect(baseRectLeft, baseRectTop, baseRectWidth, baseRectHeight)
         # print self.uid, self.baseRect.width, self.baseRect.height
-
+        
+    def getBaseRectTop(self, baseRectHeight):
+        return self.mapRect.bottom - baseRectHeight
+        
     def doMove(self, px, py):
         self.mapRect.move_ip(px, py)
         self.baseRect.move_ip(px, py)

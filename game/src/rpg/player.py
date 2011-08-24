@@ -51,6 +51,12 @@ class Player(RpgSprite):
         self.keyCount = None
         self.lives = None
         self.ticks = 0
+        
+    """
+    Base rect for the player extends beyond the bottom of the sprite image.
+    """
+    def getBaseRectTop(self, baseRectHeight):
+        return self.mapRect.bottom + BASE_RECT_EXTEND - baseRectHeight
     
     """
     The view rect is entirely determined by what the player is doing.  Sometimes

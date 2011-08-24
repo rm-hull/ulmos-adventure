@@ -31,7 +31,7 @@ class Beetle(OtherSprite):
     
     framesImage = None
     
-    baseRectSize = (9 * SCALAR, 12 * SCALAR)    
+    baseRectSize = (12 * SCALAR, 12 * SCALAR)    
 
     def __init__(self, rpgMap):
         if Beetle.framesImage is None:    
