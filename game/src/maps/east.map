@@ -556,5 +556,5 @@ sprite coin 1 10,18
 sprite coin 3 5,20
 sprite coin 1 6,3
 
-event boundary left 3-7 : boundary central left 15
+event boundary left 4-8 : boundary central left 15
 
