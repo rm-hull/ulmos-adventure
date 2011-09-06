@@ -8,7 +8,8 @@ from view import SCALAR
 FONT_FOLDER = "sprites"
 
 CHARS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
-         'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '.', ' ']
+         'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '.', '!',
+         '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '/', ' ']
 
 NUMBERS = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
@@ -41,7 +42,7 @@ class GameFont(Font):
         if GameFont.fontImage is None:    
             imagePath = os.path.join(FONT_FOLDER, "font.png")
             GameFont.fontImage = view.loadScaledImage(imagePath, None)        
-        charImages = view.processFontImage(GameFont.fontImage, 8 * SCALAR, 2)
+        charImages = view.processFontImage(GameFont.fontImage, 8 * SCALAR, 3)
         Font.__init__(self, CHARS, charImages)
         
 class NumbersFont(Font):

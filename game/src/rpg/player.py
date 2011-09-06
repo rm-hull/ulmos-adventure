@@ -305,6 +305,9 @@ class Player(RpgSprite):
     def incrementKeyCount(self, n = 1):
         self.keyCount.incrementCount(n)
         
+    def getCoinCount(self):
+        return self.coinCount.count;
+
     def getKeyCount(self):
         return self.keyCount.count;
 

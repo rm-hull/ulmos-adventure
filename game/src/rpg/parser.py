@@ -181,6 +181,8 @@ def createMapEvents(eventData):
                 transition = createBoundaryTransition(transitionBits)
             elif transitionType == "transition":
                 transition = createSceneTransition(transitionBits)
+            elif transitionType == "end":
+                transition = createEndTransition()
             if transition and eventBits:
                 event = None
                 eventType = eventBits[0]
@@ -213,6 +215,9 @@ def createSceneTransition(transitionBits):
         boundary = BOUNDARIES[transitionBits[5]]
         return events.SceneTransition(mapName, x, y, level, direction, boundary)
     return events.SceneTransition(mapName, x, y, level, direction)
+
+def createEndTransition():
+    return events.EndGameTransition()
     
 def createBoundaryEvent(eventBits, transition):
     if len(eventBits) < 3:

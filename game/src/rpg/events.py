@@ -11,6 +11,7 @@ SCENE_TRANSITION = 1
 REPLAY_TRANSITION = 2
 BOUNDARY_TRANSITION = 3
 GAME_OVER_TRANSITION = 4
+END_GAME_TRANSITION = 5
 
 EMPTY_LIST = []
 
@@ -106,3 +107,8 @@ class BoundaryTransition(Transition):
 class GameOverTransition(Transition):
     def __init__(self):
         Transition.__init__(self, GAME_OVER_TRANSITION)
+        
+class EndGameTransition(Transition):
+    def __init__(self):
+        Transition.__init__(self, END_GAME_TRANSITION)
+    

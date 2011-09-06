@@ -2,7 +2,7 @@
 
 from pygame.locals import *
 
-from events import SCENE_TRANSITION, REPLAY_TRANSITION, BOUNDARY_TRANSITION, GAME_OVER_TRANSITION
+from events import SCENE_TRANSITION, REPLAY_TRANSITION, BOUNDARY_TRANSITION, GAME_OVER_TRANSITION, END_GAME_TRANSITION
 from view import NONE, UP, DOWN, LEFT, RIGHT, TILE_SIZE, VIEW_WIDTH, VIEW_HEIGHT
 from sprites import MOVE_UNIT
 
@@ -29,6 +29,11 @@ DOORWAY_TICKS = {UP: 16, DOWN: 16, LEFT: 16, RIGHT: 16}
 
 screen = pygame.display.set_mode(DIMENSIONS)
 
+blackRect = view.createRectangle(DIMENSIONS)
+
+gameFont = font.GameFont()
+
+# globals
 fixedSprites = None
 player = None
 registry = None
@@ -52,8 +57,9 @@ def startGame():
     # create the map
     player.rpgMap = parser.loadRpgMap("central")
     # set the start position
-    player.setTilePosition(30, 21, 3)
-    #player.setTilePosition(6, 22, 2)
+    #player.setTilePosition(30, 21, 3)
+    player.setTilePosition(6, 20, 2)
+    #player.setTilePosition(5, 3, 4)
 
     # create registry
     global registry
@@ -79,6 +85,23 @@ def hidePlayer(boundary, mapRect, modifier = None):
         px = 0 - playerRect.width             
     player.setPixelPosition(px, py)
 
+def sceneZoomIn(screenImage, ticks):
+    xBorder, yBorder = (ticks + 1) * X_MULT, (ticks + 1) * Y_MULT
+    screen.blit(blackRect, ORIGIN)
+    extract = screenImage.subsurface(xBorder, yBorder,
+                                          VIEW_WIDTH - xBorder * 2,
+                                          VIEW_HEIGHT - yBorder * 2)
+    screen.blit(extract, (xBorder, yBorder))
+    pygame.display.flip()
+
+def sceneZoomOut(screenImage, ticks):
+    xBorder, yBorder = (64 - ticks) * X_MULT, (64 - ticks) * Y_MULT
+    extract = screenImage.subsurface(xBorder, yBorder,
+                                          VIEW_WIDTH - xBorder * 2,
+                                          VIEW_HEIGHT - yBorder * 2)
+    screen.blit(extract, (xBorder, yBorder))
+    pygame.display.flip()
+  
 class PlayState:
     
     def __init__(self, lastTransition = None):
@@ -105,6 +128,8 @@ class PlayState:
                 return SceneTransitionState(transition)
             if transition.type == GAME_OVER_TRANSITION:
                 return GameOverState(transition)
+            if transition.type == END_GAME_TRANSITION:
+                return EndGameState(transition)
         # draw the map view to the screen
         self.drawMapView(screen)
         pygame.display.flip()
@@ -195,19 +220,12 @@ class SceneTransitionState:
     def __init__(self, transition):
         self.transition = transition
         self.screenImage = screen.copy()
-        self.blackRect = view.createRectangle(DIMENSIONS)
         self.nextState = None
         self.ticks = 0
              
     def execute(self, keyPresses):
         if self.ticks < 32:
-            xBorder, yBorder = (self.ticks + 1) * X_MULT, (self.ticks + 1) * Y_MULT
-            screen.blit(self.blackRect, ORIGIN)
-            extract = self.screenImage.subsurface(xBorder, yBorder,
-                                                  VIEW_WIDTH - xBorder * 2,
-                                                  VIEW_HEIGHT - yBorder * 2)
-            screen.blit(extract, (xBorder, yBorder))
-            pygame.display.flip()
+            sceneZoomIn(self.screenImage, self.ticks)
         elif self.ticks == 32:
             # load the next map
             nextRpgMap = parser.loadRpgMap(self.transition.mapName)
@@ -231,12 +249,7 @@ class SceneTransitionState:
             # extract the next image from the state
             self.nextState.drawMapView(self.screenImage, 0)           
         elif self.ticks < 64:
-            xBorder, yBorder = (64 - self.ticks) * X_MULT, (64 - self.ticks) * Y_MULT
-            extract = self.screenImage.subsurface(xBorder, yBorder,
-                                                  VIEW_WIDTH - xBorder * 2,
-                                                  VIEW_HEIGHT - yBorder * 2)
-            screen.blit(extract, (xBorder, yBorder))
-            pygame.display.flip()
+            sceneZoomOut(self.screenImage, self.ticks)
         else:
             if self.transition.firstMap:
                 return self.nextState
@@ -303,10 +316,8 @@ class GameOverState:
     def __init__(self, transition):
         self.transition = transition
         self.screenImage = screen.copy()
-        self.blackRect = view.createRectangle(DIMENSIONS)
         self.nextState = None
         self.ticks = 0
-        gameFont = font.GameFont()
         self.topLine1 = gameFont.getTextImage("BRAVE ADVENTURER")
         self.topLine2 = gameFont.getTextImage("YOU ARE DEAD")
         self.lowLine1 = gameFont.getTextImage("PRESS ANY KEY")
@@ -314,18 +325,47 @@ class GameOverState:
              
     def execute(self, keyPresses):
         if self.ticks < 32:
-            xBorder, yBorder = (self.ticks + 1) * X_MULT, (self.ticks + 1) * Y_MULT
-            screen.blit(self.blackRect, ORIGIN)
-            extract = self.screenImage.subsurface(xBorder, yBorder,
-                                                  VIEW_WIDTH - xBorder * 2,
-                                                  VIEW_HEIGHT - yBorder * 2)
-            screen.blit(extract, (xBorder, yBorder))
-            pygame.display.flip()
+            sceneZoomIn(self.screenImage, self.ticks)
         elif self.ticks == 32:
             x, y = (VIEW_WIDTH - self.topLine1.get_width()) // 2, 32 * view.SCALAR
             screen.blit(self.topLine1, (x, y))
             x, y = (VIEW_WIDTH - self.topLine2.get_width()) // 2, 44 * view.SCALAR
             screen.blit(self.topLine2, (x, y))
+            pygame.display.flip()
+        elif self.ticks == 64:
+            x, y = (VIEW_WIDTH - self.lowLine1.get_width()) // 2, VIEW_HEIGHT - 42 * view.SCALAR
+            screen.blit(self.lowLine1, (x, y))
+            x, y = (VIEW_WIDTH - self.lowLine2.get_width()) // 2, VIEW_HEIGHT - 30 * view.SCALAR
+            screen.blit(self.lowLine2, (x, y))
+            pygame.display.flip()
+        elif self.ticks > 64:
+            keysPressed = [key for key in keyPresses if key]
+            if len(keysPressed) > 0:
+                return startGame()
+        self.ticks += 1
+
+class EndGameState:
+    
+    def __init__(self, transition):
+        self.transition = transition
+        self.screenImage = screen.copy()
+        self.ticks = 0
+        self.topLine1 = gameFont.getTextImage("YOUR ADVENTURE IS")
+        self.topLine2 = gameFont.getTextImage("AT AN END... FOR NOW!")
+        self.topLine3 = gameFont.getTextImage("YOU FOUND " + str(player.getCoinCount()) + "/10 COINS");
+        self.lowLine1 = gameFont.getTextImage("PRESS ANY KEY")
+        self.lowLine2 = gameFont.getTextImage("TO PLAY AGAIN")
+             
+    def execute(self, keyPresses):
+        if self.ticks < 32:
+            sceneZoomIn(self.screenImage, self.ticks)
+        elif self.ticks == 32:
+            x, y = (VIEW_WIDTH - self.topLine1.get_width()) // 2, 20 * view.SCALAR
+            screen.blit(self.topLine1, (x, y))
+            x, y = (VIEW_WIDTH - self.topLine2.get_width()) // 2, 32 * view.SCALAR
+            screen.blit(self.topLine2, (x, y))
+            x, y = (VIEW_WIDTH - self.topLine3.get_width()) // 2, 44 * view.SCALAR
+            screen.blit(self.topLine3, (x, y))
             pygame.display.flip()
         elif self.ticks == 64:
             x, y = (VIEW_WIDTH - self.lowLine1.get_width()) // 2, VIEW_HEIGHT - 42 * view.SCALAR
