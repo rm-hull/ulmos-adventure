@@ -5,6 +5,7 @@ from pygame.locals import *
 import pygame
 
 # initialise pygame before we import anything else
+pygame.mixer.pre_init(44100, -16, 2, 1024)
 pygame.init()
 
 import rpg.states
