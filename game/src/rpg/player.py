@@ -15,6 +15,10 @@ NO_BOUNDARY = 0
 lifeLostSoundPath = os.path.join(SOUNDS_FOLDER, "lifelost.wav")
 lifeLostSound = pygame.mixer.Sound(lifeLostSoundPath)
 
+footstepSoundPath = os.path.join(SOUNDS_FOLDER, "footstep.wav")
+footstepSound = pygame.mixer.Sound(footstepSoundPath)
+footstepSound.set_volume(0.5)
+
 """
 Valid movement combinations - movement is keyed on direction bits and is stored
 as a tuple (px, py, direction, diagonal)
@@ -199,7 +203,9 @@ class Player(RpgSprite):
         self.doMove(px, py)
         # animate the player
         self.clearMasks()
-        self.image = self.spriteFrames.advanceFrame(direction = myDirection)
+        self.image, frameIndex = self.spriteFrames.advanceFrame(direction = myDirection)
+        if frameIndex == 1 or frameIndex == 3:
+            footstepSound.play()
         self.applyMasks()
     
     """

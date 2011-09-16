@@ -166,7 +166,7 @@ class RpgMap:
         masks = {}
         for tile in spriteTiles:
             if tile:
-                tileMasks = tile.getMasks(sprite.level, sprite.z)
+                tileMasks = tile.getMasks(sprite.level, sprite.z, sprite.upright)
                 if tileMasks:
                     masks[(tile.x, tile.y)] = tileMasks
         return masks
@@ -272,13 +272,17 @@ class MapTile:
             return nearestLevel
         return None
     
-    def getMasks(self, spriteLevel, spriteZ):
+    def getMasks(self, spriteLevel, spriteZ, spriteUpright):
         if len(self.masks) == 0:
             return None
         masks = []
         for maskInfo in self.masks:
             if maskInfo.z > spriteZ:
                 if maskInfo.flat and maskInfo.level == spriteLevel:
+                    continue
+                masks.append(self.tiles[maskInfo.tileIndex])
+            elif maskInfo.z < spriteZ:
+                if maskInfo.flat or spriteUpright or maskInfo.level != spriteLevel:
                     continue
                 masks.append(self.tiles[maskInfo.tileIndex])
         if len(masks) > 0:

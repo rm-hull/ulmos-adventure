@@ -40,6 +40,7 @@ class Beetle(OtherSprite):
         animationFrames = view.processMovementFrames(Beetle.framesImage, 2)
         spriteFrames = DirectionalFrames(animationFrames, 12)
         OtherSprite.__init__(self, rpgMap, spriteFrames)
+        self.upright = False
 
     def processCollision(self, player):
         print "life lost!"

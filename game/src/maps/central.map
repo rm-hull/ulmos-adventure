@@ -1072,6 +1072,6 @@ sprite coin 1 18,25
 
 event tile 23,23 1 : transition caves 11,14 1 up up
 event tile 19,18 3 : transition caves 4,14 1 up up
-event tile 6,2 4 : end
+event tile 6,2 4 : transition northcave 7,15 1 up up
 event boundary right 19-23 : boundary east right -15
 

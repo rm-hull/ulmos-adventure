@@ -30,7 +30,8 @@ class RpgSprite(pygame.sprite.Sprite):
         self.rpgMap = rpgMap
         self.spriteFrames = spriteFrames
         self.position = [i * SCALAR for i in position]
-        self.image = self.spriteFrames.advanceFrame(0)
+        self.image, temp = self.spriteFrames.advanceFrame(0)
+        self.upright = True
         # indicates if this sprite is currently visible
         self.inView = False
         # indicates if this sprite is currently masked by any map tiles
@@ -96,7 +97,7 @@ class RpgSprite(pygame.sprite.Sprite):
                 [self.image.blit(mask, (px, py)) for mask in masks[tilePoint]]
                 
     def advanceFrame(self, increment, metadata):
-        self.image = self.spriteFrames.advanceFrame(increment, **metadata)
+        self.image, temp = self.spriteFrames.advanceFrame(increment, **metadata)
         
     def isIntersecting(self, sprite):
         if self != sprite and self.level == sprite.level and self.baseRect.colliderect(sprite.baseRect):

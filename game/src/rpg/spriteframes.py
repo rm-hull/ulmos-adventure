@@ -18,6 +18,8 @@ class SpriteFrames:
             self.frameCount = (self.frameCount + increment) % self.frameSkip
             if self.frameCount == 0:
                 self.frameIndex = (self.frameIndex + 1) % self.numFrames
+                return self.frameIndex
+        return None
     
     def repairCurrentFrame(self):
         pass
@@ -38,8 +40,8 @@ class StaticFrames(SpriteFrames):
         lastImage.blit(self.virginAnimationFrames[self.frameIndex], (0, 0))
 
     def advanceFrame(self, increment = 1, **kwargs):
-        self.advanceFrameIndex(increment)
-        return self.animationFrames[self.frameIndex]
+        newFrameIndex = self.advanceFrameIndex(increment)
+        return self.animationFrames[self.frameIndex], newFrameIndex
         
 class DirectionalFrames(SpriteFrames):
     
@@ -55,7 +57,7 @@ class DirectionalFrames(SpriteFrames):
         lastImage.blit(self.virginAnimationFrames[self.direction][self.frameIndex], (0, 0))
         
     def advanceFrame(self, increment = 1, **kwargs):
-        self.advanceFrameIndex(increment)
+        newFrameIndex = self.advanceFrameIndex(increment)
         if DIRECTION in kwargs:
             self.direction = kwargs[DIRECTION]
-        return self.animationFrames[self.direction][self.frameIndex]
+        return self.animationFrames[self.direction][self.frameIndex], newFrameIndex
