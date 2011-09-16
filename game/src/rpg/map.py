@@ -281,8 +281,8 @@ class MapTile:
                 if maskInfo.flat and maskInfo.level == spriteLevel:
                     continue
                 masks.append(self.tiles[maskInfo.tileIndex])
-            elif maskInfo.z < spriteZ:
-                if maskInfo.flat or spriteUpright or maskInfo.level != spriteLevel:
+            else:
+                if spriteUpright or maskInfo.flat or maskInfo.level < spriteLevel:
                     continue
                 masks.append(self.tiles[maskInfo.tileIndex])
         if len(masks) > 0:
