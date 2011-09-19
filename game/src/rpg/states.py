@@ -4,12 +4,13 @@ from pygame.locals import *
 
 from events import SCENE_TRANSITION, REPLAY_TRANSITION, BOUNDARY_TRANSITION, GAME_OVER_TRANSITION, END_GAME_TRANSITION
 from view import NONE, UP, DOWN, LEFT, RIGHT, TILE_SIZE, VIEW_WIDTH, VIEW_HEIGHT
-from sprites import MOVE_UNIT
+from sprites import MOVE_UNIT, SOUNDS_FOLDER
 
 from fixedsprites import FixedCoin, CoinCount, KeyCount, Lives
 from registry import Registry
 from player import Ulmo
 
+import os
 import pygame
 import parser
 import sprites
@@ -32,6 +33,10 @@ screen = pygame.display.set_mode(DIMENSIONS)
 blackRect = view.createRectangle(DIMENSIONS)
 
 gameFont = font.GameFont()
+
+swooshSoundPath = os.path.join(SOUNDS_FOLDER, "swoosh.wav")
+swooshSound = pygame.mixer.Sound(swooshSoundPath)
+swooshSound.set_volume(0.4)
 
 # globals
 fixedSprites = None
@@ -225,6 +230,8 @@ class SceneTransitionState:
              
     def execute(self, keyPresses):
         if self.ticks < 32:
+            if self.ticks == 0 and self.transition.type == SCENE_TRANSITION:
+                swooshSound.play()
             sceneZoomIn(self.screenImage, self.ticks)
         elif self.ticks == 32:
             # load the next map
@@ -245,7 +252,7 @@ class SceneTransitionState:
             # setting the direction will also apply masks
             player.setDirection(self.transition.direction)
             # create play state
-            self.nextState = PlayState(self.transition)
+            self.nextState = PlayState(self.createReplayTransition())
             # extract the next image from the state
             self.nextState.drawMapView(self.screenImage, 0)           
         elif self.ticks < 64:
@@ -260,6 +267,14 @@ class SceneTransitionState:
         self.ticks += 1
         return None
 
+    def createReplayTransition(self):
+        return events.ReplayTransition(self.transition.mapName,
+                                       player.mapRect.left,
+                                       player.mapRect.top,
+                                       player.level,
+                                       player.spriteFrames.direction,
+                                       self.transition.boundary)
+
 class BoundaryTransitionState:
     
     def __init__(self, transition):
@@ -271,6 +286,7 @@ class BoundaryTransitionState:
                      
     def execute(self, keyPresses):
         if self.ticks == 0:
+            swooshSound.play()
             self.oldImage = screen.copy()
             # load another map
             nextRpgMap = parser.loadRpgMap(self.transition.mapName)
