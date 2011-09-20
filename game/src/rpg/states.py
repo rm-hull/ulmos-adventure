@@ -62,8 +62,8 @@ def startGame():
     # create the map
     player.rpgMap = parser.loadRpgMap("central")
     # set the start position
-    #player.setTilePosition(30, 21, 3)
     player.setTilePosition(6, 20, 2)
+    #player.setTilePosition(30, 21, 3)
     #player.setTilePosition(5, 3, 4)
 
     # create registry

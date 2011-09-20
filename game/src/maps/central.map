@@ -1055,7 +1055,6 @@
 31,31 water:w2
 
 sprite door 4 6,2
-sprite coin 2 2,18
 sprite coin 2 2,19
 sprite beetle 3 13,23 16,23 16,21 17,21 16,21 16,23
 sprite beetle 4 12,6 12,8 9,8 12,8
