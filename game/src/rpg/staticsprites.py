@@ -10,13 +10,13 @@ class Flames(OtherSprite):
     
     framesImage = None
     
-    def __init__(self, rpgMap):
+    def __init__(self):
         if Flames.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "flame-frames.png")
             Flames.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(Flames.framesImage)
         spriteFrames = StaticFrames(animationFrames, 6)
-        OtherSprite.__init__(self, rpgMap, spriteFrames, (4, 2))
+        OtherSprite.__init__(self, spriteFrames, (4, 2))
 
 class Coin(OtherSprite):
     
@@ -24,13 +24,13 @@ class Coin(OtherSprite):
     
     baseRectSize = (8 * SCALAR, BASE_RECT_HEIGHT)
         
-    def __init__(self, rpgMap):
+    def __init__(self):
         if Coin.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "coin-frames.png")
             Coin.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(Coin.framesImage)
         spriteFrames = StaticFrames(animationFrames, 6)
-        OtherSprite.__init__(self, rpgMap, spriteFrames, (2, 2))
+        OtherSprite.__init__(self, spriteFrames, (2, 2))
         
     def processCollision(self, player):
         event = CoinCollectedEvent(CoinMetadata(self.uid))
@@ -44,13 +44,13 @@ class Key(OtherSprite):
     
     baseRectSize = (8 * SCALAR, BASE_RECT_HEIGHT)
         
-    def __init__(self, rpgMap):
+    def __init__(self):
         if Key.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "key-frames.png")
             Key.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(Key.framesImage, 6)
         spriteFrames = StaticFrames(animationFrames, 6)
-        OtherSprite.__init__(self, rpgMap, spriteFrames, (2, 2))
+        OtherSprite.__init__(self, spriteFrames, (2, 2))
         
     def processCollision(self, player):
         event = KeyCollectedEvent(KeyMetadata(self.uid))
@@ -64,13 +64,13 @@ class Chest(OtherSprite):
     
     baseRectSize = (8 * SCALAR, BASE_RECT_HEIGHT)
         
-    def __init__(self, rpgMap):
+    def __init__(self):
         if Chest.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "chest.png")
             Chest.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(Chest.framesImage, 1)
         spriteFrames = StaticFrames(animationFrames, 6)
-        OtherSprite.__init__(self, rpgMap, spriteFrames)
+        OtherSprite.__init__(self, spriteFrames)
         
     # override
     def advanceFrame(self, increment, metadata):
@@ -82,13 +82,13 @@ class Rock(OtherSprite):
     
     baseRectSize = (8 * SCALAR, BASE_RECT_HEIGHT)
         
-    def __init__(self, rpgMap):
+    def __init__(self):
         if Rock.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "rock.png")
             Rock.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(Rock.framesImage, 1)
         spriteFrames = StaticFrames(animationFrames, 6)
-        OtherSprite.__init__(self, rpgMap, spriteFrames, (0, -4))
+        OtherSprite.__init__(self, spriteFrames, (0, -4))
         
     # override
     def advanceFrame(self, increment, metadata):
@@ -100,13 +100,13 @@ class Door(OtherSprite):
     
     baseRectSize = (4 * SCALAR, BASE_RECT_HEIGHT)    
 
-    def __init__(self, rpgMap):
+    def __init__(self):
         if Door.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "door-frames.png")
             Door.framesImage = view.loadScaledImage(imagePath, None)
         animationFrames = view.processStaticFrames(Door.framesImage, 8)
         spriteFrames = StaticFrames(animationFrames, 6)
-        OtherSprite.__init__(self, rpgMap, spriteFrames)
+        OtherSprite.__init__(self, spriteFrames)
         self.opening = False
         self.frameCount = 0
         self.frameIndex = 0

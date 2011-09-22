@@ -29,8 +29,8 @@ def createSprite(mapSprite, rpgMap, eventBus, registry):
             return None
     if mapSprite.type in spriteClasses:
         spriteClass = spriteClasses[mapSprite.type]
-        sprite = spriteClass(rpgMap)
-        sprite.setUniqueIdentifier(mapSprite.uid, eventBus)
+        sprite = spriteClass()
+        sprite.setup(mapSprite.uid, rpgMap, eventBus)
         return sprite
     print "sprite type not found:", mapSprite.type 
     return None

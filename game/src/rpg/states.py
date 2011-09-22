@@ -1,15 +1,5 @@
 #! /usr/bin/env python
 
-from pygame.locals import *
-
-from events import SCENE_TRANSITION, REPLAY_TRANSITION, BOUNDARY_TRANSITION, GAME_OVER_TRANSITION, END_GAME_TRANSITION
-from view import NONE, UP, DOWN, LEFT, RIGHT, TILE_SIZE, VIEW_WIDTH, VIEW_HEIGHT
-from sprites import MOVE_UNIT
-
-from fixedsprites import FixedCoin, CoinCount, KeyCount, Lives
-from registry import Registry
-from player import Ulmo
-
 import os
 import pygame
 import parser
@@ -18,9 +8,19 @@ import view
 import spritebuilder
 import events
 import font
-from rpg.eventbus import EventBus
-from rpg.sounds import SoundHandler
-from rpg.spritemetadata import MapTransitionEvent
+
+from pygame.locals import *
+
+from sprites import MOVE_UNIT
+from view import NONE, UP, DOWN, LEFT, RIGHT, TILE_SIZE, VIEW_WIDTH, VIEW_HEIGHT
+from events import SCENE_TRANSITION, REPLAY_TRANSITION, BOUNDARY_TRANSITION, GAME_OVER_TRANSITION, END_GAME_TRANSITION
+
+from eventbus import EventBus
+from fixedsprites import FixedCoin, CoinCount, KeyCount, Lives
+from registry import Registry
+from player import Ulmo
+from sounds import SoundHandler
+from spritemetadata import MapTransitionEvent
 
 ORIGIN = (0, 0)
 X_MULT = VIEW_WIDTH // 64
@@ -77,17 +77,17 @@ def startGame():
     # create player
     global player
     player = Ulmo()
-    player.setUniqueIdentifier("ulmo", eventBus)
     player.coinCount = coinCount
     player.keyCount = keyCount
     player.lives = lives
     # create the map
-    player.rpgMap = parser.loadRpgMap("central")
+    rpgMap = parser.loadRpgMap("central")
+    player.setup("ulmo", rpgMap, eventBus)
     # set the start position
     #player.setTilePosition(2, 16, 2)
-    #player.setTilePosition(6, 20, 2)
+    player.setTilePosition(6, 20, 2)
     #player.setTilePosition(30, 21, 3)
-    player.setTilePosition(5, 3, 4)
+    #player.setTilePosition(5, 3, 4)
 
     # return the play state
     return PlayState()

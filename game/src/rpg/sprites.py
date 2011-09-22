@@ -23,10 +23,9 @@ Base sprite class that supports being masked by the map.
 """
 class RpgSprite(pygame.sprite.Sprite):
 
-    def __init__(self, rpgMap, spriteFrames, position = (0, 0)):
+    def __init__(self, spriteFrames, position = (0, 0)):
         pygame.sprite.Sprite.__init__(self)
         # properties common to all RpgSprites
-        self.rpgMap = rpgMap
         self.spriteFrames = spriteFrames
         self.position = [i * SCALAR for i in position]
         self.image, temp = self.spriteFrames.advanceFrame(0)
@@ -39,8 +38,9 @@ class RpgSprite(pygame.sprite.Sprite):
         # indicates if this sprite should be removed on next update
         self.toRemove = False
         
-    def setUniqueIdentifier(self, uid, eventBus):
+    def setup(self, uid, rpgMap, eventBus):
         self.uid = uid
+        self.rpgMap = rpgMap
         self.eventBus = eventBus
         
     def setTilePosition(self, tx, ty, level):
@@ -115,8 +115,8 @@ Base class for any sprites that aren't either the player or a fixed sprite.
 """
 class OtherSprite(RpgSprite):
     
-    def __init__(self, rpgMap, spriteFrames, position = (0, 0)):
-        RpgSprite.__init__(self, rpgMap, spriteFrames, position)
+    def __init__(self, spriteFrames, position = (0, 0)):
+        RpgSprite.__init__(self, spriteFrames, position)
         self.movement = None
     
     def update(self, player, gameSprites, visibleSprites, increment):

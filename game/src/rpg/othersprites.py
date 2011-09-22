@@ -31,13 +31,13 @@ class Beetle(OtherSprite):
     
     baseRectSize = (12 * SCALAR, 12 * SCALAR)    
 
-    def __init__(self, rpgMap):
+    def __init__(self):
         if Beetle.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "beetle-frames.png")
             Beetle.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processMovementFrames(Beetle.framesImage, 2)
         spriteFrames = DirectionalFrames(animationFrames, 12)
-        OtherSprite.__init__(self, rpgMap, spriteFrames)
+        OtherSprite.__init__(self, spriteFrames)
         self.upright = False
 
     def processCollision(self, player):
@@ -82,13 +82,13 @@ class Wasp(OtherSprite):
     
     baseRectSize = (9 * SCALAR, 12 * SCALAR)    
 
-    def __init__(self, rpgMap):
+    def __init__(self):
         if Wasp.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "wasp-frames.png")
             Wasp.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processMovementFrames(Wasp.framesImage, 2)
         spriteFrames = DirectionalFrames(animationFrames, 4)
-        OtherSprite.__init__(self, rpgMap, spriteFrames)
+        OtherSprite.__init__(self, spriteFrames)
         
     def processCollision(self, player):
         print "life lost!"

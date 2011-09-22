@@ -40,7 +40,7 @@ extending MaskSprite, but all animation functionality is encapsulated here.
 class Player(RpgSprite):
     
     def __init__(self, spriteFrames, position = (0, 0)):
-        RpgSprite.__init__(self, None, spriteFrames, position)
+        RpgSprite.__init__(self, spriteFrames, position)
         # view rect is the scrolling window onto the map
         self.viewRect = Rect((0, 0), pygame.display.get_surface().get_size())
         # movement
