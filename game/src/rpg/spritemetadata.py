@@ -1,5 +1,48 @@
 #! /usr/bin/env python
 
+class Event():    
+    def getMetadata(self):
+        pass
+
+class DoorOpeningEvent(Event):
+    pass
+
+class PlayerFootstepEvent(Event):
+    pass
+
+class MapTransitionEvent(Event):
+    pass
+
+class LifeLostEvent(Event):
+    pass
+
+class WaspZoomingEvent(Event):
+    pass
+
+# ==============================================================================
+
+class MetadataEvent(Event):
+    
+    def __init__(self, metadata):
+        self.metadata = metadata
+        
+    def getMetadata(self):
+        return self.metadata
+        
+class CoinCollectedEvent(MetadataEvent):
+    def __init__(self, metadata):
+        MetadataEvent.__init__(self, metadata)
+
+class KeyCollectedEvent(MetadataEvent):
+    def __init__(self, metadata):
+        MetadataEvent.__init__(self, metadata)
+
+class DoorOpenedEvent(MetadataEvent):
+    def __init__(self, metadata):
+        MetadataEvent.__init__(self, metadata)
+
+# ==============================================================================
+
 class SpriteMetadata:
     
     def __init__(self, uid):
@@ -13,11 +56,6 @@ class SpriteMetadata:
     def applyMapActions(self, rpgMap):
         pass
     
-class FlamesMetadata(SpriteMetadata):
-
-    def __init__(self, uid):
-        SpriteMetadata.__init__(self, uid)
-
 class CoinMetadata(SpriteMetadata):
     
     def __init__(self, uid, collected = True):

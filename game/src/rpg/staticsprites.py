@@ -2,14 +2,9 @@
 
 from sprites import *
 
-from spritemetadata import KeyMetadata, CoinMetadata, DoorMetadata
 from spriteframes import StaticFrames
-
-pickupSoundPath = os.path.join(SOUNDS_FOLDER, "pickup.wav")
-pickupSound = pygame.mixer.Sound(pickupSoundPath)
-
-doorSoundPath = os.path.join(SOUNDS_FOLDER, "door.wav")
-doorSound = pygame.mixer.Sound(doorSoundPath)
+from spritemetadata import KeyMetadata, CoinMetadata, DoorMetadata
+from spritemetadata import CoinCollectedEvent, KeyCollectedEvent, DoorOpenedEvent, DoorOpeningEvent
 
 class Flames(OtherSprite):
     
@@ -38,9 +33,8 @@ class Coin(OtherSprite):
         OtherSprite.__init__(self, rpgMap, spriteFrames, (2, 2))
         
     def processCollision(self, player):
-        pickupSound.play()
-        metadata = CoinMetadata(self.uid)
-        self.registry.registerMetadata(metadata)
+        event = CoinCollectedEvent(CoinMetadata(self.uid))
+        self.eventBus.dispatchCoinCollectedEvent(event)
         player.incrementCoinCount()
         self.toRemove = True
 
@@ -59,9 +53,8 @@ class Key(OtherSprite):
         OtherSprite.__init__(self, rpgMap, spriteFrames, (2, 2))
         
     def processCollision(self, player):
-        pickupSound.play()
-        metadata = KeyMetadata(self.uid)
-        self.registry.registerMetadata(metadata)
+        event = KeyCollectedEvent(KeyMetadata(self.uid))
+        self.eventBus.dispatchKeyCollectedEvent(event)
         player.incrementKeyCount()
         self.toRemove = True
 
@@ -139,11 +132,13 @@ class Door(OtherSprite):
     def opened(self):
         metadata = DoorMetadata(self.uid, self.x, self.y, self.level)
         metadata.applyMapActions(self.rpgMap)
-        self.registry.registerMetadata(metadata)
+        event = DoorOpenedEvent(metadata)
+        self.eventBus.dispatchDoorOpenedEvent(event)
         self.toRemove = True
         
     def processAction(self, player):
         if player.getKeyCount() > 0 and not self.opening:
             player.incrementKeyCount(-1)
             self.opening = True
-            doorSound.play()
+            event = DoorOpeningEvent()
+            self.eventBus.dispatchDoorOpeningEvent(event)

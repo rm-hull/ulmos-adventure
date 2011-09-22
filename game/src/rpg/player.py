@@ -5,19 +5,15 @@ import events
 from sprites import *
 from view import UP, DOWN, LEFT, RIGHT
 from spriteframes import DirectionalFrames
+from spritemetadata import PlayerFootstepEvent, LifeLostEvent
 
-DUMMY_EVENT = events.DummyEvent()
+#DUMMY_EVENT = events.DummyEvent()
+PLAYER_FOOTSTEP_EVENT = PlayerFootstepEvent()
+LIFE_LOST_EVENT = LifeLostEvent()
 
 DIAGONAL_TICK = 3
 
 NO_BOUNDARY = 0
-
-lifeLostSoundPath = os.path.join(SOUNDS_FOLDER, "lifelost.wav")
-lifeLostSound = pygame.mixer.Sound(lifeLostSoundPath)
-
-footstepSoundPath = os.path.join(SOUNDS_FOLDER, "footstep.wav")
-footstepSound = pygame.mixer.Sound(footstepSoundPath)
-footstepSound.set_volume(0.5)
 
 """
 Valid movement combinations - movement is keyed on direction bits and is stored
@@ -205,7 +201,7 @@ class Player(RpgSprite):
         self.clearMasks()
         self.image, frameIndex = self.spriteFrames.advanceFrame(direction = myDirection)
         if frameIndex == 1 or frameIndex == 3:
-            footstepSound.play()
+            self.eventBus.dispatchPlayerFootstepEvent(PLAYER_FOOTSTEP_EVENT)
         self.applyMasks()
     
     """
@@ -231,7 +227,7 @@ class Player(RpgSprite):
                 if all(testList):
                     return event
         print "boundary!"
-        return DUMMY_EVENT
+        return None
     
     """
     Returns the boundary that has been breached.
@@ -318,7 +314,7 @@ class Player(RpgSprite):
         return self.keyCount.count;
 
     def loseLife(self, n = -1):
-        lifeLostSound.play()
+        self.eventBus.dispatchLifeLostEvent(LIFE_LOST_EVENT)
         self.lives.incrementCount(n)
         
     def gameOver(self):

@@ -14,7 +14,6 @@ BASE_RECT_HEIGHT = 9 * SCALAR
 BASE_RECT_EXTEND = 1 * SCALAR
 
 SPRITES_FOLDER = "sprites"
-SOUNDS_FOLDER = "sounds"
 
 NO_METADATA = {}
 NO_MOVEMENT = (0, 0, NO_METADATA)
@@ -31,6 +30,7 @@ class RpgSprite(pygame.sprite.Sprite):
         self.spriteFrames = spriteFrames
         self.position = [i * SCALAR for i in position]
         self.image, temp = self.spriteFrames.advanceFrame(0)
+        # indicates if this sprite stands upright
         self.upright = True
         # indicates if this sprite is currently visible
         self.inView = False
@@ -39,9 +39,9 @@ class RpgSprite(pygame.sprite.Sprite):
         # indicates if this sprite should be removed on next update
         self.toRemove = False
         
-    def setUniqueIdentifier(self, uid, registry):
+    def setUniqueIdentifier(self, uid, eventBus):
         self.uid = uid
-        self.registry = registry
+        self.eventBus = eventBus
         
     def setTilePosition(self, tx, ty, level):
         self.x, self.y = tx, ty

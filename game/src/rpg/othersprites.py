@@ -3,6 +3,7 @@
 from sprites import *
 from spriteframes import DirectionalFrames, DIRECTION
 from view import UP, DOWN, LEFT, RIGHT, VIEW_WIDTH, VIEW_HEIGHT
+from rpg.spritemetadata import WaspZoomingEvent
 
 """
 Metadata is used to provide a loose coupling between the sprite movement and
@@ -23,9 +24,6 @@ ZOOM_MOVEMENT = {UP: (0, -2 * MOVE_UNIT, UP_METADATA),
                  DOWN: (0, 2 * MOVE_UNIT, DOWN_METADATA),
                  LEFT: (-2 * MOVE_UNIT, 0, LEFT_METADATA),
                  RIGHT: (2 * MOVE_UNIT, 0, RIGHT_METADATA)}
-
-waspSoundPath = os.path.join(SOUNDS_FOLDER, "wasp.wav")
-waspSound = pygame.mixer.Sound(waspSoundPath)
 
 class Beetle(OtherSprite):
     
@@ -128,6 +126,6 @@ class Wasp(OtherSprite):
             self.countdown -= 1
             if self.countdown == 0:
                 self.zooming = True
-                waspSound.play()
+                self.eventBus.dispatchWaspZoomingEvent(WaspZoomingEvent())
         return NO_MOVEMENT
     

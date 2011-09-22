@@ -9,8 +9,6 @@ class Registry:
     def __init__(self):
         # a map of sprite metadata keyed on uid 
         self.spriteMetadata = {}
-        self.coinCount = 0;
-        self.keyCount = 0;
 
     def registerMetadata(self, spriteMetadata):
         self.spriteMetadata[spriteMetadata.uid] = spriteMetadata
@@ -20,8 +18,13 @@ class Registry:
             return self.spriteMetadata[uid]
         return None
     
-    def incrementCoinCount(self, n = 1):
-        self.coinCount += n
-
-    def incrementKeyCount(self, n = 1):
-        self.keyCount += n
+    # ==========================================================================
+         
+    def coinCollected(self, coinCollectedEvent):
+        self.registerMetadata(coinCollectedEvent.getMetadata())
+        
+    def keyCollected(self, keyCollectedEvent):
+        self.registerMetadata(keyCollectedEvent.getMetadata())
+        
+    def doorOpened(self, doorOpenedEvent):
+        self.registerMetadata(doorOpenedEvent.getMetadata())

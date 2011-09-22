@@ -4,7 +4,7 @@ from pygame.locals import *
 
 from events import SCENE_TRANSITION, REPLAY_TRANSITION, BOUNDARY_TRANSITION, GAME_OVER_TRANSITION, END_GAME_TRANSITION
 from view import NONE, UP, DOWN, LEFT, RIGHT, TILE_SIZE, VIEW_WIDTH, VIEW_HEIGHT
-from sprites import MOVE_UNIT, SOUNDS_FOLDER
+from sprites import MOVE_UNIT
 
 from fixedsprites import FixedCoin, CoinCount, KeyCount, Lives
 from registry import Registry
@@ -18,6 +18,9 @@ import view
 import spritebuilder
 import events
 import font
+from rpg.eventbus import EventBus
+from rpg.sounds import SoundHandler
+from rpg.spritemetadata import MapTransitionEvent
 
 ORIGIN = (0, 0)
 X_MULT = VIEW_WIDTH // 64
@@ -34,42 +37,58 @@ blackRect = view.createRectangle(DIMENSIONS)
 
 gameFont = font.GameFont()
 
-swooshSoundPath = os.path.join(SOUNDS_FOLDER, "swoosh.wav")
-swooshSound = pygame.mixer.Sound(swooshSoundPath)
-swooshSound.set_volume(0.4)
-
 # globals
 fixedSprites = None
 player = None
 registry = None
+eventBus = None
+soundHandler = None
 
 def startGame():
-    # create fixed sprites
+    global eventBus
+    eventBus = EventBus()
+
+    # create registry
+    global registry
+    registry = Registry()
+    eventBus.addCoinCollectedListener(registry)
+    eventBus.addKeyCollectedListener(registry)
+    eventBus.addDoorOpenedListener(registry)
+    
+    global soundHandler
+    soundHandler = SoundHandler()
+    eventBus.addCoinCollectedListener(soundHandler)
+    eventBus.addKeyCollectedListener(soundHandler)
+    eventBus.addDoorOpeningListener(soundHandler)
+    eventBus.addPlayerFootstepListener(soundHandler)
+    eventBus.addMapTransitionListener(soundHandler)
+    eventBus.addLifeLostListener(soundHandler)
+    eventBus.addWaspZoomingListener(soundHandler)
+    
+        # create fixed sprites
     global fixedSprites
     fixedSprites = pygame.sprite.Group()
     fixedCoin = FixedCoin((27, 3))
     coinCount = CoinCount(0, (38, 3))
-    keyCount = KeyCount(0, (VIEW_WIDTH - 3, 3))
+    keyCount = KeyCount(1, (VIEW_WIDTH - 3, 3))
     lives = Lives(2, (3, 3))
     fixedSprites.add(fixedCoin, lives, coinCount, keyCount)
     
     # create player
     global player
     player = Ulmo()
+    player.setUniqueIdentifier("ulmo", eventBus)
     player.coinCount = coinCount
     player.keyCount = keyCount
     player.lives = lives
     # create the map
     player.rpgMap = parser.loadRpgMap("central")
     # set the start position
-    player.setTilePosition(6, 20, 2)
+    #player.setTilePosition(2, 16, 2)
+    #player.setTilePosition(6, 20, 2)
     #player.setTilePosition(30, 21, 3)
-    #player.setTilePosition(5, 3, 4)
+    player.setTilePosition(5, 3, 4)
 
-    # create registry
-    global registry
-    registry = Registry()
-    
     # return the play state
     return PlayState()
 
@@ -119,7 +138,7 @@ class PlayState:
         # add the player to the visible group
         self.visibleSprites = sprites.RpgSprites(player)
         # create more sprites
-        self.gameSprites = spritebuilder.createSpritesForMap(player.rpgMap, registry)
+        self.gameSprites = spritebuilder.createSpritesForMap(player.rpgMap, eventBus, registry)
              
     def execute(self, keyPresses):
         transition = self.getNextTransition(keyPresses)
@@ -231,7 +250,7 @@ class SceneTransitionState:
     def execute(self, keyPresses):
         if self.ticks < 32:
             if self.ticks == 0 and self.transition.type == SCENE_TRANSITION:
-                swooshSound.play()
+                eventBus.dispatchMapTransitionEvent(MapTransitionEvent())
             sceneZoomIn(self.screenImage, self.ticks)
         elif self.ticks == 32:
             # load the next map
@@ -286,7 +305,7 @@ class BoundaryTransitionState:
                      
     def execute(self, keyPresses):
         if self.ticks == 0:
-            swooshSound.play()
+            eventBus.dispatchMapTransitionEvent(MapTransitionEvent())
             self.oldImage = screen.copy()
             # load another map
             nextRpgMap = parser.loadRpgMap(self.transition.mapName)

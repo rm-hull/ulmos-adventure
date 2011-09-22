@@ -20,7 +20,7 @@ Returns a sprite instance based on the given mapSprite.  If the registry
 indicates that the sprite has been removed from the map, this method returns
 None.
 """
-def createSprite(rpgMap, registry, mapSprite):
+def createSprite(mapSprite, rpgMap, eventBus, registry):
     spriteMetadata = registry.getMetadata(mapSprite.uid);
     if spriteMetadata:
         # allow any interactions with the map, eg. an open door
@@ -30,7 +30,7 @@ def createSprite(rpgMap, registry, mapSprite):
     if mapSprite.type in spriteClasses:
         spriteClass = spriteClasses[mapSprite.type]
         sprite = spriteClass(rpgMap)
-        sprite.setUniqueIdentifier(mapSprite.uid, registry)
+        sprite.setUniqueIdentifier(mapSprite.uid, eventBus)
         return sprite
     print "sprite type not found:", mapSprite.type 
     return None
@@ -39,11 +39,11 @@ def createSprite(rpgMap, registry, mapSprite):
 Returns a sprite group for the given map.  This excludes any sprites that are
 removed from the map.
 """
-def createSpritesForMap(rpgMap, registry):
+def createSpritesForMap(rpgMap, eventBus, registry):
     gameSprites = pygame.sprite.Group()
     if rpgMap.mapSprites:
         for mapSprite in rpgMap.mapSprites:
-            sprite = createSprite(rpgMap, registry, mapSprite)
+            sprite = createSprite(mapSprite, rpgMap, eventBus, registry)
             if sprite:
                 sprite.initMovement(mapSprite.level, mapSprite.tilePoints)
                 gameSprites.add(sprite)
