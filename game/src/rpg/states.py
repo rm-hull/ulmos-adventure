@@ -38,11 +38,11 @@ blackRect = view.createRectangle(DIMENSIONS)
 gameFont = font.GameFont()
 
 # globals
+eventBus = None
+registry = None
+soundHandler = None
 fixedSprites = None
 player = None
-registry = None
-eventBus = None
-soundHandler = None
 
 def startGame():
     global eventBus
@@ -64,13 +64,14 @@ def startGame():
     eventBus.addMapTransitionListener(soundHandler)
     eventBus.addLifeLostListener(soundHandler)
     eventBus.addWaspZoomingListener(soundHandler)
+    eventBus.addBeetleCrawlingListener(soundHandler)
     
         # create fixed sprites
     global fixedSprites
     fixedSprites = pygame.sprite.Group()
     fixedCoin = FixedCoin((27, 3))
     coinCount = CoinCount(0, (38, 3))
-    keyCount = KeyCount(1, (VIEW_WIDTH - 3, 3))
+    keyCount = KeyCount(0, (VIEW_WIDTH - 3, 3))
     lives = Lives(2, (3, 3))
     fixedSprites.add(fixedCoin, lives, coinCount, keyCount)
     

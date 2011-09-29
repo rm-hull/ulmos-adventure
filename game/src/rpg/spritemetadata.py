@@ -19,6 +19,9 @@ class LifeLostEvent(Event):
 class WaspZoomingEvent(Event):
     pass
 
+class BeetleCrawlingEvent(Event):
+    pass
+
 # ==============================================================================
 
 class MetadataEvent(Event):

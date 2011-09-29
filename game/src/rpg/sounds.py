@@ -5,29 +5,19 @@ import pygame
 
 SOUNDS_FOLDER = "sounds"
 
-pickupSoundPath = os.path.join(SOUNDS_FOLDER, "pickup.wav")
-pickupSound = pygame.mixer.Sound(pickupSoundPath)
-pickupSound.set_volume(1.0)
+def getSound(name, volume):
+    soundPath = os.path.join(SOUNDS_FOLDER, name)
+    sound = pygame.mixer.Sound(soundPath)
+    sound.set_volume(volume)
+    return sound
 
-doorSoundPath = os.path.join(SOUNDS_FOLDER, "door.wav")
-doorSound = pygame.mixer.Sound(doorSoundPath)
-doorSound.set_volume(1.0)
-
-swooshSoundPath = os.path.join(SOUNDS_FOLDER, "swoosh.wav")
-swooshSound = pygame.mixer.Sound(swooshSoundPath)
-swooshSound.set_volume(0.4)
-
-lifeLostSoundPath = os.path.join(SOUNDS_FOLDER, "lifelost.wav")
-lifeLostSound = pygame.mixer.Sound(lifeLostSoundPath)
-lifeLostSound.set_volume(1.0)
-
-footstepSoundPath = os.path.join(SOUNDS_FOLDER, "footstep.wav")
-footstepSound = pygame.mixer.Sound(footstepSoundPath)
-footstepSound.set_volume(0.5)
-
-waspSoundPath = os.path.join(SOUNDS_FOLDER, "wasp.wav")
-waspSound = pygame.mixer.Sound(waspSoundPath)
-waspSound.set_volume(0.8)
+pickupSound = getSound("pickup.wav", 1.0)
+doorSound = getSound("door.wav", 1.0)
+swooshSound = getSound("swoosh.wav", 0.4)
+lifeLostSound = getSound("lifelost.wav", 1.0)
+footstepSound = getSound("footstep.wav", 0.5)
+waspSound = getSound("wasp.wav", 0.8)
+beetleSound = getSound("beetle.wav", 0.3)
 
 class SoundHandler:
     
@@ -49,5 +39,8 @@ class SoundHandler:
     def lifeLost(self, lifeLostEvent):
         lifeLostSound.play()
     
-    def waspZoom(self, waspZoomEvent):
+    def waspZooming(self, waspZoomingEvent):
         waspSound.play()
+        
+    def beetleCrawling(self, beetleCrawlingEvent):
+        beetleSound.play()

@@ -11,6 +11,8 @@ class EventBus:
         self.mapTransitionListeners = []
         self.lifeLostListeners = []
         self.waspZoomingListeners = []
+        self.waspHoveringListeners = []
+        self.beetleCrawlingListeners = []
         
     def addCoinCollectedListener(self, coinCollectedListener):
         self.coinCollectedListeners.append(coinCollectedListener)
@@ -67,4 +69,11 @@ class EventBus:
     def dispatchWaspZoomingEvent(self, waspZoomingEvent):
         for listener in self.waspZoomingListeners:
             listener.waspZooming(waspZoomingEvent)
+
+    def addBeetleCrawlingListener(self, beetleCrawlingListener):
+        self.beetleCrawlingListeners.append(beetleCrawlingListener)
+
+    def dispatchBeetleCrawlingEvent(self, beetleCrawlingEvent):
+        for listener in self.beetleCrawlingListeners:
+            listener.beetleCrawling(beetleCrawlingEvent)
 

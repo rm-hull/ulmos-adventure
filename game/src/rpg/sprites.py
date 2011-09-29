@@ -97,8 +97,12 @@ class RpgSprite(pygame.sprite.Sprite):
                 [self.image.blit(mask, (px, py)) for mask in masks[tilePoint]]
                 
     def advanceFrame(self, increment, metadata):
-        self.image, temp = self.spriteFrames.advanceFrame(increment, **metadata)
+        self.image, frameIndex = self.spriteFrames.advanceFrame(increment, **metadata)
+        self.playSound(frameIndex)
         
+    def playSound(self, frameIndex):
+        pass
+            
     def isIntersecting(self, sprite):
         if self != sprite and self.level == sprite.level and self.baseRect.colliderect(sprite.baseRect):
             return True

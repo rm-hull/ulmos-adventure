@@ -3,7 +3,7 @@
 from sprites import *
 from spriteframes import DirectionalFrames, DIRECTION
 from view import UP, DOWN, LEFT, RIGHT, VIEW_WIDTH, VIEW_HEIGHT
-from rpg.spritemetadata import WaspZoomingEvent
+from rpg.spritemetadata import WaspZoomingEvent, BeetleCrawlingEvent
 
 """
 Metadata is used to provide a loose coupling between the sprite movement and
@@ -29,8 +29,8 @@ class Beetle(OtherSprite):
     
     framesImage = None
     
-    baseRectSize = (12 * SCALAR, 12 * SCALAR)    
-
+    baseRectSize = (12 * SCALAR, 12 * SCALAR)
+    
     def __init__(self):
         if Beetle.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "beetle-frames.png")
@@ -41,7 +41,6 @@ class Beetle(OtherSprite):
         self.upright = False
 
     def processCollision(self, player):
-        print "life lost!"
         player.loseLife()
         return True
     
@@ -75,7 +74,11 @@ class Beetle(OtherSprite):
             return MOVEMENT[DOWN]
         # otherwise there is nowhere to move to
         return NO_MOVEMENT
-
+    
+    def playSound(self, frameIndex):
+        if frameIndex == 1:
+            self.eventBus.dispatchBeetleCrawlingEvent(BeetleCrawlingEvent())
+        
 class Wasp(OtherSprite):
     
     framesImage = None
@@ -91,7 +94,6 @@ class Wasp(OtherSprite):
         OtherSprite.__init__(self, spriteFrames)
         
     def processCollision(self, player):
-        print "life lost!"
         player.loseLife()
         return True
     
