@@ -104,7 +104,7 @@ class Wasp(OtherSprite):
         self.downRect = Rect(self.baseRect.left, self.baseRect.bottom, self.baseRect.width, VIEW_HEIGHT)
         self.leftRect = Rect(self.baseRect.left - VIEW_WIDTH, self.baseRect.top, VIEW_WIDTH, self.baseRect.height)
         self.rightRect = Rect(self.baseRect.right, self.baseRect.top, VIEW_WIDTH, self.baseRect.height)
-        self.countdown = 8;
+        self.countdown = 10;
         self.zooming = False
         self.direction = None # this is also used to detect if the sprite has 'seen' the player
     

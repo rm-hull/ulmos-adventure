@@ -394,6 +394,8 @@ class EndGameState:
              
     def execute(self, keyPresses):
         if self.ticks < 32:
+            if self.ticks == 0:
+                eventBus.dispatchMapTransitionEvent(MapTransitionEvent())
             sceneZoomIn(self.screenImage, self.ticks)
         elif self.ticks == 32:
             x, y = (VIEW_WIDTH - self.topLine1.get_width()) // 2, 20 * view.SCALAR

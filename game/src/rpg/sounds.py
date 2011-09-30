@@ -5,6 +5,8 @@ import pygame
 
 SOUNDS_FOLDER = "sounds"
 
+BEETLE_SOUND_TICKS = 15
+
 def getSound(name, volume):
     soundPath = os.path.join(SOUNDS_FOLDER, name)
     sound = pygame.mixer.Sound(soundPath)
@@ -17,30 +19,70 @@ swooshSound = getSound("swoosh.wav", 0.4)
 lifeLostSound = getSound("lifelost.wav", 1.0)
 footstepSound = getSound("footstep.wav", 0.5)
 waspSound = getSound("wasp.wav", 0.8)
-beetleSound = getSound("beetle.wav", 0.3)
+beetleSound = getSound("beetle2.wav", 0.2)
 
+"""
+Listens for specific events and builds up a set of sounds that are played back
+when flush is called.
+"""
 class SoundHandler:
     
+    def __init__(self):
+        self.sounds = set()
+        # properties required for 
+        self.nextSound = None
+        self.ready = True
+        self.count = 0
+            
     def coinCollected(self, coinCollectedEvent):
-        pickupSound.play()
+        self.sounds.add(pickupSound)
         
     def keyCollected(self, keyCollectedEvent):
-        pickupSound.play()
+        self.sounds.add(pickupSound)
         
     def doorOpening(self, doorOpeningEvent):
-        doorSound.play()
+        self.sounds.add(doorSound)
         
     def playerFootstep(self, playerFootstepEvent):
-        footstepSound.play()
+        self.sounds.add(footstepSound)
         
     def mapTransition(self, mapTransitionEvent):
-        swooshSound.play()
+        self.sounds.add(swooshSound)
         
     def lifeLost(self, lifeLostEvent):
-        lifeLostSound.play()
+        self.sounds.add(lifeLostSound)
     
     def waspZooming(self, waspZoomingEvent):
-        waspSound.play()
-        
+        self.sounds.add(waspSound)
+    
+    """
+    Additional logic here to prevent a 'log jam' of beetle crawling sounds
+    """    
     def beetleCrawling(self, beetleCrawlingEvent):
-        beetleSound.play()
+        # if we already have a next sound, ignore it
+        if self.nextSound:
+            return
+        # if ready, add the sound to the set for immediate playback
+        if self.ready:
+            self.sounds.add(beetleSound)
+            self.ready = False
+            self.count = 0
+            return
+        # we're not ready yet - store the sound for later
+        self.nextSound = beetleSound
+        
+    def handleNextSound(self):
+        self.count = (self.count + 1) % BEETLE_SOUND_TICKS
+        if self.count == 0:
+            if self.nextSound:
+                self.sounds.add(self.nextSound)
+                self.nextSound = None
+            else:
+                self.ready = True
+        
+    def flush(self):
+        self.handleNextSound()
+        # play sounds
+        for sound in self.sounds:
+            sound.play()
+        self.sounds.clear()

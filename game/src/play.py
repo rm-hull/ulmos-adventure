@@ -26,6 +26,8 @@ def playMain():
         keyPresses = pygame.key.get_pressed()
         # delegate key presses to the current state
         newState = currentState.execute(keyPresses)
+        # flush sounds
+        rpg.states.soundHandler.flush()
         # change state if necessary
         if newState:
             currentState = newState
