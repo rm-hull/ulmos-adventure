@@ -19,7 +19,7 @@ swooshSound = getSound("swoosh.wav", 0.4)
 lifeLostSound = getSound("lifelost.wav", 1.0)
 footstepSound = getSound("footstep.wav", 0.5)
 waspSound = getSound("wasp.wav", 0.8)
-beetleSound = getSound("beetle2.wav", 0.2)
+beetleSound = getSound("beetle.wav", 0.2)
 
 """
 Listens for specific events and builds up a set of sounds that are played back
