@@ -3,8 +3,8 @@
 from sprites import *
 
 from spriteframes import StaticFrames
-from spritemetadata import KeyMetadata, CoinMetadata, DoorMetadata
-from spritemetadata import CoinCollectedEvent, KeyCollectedEvent, DoorOpenedEvent, DoorOpeningEvent
+from events import CoinCollectedEvent, KeyCollectedEvent, DoorOpenedEvent, DoorOpeningEvent
+from events import KeyMetadata, CoinMetadata, DoorMetadata
 
 class Flames(OtherSprite):
     

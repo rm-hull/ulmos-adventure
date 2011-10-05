@@ -5,7 +5,7 @@ import events
 from sprites import *
 from view import UP, DOWN, LEFT, RIGHT
 from spriteframes import DirectionalFrames
-from spritemetadata import PlayerFootstepEvent, LifeLostEvent
+from events import PlayerFootstepEvent, LifeLostEvent
 
 #DUMMY_EVENT = events.DummyEvent()
 PLAYER_FOOTSTEP_EVENT = PlayerFootstepEvent()

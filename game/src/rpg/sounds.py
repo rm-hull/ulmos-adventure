@@ -17,6 +17,7 @@ pickupSound = getSound("pickup.wav", 1.0)
 doorSound = getSound("door.wav", 1.0)
 swooshSound = getSound("swoosh.wav", 0.4)
 lifeLostSound = getSound("lifelost.wav", 1.0)
+endGameSound = getSound("endgame.wav", 0.6)
 footstepSound = getSound("footstep.wav", 0.5)
 waspSound = getSound("wasp.wav", 0.8)
 beetleSound = getSound("beetle.wav", 0.2)
@@ -31,6 +32,7 @@ class SoundHandler:
         self.sounds = set()
         # properties required for 
         self.nextSound = None
+        self.soundOn = True
         self.ready = True
         self.count = 0
             
@@ -48,6 +50,9 @@ class SoundHandler:
         
     def mapTransition(self, mapTransitionEvent):
         self.sounds.add(swooshSound)
+        
+    def endGame(self, endGameEvent):
+        self.sounds.add(endGameSound)
         
     def lifeLost(self, lifeLostEvent):
         self.sounds.add(lifeLostSound)
@@ -84,5 +89,10 @@ class SoundHandler:
         self.handleNextSound()
         # play sounds
         for sound in self.sounds:
-            sound.play()
+            if self.soundOn:
+                sound.play()
         self.sounds.clear()
+        
+    def toggleMute(self):
+        self.soundOn = not self.soundOn
+        

@@ -5,7 +5,7 @@ from __future__ import with_statement
 from view import TILE_SIZE
 
 import view
-import events
+import mapevents
 
 FLOAT_TEST = '.5'
 
@@ -34,12 +34,12 @@ class RpgMap:
         self.boundaryEvents = {}
         self.tileEvents = {}
         for event in mapEvents:
-            if event.type == events.BOUNDARY_EVENT:
+            if event.type == mapevents.BOUNDARY_EVENT:
                 if event.boundary in self.boundaryEvents:
                     self.boundaryEvents[event.boundary].append(event)
                 else:
                     self.boundaryEvents[event.boundary] = [event]
-            elif event.type == events.TILE_EVENT:
+            elif event.type == mapevents.TILE_EVENT:
                 if event.level in self.tileEvents:
                     self.tileEvents[event.level].append(event)
                 else:

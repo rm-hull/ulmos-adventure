@@ -10,6 +10,7 @@ class EventBus:
         self.playerFootstepListeners = []
         self.mapTransitionListeners = []
         self.lifeLostListeners = []
+        self.endGameListeners = []
         self.waspZoomingListeners = []
         self.waspHoveringListeners = []
         self.beetleCrawlingListeners = []
@@ -62,6 +63,13 @@ class EventBus:
     def dispatchLifeLostEvent(self, lifeLostEvent):
         for listener in self.lifeLostListeners:
             listener.lifeLost(lifeLostEvent)
+
+    def addEndGameListener(self, endGameListener):
+        self.endGameListeners.append(endGameListener)
+        
+    def dispatchEndGameEvent(self, endGameEvent):
+        for listener in self.endGameListeners:
+            listener.endGame(endGameEvent)
 
     def addWaspZoomingListener(self, waspZoomingListener):
         self.waspZoomingListeners.append(waspZoomingListener)

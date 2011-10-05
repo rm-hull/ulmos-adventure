@@ -6,21 +6,21 @@ import parser
 import sprites
 import view
 import spritebuilder
-import events
+import mapevents
 import font
 
 from pygame.locals import *
 
 from sprites import MOVE_UNIT
 from view import NONE, UP, DOWN, LEFT, RIGHT, TILE_SIZE, VIEW_WIDTH, VIEW_HEIGHT
-from events import SCENE_TRANSITION, REPLAY_TRANSITION, BOUNDARY_TRANSITION, GAME_OVER_TRANSITION, END_GAME_TRANSITION
+from mapevents import SCENE_TRANSITION, REPLAY_TRANSITION, BOUNDARY_TRANSITION, GAME_OVER_TRANSITION, END_GAME_TRANSITION
 
 from eventbus import EventBus
-from fixedsprites import FixedCoin, CoinCount, KeyCount, Lives
 from registry import Registry
 from player import Ulmo
 from sounds import SoundHandler
-from spritemetadata import MapTransitionEvent
+from events import MapTransitionEvent, EndGameEvent
+from fixedsprites import FixedCoin, CoinCount, KeyCount, Lives
 
 ORIGIN = (0, 0)
 X_MULT = VIEW_WIDTH // 64
@@ -62,6 +62,7 @@ def startGame():
     eventBus.addDoorOpeningListener(soundHandler)
     eventBus.addPlayerFootstepListener(soundHandler)
     eventBus.addMapTransitionListener(soundHandler)
+    eventBus.addEndGameListener(soundHandler)
     eventBus.addLifeLostListener(soundHandler)
     eventBus.addWaspZoomingListener(soundHandler)
     eventBus.addBeetleCrawlingListener(soundHandler)
@@ -185,7 +186,7 @@ class PlayState:
         # the processCollision method returns True to indicate that the player lost a life
         if player.processCollisions(self.visibleSprites.sprites()):
             if player.gameOver():
-                return events.GameOverTransition()
+                return mapevents.GameOverTransition()
             return self.lastTransition
         return None
     
@@ -225,11 +226,11 @@ class PlayState:
             fixedSprites.draw(surface)
     
     def createReplayTransition(self):
-        transition = events.ReplayTransition(player.rpgMap.name,
-                                             player.mapRect.left,
-                                             player.mapRect.top,
-                                             player.level,
-                                             player.spriteFrames.direction)
+        transition = mapevents.ReplayTransition(player.rpgMap.name,
+                                                player.mapRect.left,
+                                                player.mapRect.top,
+                                                player.level,
+                                                player.spriteFrames.direction)
         transition.firstMap = True
         return transition
         
@@ -288,12 +289,12 @@ class SceneTransitionState:
         return None
 
     def createReplayTransition(self):
-        return events.ReplayTransition(self.transition.mapName,
-                                       player.mapRect.left,
-                                       player.mapRect.top,
-                                       player.level,
-                                       player.spriteFrames.direction,
-                                       self.transition.boundary)
+        return mapevents.ReplayTransition(self.transition.mapName,
+                                          player.mapRect.left,
+                                          player.mapRect.top,
+                                          player.level,
+                                          player.spriteFrames.direction,
+                                          self.transition.boundary)
 
 class BoundaryTransitionState:
     
@@ -340,12 +341,12 @@ class BoundaryTransitionState:
         return None
     
     def createReplayTransition(self):
-        return events.ReplayTransition(self.transition.mapName,
-                                       player.mapRect.left,
-                                       player.mapRect.top,
-                                       player.level,
-                                       player.spriteFrames.direction,
-                                       self.boundary)
+        return mapevents.ReplayTransition(self.transition.mapName,
+                                          player.mapRect.left,
+                                          player.mapRect.top,
+                                          player.level,
+                                          player.spriteFrames.direction,
+                                          self.boundary)
 
 class GameOverState:
     
@@ -395,7 +396,7 @@ class EndGameState:
     def execute(self, keyPresses):
         if self.ticks < 32:
             if self.ticks == 0:
-                eventBus.dispatchMapTransitionEvent(MapTransitionEvent())
+                eventBus.dispatchEndGameEvent(EndGameEvent())
             sceneZoomIn(self.screenImage, self.ticks)
         elif self.ticks == 32:
             x, y = (VIEW_WIDTH - self.topLine1.get_width()) // 2, 20 * view.SCALAR

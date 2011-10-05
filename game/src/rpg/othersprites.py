@@ -3,7 +3,7 @@
 from sprites import *
 from spriteframes import DirectionalFrames, DIRECTION
 from view import UP, DOWN, LEFT, RIGHT, VIEW_WIDTH, VIEW_HEIGHT
-from rpg.spritemetadata import WaspZoomingEvent, BeetleCrawlingEvent
+from events import WaspZoomingEvent, BeetleCrawlingEvent
 
 """
 Metadata is used to provide a loose coupling between the sprite movement and
