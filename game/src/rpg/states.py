@@ -31,6 +31,7 @@ DIMENSIONS = (VIEW_WIDTH, VIEW_HEIGHT)
 BOUNDARY_TICKS = {UP: 24, DOWN: 24, LEFT: 14, RIGHT: 14}
 DOORWAY_TICKS = {UP: 16, DOWN: 16, LEFT: 16, RIGHT: 16}
 
+pygame.display.set_caption("Ulmo's Adventure")
 screen = pygame.display.set_mode(DIMENSIONS)
 
 blackRect = view.createRectangle(DIMENSIONS)

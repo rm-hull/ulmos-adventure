@@ -93,6 +93,6 @@ class SoundHandler:
                 sound.play()
         self.sounds.clear()
         
-    def toggleMute(self):
+    def toggleSound(self):
         self.soundOn = not self.soundOn
         

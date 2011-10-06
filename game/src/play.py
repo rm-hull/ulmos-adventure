@@ -24,7 +24,7 @@ def playMain():
                 return
             if event.type == KEYDOWN and event.key == K_x:
                 # mute sound handler
-                rpg.states.soundHandler.toggleMute()
+                rpg.states.soundHandler.toggleSound()
         # detect key presses    
         keyPresses = pygame.key.get_pressed()
         # delegate key presses to the current state
