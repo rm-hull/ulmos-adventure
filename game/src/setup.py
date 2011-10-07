@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name = "rpg-world",
-      version = "1.0",
+      version = "0.92",
       py_modules=["play"],
       packages=["rpg"],
       author="Sam Eldred",
