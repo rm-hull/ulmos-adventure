@@ -6,6 +6,7 @@ class EventBus:
         self.coinCollectedListeners = []
         self.keyCollectedListeners = []
         self.doorOpenedListeners = []
+        self.checkpointReachedListeners = []
         self.doorOpeningListeners = []
         self.playerFootstepListeners = []
         self.mapTransitionListeners = []
@@ -35,6 +36,13 @@ class EventBus:
     def dispatchDoorOpenedEvent(self, doorOpenedEvent):
         for listener in self.doorOpenedListeners:
             listener.doorOpened(doorOpenedEvent)
+
+    def addCheckpointReachedListener(self, checkpointReachedListener):
+        self.checkpointReachedListeners.append(checkpointReachedListener)
+            
+    def dispatchCheckpointReachedEvent(self, checkpointReachedEvent):
+        for listener in self.checkpointReachedListeners:
+            listener.checkpointReached(checkpointReachedEvent)
 
     def addDoorOpeningListener(self, doorOpeningListener):
         self.doorOpeningListeners.append(doorOpeningListener)

@@ -47,6 +47,10 @@ class DoorOpenedEvent(MetadataEvent):
     def __init__(self, metadata):
         MetadataEvent.__init__(self, metadata)
 
+class CheckpointReachedEvent(MetadataEvent):
+    def __init__(self, metadata):
+        MetadataEvent.__init__(self, metadata)
+
 # ==============================================================================
 
 class SpriteMetadata:
@@ -94,3 +98,15 @@ class DoorMetadata(SpriteMetadata):
     # makes the corresponding tile available for this level
     def applyMapActions(self, rpgMap):
         rpgMap.addLevel(self.x, self.y + 1, self.level)
+
+class CheckpointMetadata(SpriteMetadata):
+    
+    def __init__(self, uid, mapName, tilePosition, level):
+        SpriteMetadata.__init__(self, uid)
+        self.mapName = mapName
+        self.tilePosition = tilePosition
+        self.level = level
+
+    def isRemovedFromMap(self):
+        return True
+        

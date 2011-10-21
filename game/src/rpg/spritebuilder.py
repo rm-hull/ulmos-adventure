@@ -3,7 +3,7 @@
 import pygame
 
 from othersprites import Beetle, Wasp
-from staticsprites import Flames, Coin, Key, Chest, Rock, Door
+from staticsprites import Flames, Coin, Key, Chest, Rock, Door, Checkpoint
 
 # map of sprite classes keyed on type
 spriteClasses = {"flames": Flames,
@@ -13,7 +13,8 @@ spriteClasses = {"flames": Flames,
                  "rock": Rock,
                  "door": Door,
                  "beetle": Beetle,
-                 "wasp": Wasp}
+                 "wasp": Wasp,
+                 "checkpoint" : Checkpoint}
 
 """
 Returns a sprite instance based on the given mapSprite.  If the registry

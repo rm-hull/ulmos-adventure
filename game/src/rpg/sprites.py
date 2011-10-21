@@ -44,7 +44,7 @@ class RpgSprite(pygame.sprite.Sprite):
         self.eventBus = eventBus
         
     def setTilePosition(self, tx, ty, level):
-        self.x, self.y = tx, ty
+        self.tilePosition = (tx, ty)
         self.setPixelPosition(tx * TILE_SIZE + self.position[0],
                               ty * TILE_SIZE + self.position[1],
                               level)

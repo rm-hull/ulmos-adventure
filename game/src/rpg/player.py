@@ -301,11 +301,11 @@ class Player(RpgSprite):
     def handleAction(self, sprites):
         self.processActions(sprites)
                     
-    def incrementCoinCount(self, n = 1):
-        self.coinCount.incrementCount(n)
+    def incrementCoinCount(self):
+        self.coinCount.incrementCount()
         
-    def incrementKeyCount(self, n = 1):
-        self.keyCount.incrementCount(n)
+    def incrementKeyCount(self):
+        self.keyCount.incrementCount()
         
     def getCoinCount(self):
         return self.coinCount.count;
@@ -333,5 +333,5 @@ class Ulmo(Player):
             Ulmo.framesImage = view.loadScaledImage(imagePath, None)
         animationFrames = view.processMovementFrames(Ulmo.framesImage)
         spriteFrames = DirectionalFrames(animationFrames, 6)
-        Player.__init__(self, spriteFrames, (1, 4))
+        Player.__init__(self, spriteFrames, (1, -12))
         

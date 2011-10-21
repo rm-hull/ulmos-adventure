@@ -45,16 +45,26 @@ soundHandler = None
 fixedSprites = None
 player = None
 
-def startGame():
+def startGame(cont = False):
     global eventBus
     eventBus = EventBus()
 
     # create registry
     global registry
-    registry = Registry()
+    if cont:
+        registry = registry.snapshot
+    else:
+        registry = Registry("central", (6, 21), 2)
+        #registry = Registry((22, 20), 3)
+        #registry = Registry((30, 22), 3)
+        #registry = Registry((5, 8), 4)
+    # ensure we have a snapshot for next time
+    registry.takeSnapshot()
+    # add event listeners
     eventBus.addCoinCollectedListener(registry)
     eventBus.addKeyCollectedListener(registry)
     eventBus.addDoorOpenedListener(registry)
+    eventBus.addCheckpointReachedListener(registry)
     
     global soundHandler
     soundHandler = SoundHandler()
@@ -72,8 +82,8 @@ def startGame():
     global fixedSprites
     fixedSprites = pygame.sprite.Group()
     fixedCoin = FixedCoin((27, 3))
-    coinCount = CoinCount(0, (38, 3))
-    keyCount = KeyCount(0, (VIEW_WIDTH - 3, 3))
+    coinCount = CoinCount(registry.coinCount, (38, 3))
+    keyCount = KeyCount(registry.keyCount, (VIEW_WIDTH - 3, 3))
     lives = Lives(2, (3, 3))
     fixedSprites.add(fixedCoin, lives, coinCount, keyCount)
     
@@ -84,13 +94,12 @@ def startGame():
     player.keyCount = keyCount
     player.lives = lives
     # create the map
-    rpgMap = parser.loadRpgMap("central")
+    rpgMap = parser.loadRpgMap(registry.mapName)
     player.setup("ulmo", rpgMap, eventBus)
     # set the start position
-    #player.setTilePosition(2, 16, 2)
-    player.setTilePosition(6, 20, 2)
-    #player.setTilePosition(30, 21, 3)
-    #player.setTilePosition(5, 3, 4)
+    player.setTilePosition(registry.playerPosition[0],
+                           registry.playerPosition[1],
+                           registry.playerLevel)
 
     # return the play state
     return PlayState()
@@ -134,8 +143,10 @@ class PlayState:
     def __init__(self, lastTransition = None):
         # we need this if the player loses a life
         self.lastTransition = lastTransition
-        if lastTransition == None:
+        if self.lastTransition == None:
             self.lastTransition = self.createReplayTransition()
+        if not self.lastTransition.firstMap:
+            registry.checkpoint = None
         # must set the player map + position before we create this state
         player.updateViewRect()
         # add the player to the visible group
@@ -264,17 +275,19 @@ class SceneTransitionState:
                 player.setPixelPosition(self.transition.pixelPosition[0],
                                         self.transition.pixelPosition[1],
                                         self.transition.level)
-                # player is already hidden
+                # create play state
+                self.nextState = PlayState(self.transition)
             else: # self.transition.type == SCENE_TRANSITION    
                 player.setTilePosition(self.transition.tilePosition[0],
                                        self.transition.tilePosition[1],
                                        self.transition.level)
-                if self.transition.boundary:
-                    hidePlayer(self.transition.boundary, nextRpgMap.mapRect)
+                # create play state
+                self.nextState = PlayState(self.createReplayTransition())
+            # hide player if required
+            if self.transition.boundary:
+                hidePlayer(self.transition.boundary, nextRpgMap.mapRect)
             # setting the direction will also apply masks
             player.setDirection(self.transition.direction)
-            # create play state
-            self.nextState = PlayState(self.createReplayTransition())
             # extract the next image from the state
             self.nextState.drawMapView(self.screenImage, 0)           
         elif self.ticks < 64:
@@ -358,17 +371,28 @@ class GameOverState:
         self.ticks = 0
         self.topLine1 = gameFont.getTextImage("BRAVE ADVENTURER")
         self.topLine2 = gameFont.getTextImage("YOU ARE DEAD")
-        self.lowLine1 = gameFont.getTextImage("PRESS ANY KEY")
+        self.topLine3 = gameFont.getTextImage("CONTINUE... 10")
+        self.lowLine1 = gameFont.getTextImage("PRESS SPACE")
         self.lowLine2 = gameFont.getTextImage("TO PLAY AGAIN")
+        self.blackRect = view.createRectangle(self.topLine3.get_size(), view.BLACK)
+        self.countdown = None
+        self.countdownTopleft = None
              
     def execute(self, keyPresses):
+        if self.countdown:
+            if (self.ticks - 64) % 60 == 0:
+                self.updateCountdown()                
         if self.ticks < 32:
             sceneZoomIn(self.screenImage, self.ticks)
         elif self.ticks == 32:
-            x, y = (VIEW_WIDTH - self.topLine1.get_width()) // 2, 32 * view.SCALAR
+            x, y = (VIEW_WIDTH - self.topLine1.get_width()) // 2, 20 * view.SCALAR
             screen.blit(self.topLine1, (x, y))
-            x, y = (VIEW_WIDTH - self.topLine2.get_width()) // 2, 44 * view.SCALAR
+            x, y = (VIEW_WIDTH - self.topLine2.get_width()) // 2, 32 * view.SCALAR
             screen.blit(self.topLine2, (x, y))
+            x, y = (VIEW_WIDTH - self.topLine3.get_width()) // 2, 44 * view.SCALAR
+            screen.blit(self.topLine3, (x, y))
+            # set the countdown topleft for later
+            self.countdownTopleft = (x, y)
             pygame.display.flip()
         elif self.ticks == 64:
             x, y = (VIEW_WIDTH - self.lowLine1.get_width()) // 2, VIEW_HEIGHT - 42 * view.SCALAR
@@ -376,11 +400,24 @@ class GameOverState:
             x, y = (VIEW_WIDTH - self.lowLine2.get_width()) // 2, VIEW_HEIGHT - 30 * view.SCALAR
             screen.blit(self.lowLine2, (x, y))
             pygame.display.flip()
+            self.countdown = 10
         elif self.ticks > 64:
-            keysPressed = [key for key in keyPresses if key]
-            if len(keysPressed) > 0:
+            if keyPresses[K_SPACE]:
+                if self.countdown:
+                    return startGame(True)
                 return startGame()
         self.ticks += 1
+        
+    def updateCountdown(self):
+        self.countdown = self.countdown - 1
+        countdownLine = gameFont.getTextImage("CONTINUE... " + str(self.countdown))
+        #x, y = (VIEW_WIDTH - self.topLine3.get_width()) // 2, 44 * view.SCALAR
+        screen.blit(self.blackRect, self.countdownTopleft)
+        if self.countdown > 0:
+            screen.blit(countdownLine, self.countdownTopleft)
+        else:
+            self.countdown = None
+        pygame.display.flip()
 
 class EndGameState:
     
@@ -391,7 +428,7 @@ class EndGameState:
         self.topLine1 = gameFont.getTextImage("YOUR ADVENTURE IS")
         self.topLine2 = gameFont.getTextImage("AT AN END... FOR NOW!")
         self.topLine3 = gameFont.getTextImage("YOU FOUND " + str(player.getCoinCount()) + "/10 COINS");
-        self.lowLine1 = gameFont.getTextImage("PRESS ANY KEY")
+        self.lowLine1 = gameFont.getTextImage("PRESS SPACE")
         self.lowLine2 = gameFont.getTextImage("TO PLAY AGAIN")
              
     def execute(self, keyPresses):
@@ -414,8 +451,7 @@ class EndGameState:
             screen.blit(self.lowLine2, (x, y))
             pygame.display.flip()
         elif self.ticks > 64:
-            keysPressed = [key for key in keyPresses if key]
-            if len(keysPressed) > 0:
+            if keyPresses[K_SPACE]:
                 return startGame()
         self.ticks += 1
         

@@ -3,8 +3,8 @@
 from sprites import *
 
 from spriteframes import StaticFrames
-from events import CoinCollectedEvent, KeyCollectedEvent, DoorOpenedEvent, DoorOpeningEvent
-from events import KeyMetadata, CoinMetadata, DoorMetadata
+from events import CoinCollectedEvent, KeyCollectedEvent, DoorOpenedEvent, DoorOpeningEvent, CheckpointReachedEvent
+from events import KeyMetadata, CoinMetadata, DoorMetadata, CheckpointMetadata
 
 class Flames(OtherSprite):
     
@@ -142,3 +142,25 @@ class Door(OtherSprite):
             self.opening = True
             event = DoorOpeningEvent()
             self.eventBus.dispatchDoorOpeningEvent(event)
+
+class Checkpoint(OtherSprite):
+    
+    framesImage = None
+    
+    baseRectSize = (8 * SCALAR, BASE_RECT_HEIGHT)
+        
+    def __init__(self):
+        if Checkpoint.framesImage is None:    
+            imagePath = os.path.join(SPRITES_FOLDER, "check-frames.png")
+            Checkpoint.framesImage = view.loadScaledImage(imagePath, None)        
+        animationFrames = view.processStaticFrames(Checkpoint.framesImage, 4)
+        spriteFrames = StaticFrames(animationFrames, 12)
+        OtherSprite.__init__(self, spriteFrames, (3, -3))
+        
+    def processCollision(self, player):
+        event = CheckpointReachedEvent(CheckpointMetadata(self.uid,
+                                                          self.rpgMap.name,
+                                                          self.tilePosition,
+                                                          self.level))
+        self.eventBus.dispatchCheckpointReachedEvent(event)
+        self.toRemove = True
