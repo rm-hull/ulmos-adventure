@@ -55,9 +55,9 @@ def startGame(cont = False):
         registry = registry.snapshot
     else:
         registry = Registry("central", (6, 21), 2)
-        #registry = Registry((22, 20), 3)
-        #registry = Registry((30, 22), 3)
-        #registry = Registry((5, 8), 4)
+        #registry = Registry("central", (22, 20), 3)
+        #registry = Registry("central", (30, 22), 3)
+        #registry = Registry("central", (5, 8), 4)
     # ensure we have a snapshot for next time
     registry.takeSnapshot()
     # add event listeners
@@ -77,6 +77,7 @@ def startGame(cont = False):
     eventBus.addLifeLostListener(soundHandler)
     eventBus.addWaspZoomingListener(soundHandler)
     eventBus.addBeetleCrawlingListener(soundHandler)
+    eventBus.addCheckpointReachedListener(soundHandler)
     
         # create fixed sprites
     global fixedSprites

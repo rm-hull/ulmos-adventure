@@ -15,6 +15,7 @@ def getSound(name, volume):
 
 pickupSound = getSound("pickup.wav", 1.0)
 doorSound = getSound("door.wav", 1.0)
+checkpointSound = getSound("checkpoint.wav", 0.6)
 swooshSound = getSound("swoosh.wav", 0.4)
 lifeLostSound = getSound("lifelost.wav", 1.0)
 endGameSound = getSound("endgame.wav", 0.6)
@@ -44,6 +45,9 @@ class SoundHandler:
         
     def doorOpening(self, doorOpeningEvent):
         self.sounds.add(doorSound)
+        
+    def checkpointReached(self, checkpointEvent):
+        self.sounds.add(checkpointSound)
         
     def playerFootstep(self, playerFootstepEvent):
         self.sounds.add(footstepSound)
