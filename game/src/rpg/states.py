@@ -54,6 +54,7 @@ def startGame(cont = False):
     if cont:
         registry = registry.snapshot
     else:
+        #registry = Registry("unit", (4, 6), 1)
         registry = Registry("central", (6, 21), 2)
         #registry = Registry("central", (22, 20), 3)
         #registry = Registry("central", (30, 22), 3)

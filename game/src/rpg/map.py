@@ -4,12 +4,9 @@ from __future__ import with_statement
 
 from view import TILE_SIZE
 
+import math
 import view
 import mapevents
-
-FLOAT_TEST = '.5'
-
-UPPER_LIMIT = 32
 
 MIN_SHUFFLE = (0, -1, -1, 1)
 MAX_SHUFFLE = (-1, 1, 0, -1)
@@ -103,16 +100,16 @@ class RpgMap:
         specialLevels = []
         # iterate through base tiles and gather information
         for tile in spanTiles:
-            if tile:
-                if level in tile.levels:
-                    sameLevelCount += 1
-                elif level in tile.specialLevels:
-                    sameLevelCount += 1
-                    specialLevels.append(level)                
-                else:
-                    specialLevel = tile.getSpecialLevel(level)
-                    if specialLevel:
-                        specialLevels.append(specialLevel)
+            if not tile:
+                continue
+            if level in tile.levels:
+                sameLevelCount += 1
+            else:
+                specialLevel = tile.getSpecialLevel(level)
+                if specialLevel:
+                    if specialLevel == level:
+                        sameLevelCount += 1
+                    specialLevels.append(specialLevel)
         # test validity of the requested movement           
         if sameLevelCount == len(spanTiles):
             return True, level
@@ -121,9 +118,9 @@ class RpgMap:
             maxLevel = max(specialLevels)
             if maxLevel - minLevel < 1:
                 # quick check to ensure we return a whole number if possible
-                if FLOAT_TEST in str(maxLevel):
-                    return True, minLevel
-                return True, maxLevel
+                if int(maxLevel) == maxLevel:
+                    return True, maxLevel
+                return True, minLevel
         return False, level
                     
     def isMoveValid(self, level, baseRect):
@@ -158,8 +155,8 @@ class RpgMap:
                                   baseRect.top, baseRect.bottom)
 
     """
-    The given sprite must contain mapRect, level and z attributes.  Typically this
-    object will be the sprite itself, but for ease of unit testing it can be anything.
+    The given sprite must contain mapRect, level, z and upright attributes.  Typically
+    this object will be a real sprite, but for ease of unit testing it can be anything.
     """
     def getMasks(self, sprite):
         spriteTiles = self.getSpanTiles(sprite.mapRect)
@@ -232,7 +229,8 @@ class MapTile:
     def __init__(self, x, y):
         self.x, self.y = x, y
         self.levels = []
-        self.specialLevels = []
+        #self.specialLevels = []
+        self.specialLevels = {}
         self.tiles = []
         self.masks = []
         
@@ -240,7 +238,11 @@ class MapTile:
         self.levels.append(level)
         
     def addSpecialLevel(self, level):
-        self.specialLevels.append(level)
+        if int(level) == level:
+            self.specialLevels[level] = level
+        else:
+            self.specialLevels[math.floor(level)] = level
+            self.specialLevels[math.ceil(level)] = level
         
     def addTile(self, tile):
         self.tiles.append(tile)
@@ -261,15 +263,14 @@ class MapTile:
         return self.tiles[0]
     
     def getSpecialLevel(self, level):
-        nearestLevel = None
-        difference = UPPER_LIMIT
-        for sl in self.specialLevels:
-            testDifference = abs(sl - level)
-            if testDifference < difference:
-                difference = testDifference
-                nearestLevel = sl
-        if difference < 1:
-            return nearestLevel
+        if level in self.specialLevels:
+            return self.specialLevels[level]
+        key = math.floor(level)
+        if key in self.specialLevels:
+            return self.specialLevels[key]
+        key = math.ceil(level)
+        if key in self.specialLevels:
+            return self.specialLevels[key]
         return None
     
     def getMasks(self, spriteLevel, spriteZ, spriteUpright):

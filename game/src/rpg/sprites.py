@@ -70,7 +70,7 @@ class RpgSprite(pygame.sprite.Sprite):
         baseRectTop = self.getBaseRectTop(baseRectHeight)
         baseRectLeft = (self.mapRect.width - baseRectWidth) / 2
         self.baseRect = Rect(baseRectLeft, baseRectTop, baseRectWidth, baseRectHeight)
-        # print self.uid, self.baseRect.width, self.baseRect.height
+        # print self.uid, self.mapRect, self.baseRect
         
     def getBaseRectTop(self, baseRectHeight):
         return self.mapRect.bottom - baseRectHeight
@@ -80,6 +80,7 @@ class RpgSprite(pygame.sprite.Sprite):
         self.baseRect.move_ip(px, py)
         # a pseudo z order is used to test if one sprite is behind another
         self.z = int(self.mapRect.bottom + self.level * TILE_SIZE)
+        # print self.uid, self.mapRect, self.baseRect
 
     def clearMasks(self):
         if self.masked:
