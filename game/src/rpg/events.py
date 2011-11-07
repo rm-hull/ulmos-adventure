@@ -25,6 +25,9 @@ class WaspZoomingEvent(Event):
 class BeetleCrawlingEvent(Event):
     pass
 
+class KeyUsedEvent(Event):
+    pass
+        
 # ==============================================================================
 
 class MetadataEvent(Event):
@@ -42,7 +45,7 @@ class CoinCollectedEvent(MetadataEvent):
 class KeyCollectedEvent(MetadataEvent):
     def __init__(self, metadata):
         MetadataEvent.__init__(self, metadata)
-
+        
 class DoorOpenedEvent(MetadataEvent):
     def __init__(self, metadata):
         MetadataEvent.__init__(self, metadata)
@@ -60,53 +63,35 @@ class SpriteMetadata:
     
     # placeholder method    
     def isRemovedFromMap(self):
-        return False
+        return True
     
     # placeholder method
     def applyMapActions(self, rpgMap):
         pass
     
-class CoinMetadata(SpriteMetadata):
-    
-    def __init__(self, uid, collected = True):
+class CoinMetadata(SpriteMetadata):    
+    def __init__(self, uid):
         SpriteMetadata.__init__(self, uid)
-        self.collected = collected
-
-    def isRemovedFromMap(self):
-        return self.collected
         
 class KeyMetadata(SpriteMetadata):
-
-    def __init__(self, uid, collected = True):
+    def __init__(self, uid):
         SpriteMetadata.__init__(self, uid)
-        self.collected = collected
-        
-    def isRemovedFromMap(self):
-        return self.collected
 
 class DoorMetadata(SpriteMetadata):
     
-    def __init__(self, uid, x, y, level, open = True):
+    def __init__(self, uid, tilePosition, level):
         SpriteMetadata.__init__(self, uid)
-        self.x, self.y = x, y
+        self.x, self.y = tilePosition[0], tilePosition[1]
         self.level = level
-        self.open = open
 
-    def isRemovedFromMap(self):
-        return self.open
-    
     # makes the corresponding tile available for this level
     def applyMapActions(self, rpgMap):
         rpgMap.addLevel(self.x, self.y + 1, self.level)
 
-class CheckpointMetadata(SpriteMetadata):
-    
+class CheckpointMetadata(SpriteMetadata):    
     def __init__(self, uid, mapName, tilePosition, level):
         SpriteMetadata.__init__(self, uid)
         self.mapName = mapName
         self.tilePosition = tilePosition
         self.level = level
-
-    def isRemovedFromMap(self):
-        return True
         

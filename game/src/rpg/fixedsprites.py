@@ -44,8 +44,8 @@ class CoinCount(FixedSprite):
         newImage = self.font.getTextImage(str(self.count))
         self.setImage(newImage)
         
-    def incrementCount(self):
-        self.count += 1
+    def incrementCount(self, n = 1):
+        self.count += n
         self.newImage()
         print "coins:", self.count
 
@@ -71,8 +71,8 @@ class KeyCount(FixedSprite):
         self.setImage(newImage)
         self.rect.left = VIEW_WIDTH - (3 + self.count * 8) * SCALAR
 
-    def incrementCount(self):
-        self.count += 1
+    def incrementCount(self, n = 1):
+        self.count += n
         self.newImage()
         print "keys:", self.count
 

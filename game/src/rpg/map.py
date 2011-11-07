@@ -24,24 +24,10 @@ class RpgMap:
         self.mapSprites = mapSprites
         self.cols = len(self.mapTiles)
         self.rows = len(self.mapTiles[0])
-        self.initialiseEvents(mapEvents)
         self.initialiseMapImage()
+        self.initialiseEvents(mapEvents)
+        self.event = None
         
-    def initialiseEvents(self, mapEvents):
-        self.boundaryEvents = {}
-        self.tileEvents = {}
-        for event in mapEvents:
-            if event.type == mapevents.BOUNDARY_EVENT:
-                if event.boundary in self.boundaryEvents:
-                    self.boundaryEvents[event.boundary].append(event)
-                else:
-                    self.boundaryEvents[event.boundary] = [event]
-            elif event.type == mapevents.TILE_EVENT:
-                if event.level in self.tileEvents:
-                    self.tileEvents[event.level].append(event)
-                else:
-                    self.tileEvents[event.level] = [event]
-                
     def initialiseMapImage(self):
         self.mapImage = view.createRectangle((self.cols * view.TILE_SIZE,
                                               self.rows * view.TILE_SIZE),
@@ -53,8 +39,23 @@ class RpgMap:
                     tileImage = mapTile.createTileImage()
                     if tileImage:
                         self.mapImage.blit(tileImage, (x * view.TILE_SIZE, y * view.TILE_SIZE))
+                else:
+                    # guarantee we always have a map tile
+                    self.mapTiles[x][y] = MapTile(x, y)
         self.mapRect = self.mapImage.get_rect()
     
+    def initialiseEvents(self, mapEvents):
+        self.boundaryEvents = {}
+        self.tileEvents = {}
+        for event in mapEvents:
+            if event.type == mapevents.TILE_EVENT:
+                self.mapTiles[event.x][event.y].addEvent(event)
+            elif event.type == mapevents.BOUNDARY_EVENT:
+                if event.boundary in self.boundaryEvents:
+                    self.boundaryEvents[event.boundary].append(event)
+                else:
+                    self.boundaryEvents[event.boundary] = [event]
+                
     def getMapView(self, viewRect):
         return self.mapImage.subsurface(viewRect)
     
@@ -98,18 +99,14 @@ class RpgMap:
         # baseTiles = self.getRectTiles(baseRect)
         sameLevelCount = 0
         specialLevels = []
+        event = None
         # iterate through base tiles and gather information
         for tile in spanTiles:
-            if not tile:
-                continue
-            if level in tile.levels:
-                sameLevelCount += 1
-            else:
-                specialLevel = tile.getSpecialLevel(level)
-                if specialLevel:
-                    if specialLevel == level:
-                        sameLevelCount += 1
-                    specialLevels.append(specialLevel)
+            increment, specialLevel, event = tile.testValidity(level)
+            sameLevelCount += increment
+            if specialLevel:
+                specialLevels.append(specialLevel)
+        self.event = event
         # test validity of the requested movement           
         if sameLevelCount == len(spanTiles):
             return True, level
@@ -117,12 +114,12 @@ class RpgMap:
             minLevel = min(specialLevels)
             maxLevel = max(specialLevels)
             if maxLevel - minLevel < 1:
-                # quick check to ensure we return a whole number if possible
-                if int(maxLevel) == maxLevel:
-                    return True, maxLevel
-                return True, minLevel
+                # ensure we return a whole number if possible
+                retLevel = maxLevel if int(maxLevel) == maxLevel else minLevel 
+                return True, retLevel
+        self.event = None
         return False, level
-                    
+    
     def isMoveValid(self, level, baseRect):
         return self.isSpanValid(level, self.getBaseRectTiles(baseRect))
     
@@ -229,27 +226,36 @@ class MapTile:
     def __init__(self, x, y):
         self.x, self.y = x, y
         self.levels = []
-        #self.specialLevels = []
-        self.specialLevels = {}
         self.tiles = []
-        self.masks = []
+        self.specialLevels = None
+        self.masks = None
+        self.events = None
         
     def addLevel(self, level):
         self.levels.append(level)
         
+    def addTile(self, tile):
+        self.tiles.append(tile)
+        
     def addSpecialLevel(self, level):
+        if not self.specialLevels:
+            self.specialLevels = {}
         if int(level) == level:
             self.specialLevels[level] = level
         else:
             self.specialLevels[math.floor(level)] = level
             self.specialLevels[math.ceil(level)] = level
         
-    def addTile(self, tile):
-        self.tiles.append(tile)
-        
     def addMask(self, tileIndex, level, flat = True):
+        if not self.masks:
+            self.masks = []
         self.masks.append(MaskInfo(tileIndex, level, flat, self.y))
         
+    def addEvent(self, event):
+        if not self.events:
+            self.events = []
+        self.events.append(event)
+            
     def createTileImage(self):
         if len(self.tiles) == 0:
             return None
@@ -262,7 +268,19 @@ class MapTile:
             return tileImage
         return self.tiles[0]
     
+    def testValidity(self, level):
+        if level in self.levels:
+            return 1, None, self.getEvent(level)
+        specialLevel = self.getSpecialLevel(level)
+        if specialLevel:
+            if specialLevel == level:
+                return 1, specialLevel, self.getEvent(level)
+            return 0, specialLevel, self.getEvent(level)
+        return 0, None, None
+    
     def getSpecialLevel(self, level):
+        if not self.specialLevels:
+            return None
         if level in self.specialLevels:
             return self.specialLevels[level]
         key = math.floor(level)
@@ -273,8 +291,16 @@ class MapTile:
             return self.specialLevels[key]
         return None
     
+    def getEvent(self, level):
+        if not self.events:
+            return None
+        for event in self.events:
+            if event.level == level:
+                return event
+        return None
+    
     def getMasks(self, spriteLevel, spriteZ, spriteUpright):
-        if len(self.masks) == 0:
+        if not self.masks:
             return None
         masks = []
         for maskInfo in self.masks:
@@ -293,10 +319,11 @@ class MapTile:
     def __str__(self):
         result = "<MapTile:\
          [" + str(self.x) + "," + str(self.y) + "]\
-         tiles=" + str(len(self.tiles)) + "\
-         levels=" + str(self.levels) + "\
-         specialLevels=" + str(self.specialLevels) + "\
-         masks=" + str(self.masks) + "\
+ tiles=" + str(len(self.tiles)) + "\
+ levels=" + str(self.levels) + "\
+ specialLevels=" + str(self.specialLevels) + "\
+ events=" + str(self.events) + "\
+ masks=" + str(self.masks) + "\
         >"       
         return result
 

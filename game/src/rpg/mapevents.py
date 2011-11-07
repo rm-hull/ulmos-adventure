@@ -1,8 +1,5 @@
 #! /usr/bin/env python
 
-from pygame.locals import Rect
-from view import TILE_SIZE
-
 DUMMY_EVENT = 0
 TILE_EVENT = 1
 BOUNDARY_EVENT = 2
@@ -40,12 +37,12 @@ class DummyEvent(MapEvent):
         self.boundary = boundary
 
 """
-Defines an event that occurs when the player steps on a listed tile.
+Defines an event that occurs when the player steps on a tile that has an event.
 """
 class TileEvent(MapEvent):
     def __init__(self, transition, x, y, level):
         MapEvent.__init__(self, TILE_EVENT, transition)
-        self.rect = Rect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE)
+        self.x, self.y = x, y
         self.level = level
 
 """

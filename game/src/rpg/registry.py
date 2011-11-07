@@ -51,7 +51,10 @@ class Registry:
     def keyCollected(self, keyCollectedEvent):
         self.registerMetadata(keyCollectedEvent.getMetadata())
         self.keyCount += 1
-        
+    
+    def keyUsed(self, keyUsedEvent):
+        self.keyCount -= 1
+            
     def doorOpened(self, doorOpenedEvent):
         self.registerMetadata(doorOpenedEvent.getMetadata())
         

@@ -260,11 +260,7 @@ class Player(RpgSprite):
     Processes events triggered via event tiles.
     """
     def processEvents(self):
-        if self.level in self.rpgMap.tileEvents:
-            for event in self.rpgMap.tileEvents[self.level]:
-                if self.baseRect.colliderect(event.rect):
-                    return event
-        return None
+        return self.rpgMap.event
     
     """
     Processes collisions with other sprites in the given sprite collection.
@@ -307,15 +303,18 @@ class Player(RpgSprite):
     def incrementKeyCount(self):
         self.keyCount.incrementCount()
         
+    def decrementKeyCount(self):
+        self.keyCount.incrementCount(-1)
+        
     def getCoinCount(self):
         return self.coinCount.count;
 
     def getKeyCount(self):
         return self.keyCount.count;
 
-    def loseLife(self, n = -1):
+    def loseLife(self):
         self.eventBus.dispatchLifeLostEvent(LIFE_LOST_EVENT)
-        self.lives.incrementCount(n)
+        self.lives.incrementCount(-1)
         
     def gameOver(self):
         return self.lives.noneLeft()

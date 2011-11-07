@@ -362,19 +362,19 @@ class MovementValidTest(unittest.TestCase):
         # [1] [ ]
         baseRect.move_ip(0, 16)
         self.assertEqual(2, len(rpgMap.getSpanTiles(baseRect)))
-        self.assertEqual(False, all(rpgMap.getSpanTiles(baseRect)))
+        self.assertEqual(True, all(rpgMap.getSpanTiles(baseRect)))
         self.assertEqual((False, 1), rpgMap.isMoveValid(1, baseRect))
         self.assertEqual((False, 2), rpgMap.isMoveValid(2, baseRect))
         # [ ]
         baseRect.move_ip(0, 16)
         self.assertEqual(1, len(rpgMap.getSpanTiles(baseRect)))
-        self.assertEqual(False, all(rpgMap.getSpanTiles(baseRect)))
+        self.assertEqual(True, all(rpgMap.getSpanTiles(baseRect)))
         self.assertEqual((False, 1), rpgMap.isMoveValid(1, baseRect))
         self.assertEqual((False, 2), rpgMap.isMoveValid(2, baseRect))
         # [ ] [1]
         baseRect.move_ip(0, 16)
         self.assertEqual(2, len(rpgMap.getSpanTiles(baseRect)))
-        self.assertEqual(False, all(rpgMap.getSpanTiles(baseRect)))
+        self.assertEqual(True, all(rpgMap.getSpanTiles(baseRect)))
         self.assertEqual((False, 1), rpgMap.isMoveValid(1, baseRect))
         self.assertEqual((False, 2), rpgMap.isMoveValid(2, baseRect))
         # [1]

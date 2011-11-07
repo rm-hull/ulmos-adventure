@@ -280,6 +280,6 @@ sprite beetle 1 8,5 8,8 12,8 12,5
 sprite beetle 1 8,7 4,7 4,4 8,4 8,8 12,8 12,5 8,5
 sprite coin 1 12,12
 
-event boundary down 7 : transition central 6,1 4 down
+event boundary down 7 : transition central 6,2 4 down
 event boundary up 8 : end
 

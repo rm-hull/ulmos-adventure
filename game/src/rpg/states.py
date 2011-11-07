@@ -64,6 +64,7 @@ def startGame(cont = False):
     # add event listeners
     eventBus.addCoinCollectedListener(registry)
     eventBus.addKeyCollectedListener(registry)
+    eventBus.addKeyUsedListener(registry)
     eventBus.addDoorOpenedListener(registry)
     eventBus.addCheckpointReachedListener(registry)
     
@@ -413,7 +414,6 @@ class GameOverState:
     def updateCountdown(self):
         self.countdown = self.countdown - 1
         countdownLine = gameFont.getTextImage("CONTINUE... " + str(self.countdown))
-        #x, y = (VIEW_WIDTH - self.topLine3.get_width()) // 2, 44 * view.SCALAR
         screen.blit(self.blackRect, self.countdownTopleft)
         if self.countdown > 0:
             screen.blit(countdownLine, self.countdownTopleft)

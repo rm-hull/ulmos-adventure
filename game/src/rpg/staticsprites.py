@@ -5,6 +5,7 @@ from sprites import *
 from spriteframes import StaticFrames
 from events import CoinCollectedEvent, KeyCollectedEvent, DoorOpenedEvent, DoorOpeningEvent, CheckpointReachedEvent
 from events import KeyMetadata, CoinMetadata, DoorMetadata, CheckpointMetadata
+from rpg.events import KeyUsedEvent
 
 class Flames(OtherSprite):
     
@@ -130,7 +131,7 @@ class Door(OtherSprite):
                     self.image = self.spriteFrames.animationFrames[self.frameIndex]
     
     def opened(self):
-        metadata = DoorMetadata(self.uid, self.x, self.y, self.level)
+        metadata = DoorMetadata(self.uid, self.tilePosition, self.level)
         metadata.applyMapActions(self.rpgMap)
         event = DoorOpenedEvent(metadata)
         self.eventBus.dispatchDoorOpenedEvent(event)
@@ -138,10 +139,10 @@ class Door(OtherSprite):
         
     def processAction(self, player):
         if player.getKeyCount() > 0 and not self.opening:
-            player.incrementKeyCount(-1)
+            player.decrementKeyCount()
             self.opening = True
-            event = DoorOpeningEvent()
-            self.eventBus.dispatchDoorOpeningEvent(event)
+            self.eventBus.dispatchKeyUsedEvent(KeyUsedEvent())
+            self.eventBus.dispatchDoorOpeningEvent(DoorOpeningEvent())
 
 class Checkpoint(OtherSprite):
     
