@@ -2,11 +2,11 @@
 
 from __future__ import with_statement
 
-from view import TILE_SIZE
-
 import math
 import view
 import mapevents
+
+from view import TILE_SIZE
 
 MIN_SHUFFLE = (0, -1, -1, 1)
 MAX_SHUFFLE = (-1, 1, 0, -1)
@@ -21,27 +21,21 @@ class RpgMap:
     def __init__(self, name, mapTiles, mapSprites, mapEvents):
         self.name = name
         self.mapTiles = mapTiles
+        self.cols = len(mapTiles)
+        self.rows = len(mapTiles[0])
         self.mapSprites = mapSprites
-        self.cols = len(self.mapTiles)
-        self.rows = len(self.mapTiles[0])
         self.initialiseMapImage()
         self.initialiseEvents(mapEvents)
         self.event = None
         
     def initialiseMapImage(self):
-        self.mapImage = view.createRectangle((self.cols * view.TILE_SIZE,
-                                              self.rows * view.TILE_SIZE),
+        self.mapImage = view.createRectangle((self.cols * TILE_SIZE, self.rows * TILE_SIZE),
                                               view.BLACK)
-        for x in range(self.cols):
-            for y in range(self.rows):
-                mapTile = self.mapTiles[x][y]
-                if mapTile:
-                    tileImage = mapTile.createTileImage()
-                    if tileImage:
-                        self.mapImage.blit(tileImage, (x * view.TILE_SIZE, y * view.TILE_SIZE))
-                else:
-                    # guarantee we always have a map tile
-                    self.mapTiles[x][y] = MapTile(x, y)
+        for tiles in self.mapTiles:
+            for tile in tiles:
+                tileImage = tile.createTileImage()
+                if tileImage:
+                    self.mapImage.blit(tileImage, (tile.x * TILE_SIZE, tile.y * TILE_SIZE))
         self.mapRect = self.mapImage.get_rect()
     
     def initialiseEvents(self, mapEvents):
@@ -96,7 +90,6 @@ class RpgMap:
     of the base tiles. This allows the sprite to move between one level and another.
     """
     def isSpanValid(self, level, spanTiles):
-        # baseTiles = self.getRectTiles(baseRect)
         sameLevelCount = 0
         specialLevels = []
         event = None
@@ -322,9 +315,8 @@ class MapTile:
  tiles=" + str(len(self.tiles)) + "\
  levels=" + str(self.levels) + "\
  specialLevels=" + str(self.specialLevels) + "\
- events=" + str(self.events) + "\
  masks=" + str(self.masks) + "\
-        >"       
+ events=" + str(self.events) + "\>"
         return result
 
 """

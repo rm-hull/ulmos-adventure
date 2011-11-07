@@ -74,13 +74,14 @@ def loadRpgMap(name):
     return map.RpgMap(name, mapTiles, mapSprites, mapEvents)
 
 def createMapTiles(cols, rows, tileData):
-    mapTiles = [[None] * (rows) for i in range(cols)]
-    # iterate through the tile data and create the map tiles
+    # create the map tiles
+    mapTiles = [[map.MapTile(x, y) for y in range(rows)] for x in range(cols)]
+    # iterate through the tile data and set the map tiles
     tileSets = {}     
     for tilePoint in tileData.keys():
+        bits = tileData[tilePoint]
         x, y = tilePoint[0], tilePoint[1]
-        mapTile = map.MapTile(x, y)
-        bits = tileData[(x, y)]
+        mapTile = mapTiles[x][y]
         # print bits
         startIndex = 0
         if bits[0][0] == OPEN_SQ_BRACKET and bits[0][-1] == CLOSE_SQ_BRACKET:
@@ -112,7 +113,6 @@ def createMapTiles(cols, rows, tileData):
                         mapTile.addMask(tileIndex, int(maskLevel[1:]), False)
                     else:    
                         mapTile.addMask(tileIndex, int(maskLevel))
-        mapTiles[x][y] = mapTile
     return mapTiles
 
 def loadTileSet(name):
