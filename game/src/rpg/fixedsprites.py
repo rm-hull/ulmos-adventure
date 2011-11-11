@@ -2,7 +2,7 @@
 
 from sprites import *
 
-from view import VIEW_WIDTH
+from view import VIEW_WIDTH, VIEW_HEIGHT
 
 import font
 
@@ -14,12 +14,21 @@ class FixedSprite(pygame.sprite.Sprite):
 
     def __init__(self, position = (0, 0)):
         pygame.sprite.Sprite.__init__(self)
-        self.position = [i * SCALAR for i in position]
+        x, y = 0, 0
+        if position[0] < 0:
+            x = VIEW_WIDTH + position[0] * SCALAR
+        else:
+            x = position[0] * SCALAR
+        if position[1] < 0:
+            y = VIEW_HEIGHT + position[1] * SCALAR
+        else:
+            y = position[1] * SCALAR
+        self.position = (x, y)
         
     def setImage(self, image):
         self.image = image
         self.rect = self.image.get_rect()
-        self.rect.move_ip(self.position[0], self.position[1])
+        self.rect.topleft = self.position
         
 class FixedCoin(FixedSprite):
 
@@ -65,7 +74,7 @@ class KeyCount(FixedSprite):
     def newImage(self):
         dimensions = (self.count * 8 * SCALAR, 8 * SCALAR)
         newImage = view.createTransparentRect(dimensions)
-        for i, n in enumerate(range(self.count)):
+        for i in range(self.count):
             px = i * 8 * SCALAR
             newImage.blit(self.keyImage, (px, 0))
         self.setImage(newImage)
@@ -92,7 +101,7 @@ class Lives(FixedSprite):
     def newImage(self):
         dimensions = (self.count * 8 * SCALAR, 8 * SCALAR)
         newImage = view.createTransparentRect(dimensions)
-        for i, n in enumerate(range(self.count)):
+        for i in range(self.count):
             px = i * 8 * SCALAR
             newImage.blit(self.livesImage, (px, 0))
         self.setImage(newImage)
@@ -106,4 +115,39 @@ class Lives(FixedSprite):
         
     def noneLeft(self):
         return self.count < 0
-   
+
+class CheckpointIcon(FixedSprite):
+
+    initialImage = None
+    
+    def __init__(self, position = (0, 0)):
+        if CheckpointIcon.initialImage is None:    
+            imagePath = os.path.join(SPRITES_FOLDER, "small-check.png")
+            CheckpointIcon.initialImage = view.loadScaledImage(imagePath, None)
+        FixedSprite.__init__(self, position)
+        self.onImage = view.createDuplicateSpriteImage(CheckpointIcon.initialImage)
+        self.offImage = view.createTransparentRect((0, 0))
+        self.setImage(self.offImage)
+        self.on = False
+        self.ticks = -1
+        
+    def activate(self):
+        self.ticks = 0
+        
+    def update(self):
+        # test if the icon is active
+        if self.ticks < 0:
+            return
+        # test if the icon cycle has finished
+        if self.ticks > 100:
+            self.ticks = -1
+            return
+        # update icon
+        if self.ticks % 20 == 0:
+            if self.on:
+                self.setImage(self.offImage)
+                self.on = False
+            else:
+                self.setImage(self.onImage)
+                self.on = True
+        self.ticks += 1

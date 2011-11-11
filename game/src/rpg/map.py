@@ -14,7 +14,7 @@ MAX_SHUFFLE = (-1, 1, 0, -1)
 """
 Encapsulates the logic required for the main map.  You should not instantiate
 this class directly - instead, use parser.loadRpgMap and the mapTiles, mapSprites
-and mapTriggers will be populated from the named map file.
+and mapEvents will be populated from the named map file.
 """
 class RpgMap:
     

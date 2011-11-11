@@ -164,4 +164,5 @@ class Checkpoint(OtherSprite):
                                                           self.tilePosition,
                                                           self.level))
         self.eventBus.dispatchCheckpointReachedEvent(event)
+        player.checkpointReached()
         self.toRemove = True

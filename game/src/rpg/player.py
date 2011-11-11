@@ -50,6 +50,7 @@ class Player(RpgSprite):
         self.coinCount = None
         self.keyCount = None
         self.lives = None
+        self.checkpointIcon = None
         self.ticks = 0
         
     """
@@ -257,9 +258,10 @@ class Player(RpgSprite):
         return px // TILE_SIZE, py // TILE_SIZE
             
     """
-    Processes events triggered via event tiles.
+    Apply updates and return any map events.
     """
-    def processEvents(self):
+    def update(self):
+        self.checkpointIcon.update()
         return self.rpgMap.event
     
     """
@@ -318,6 +320,9 @@ class Player(RpgSprite):
         
     def gameOver(self):
         return self.lives.noneLeft()
+    
+    def checkpointReached(self):
+        self.checkpointIcon.activate()
         
 """
 Extends the player sprite by defining a set of frame images.

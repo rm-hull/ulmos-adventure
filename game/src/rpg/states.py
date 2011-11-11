@@ -20,7 +20,7 @@ from registry import Registry
 from player import Ulmo
 from sounds import SoundHandler
 from events import MapTransitionEvent, EndGameEvent
-from fixedsprites import FixedCoin, CoinCount, KeyCount, Lives
+from fixedsprites import FixedCoin, CoinCount, KeyCount, Lives, CheckpointIcon
 
 ORIGIN = (0, 0)
 X_MULT = VIEW_WIDTH // 64
@@ -55,9 +55,9 @@ def startGame(cont = False):
         registry = registry.snapshot
     else:
         #registry = Registry("unit", (4, 6), 1)
-        registry = Registry("central", (6, 21), 2)
+        #registry = Registry("central", (6, 21), 2)
         #registry = Registry("central", (22, 20), 3)
-        #registry = Registry("central", (30, 22), 3)
+        registry = Registry("central", (30, 22), 3)
         #registry = Registry("central", (5, 8), 4)
     # ensure we have a snapshot for next time
     registry.takeSnapshot()
@@ -86,9 +86,10 @@ def startGame(cont = False):
     fixedSprites = pygame.sprite.Group()
     fixedCoin = FixedCoin((27, 3))
     coinCount = CoinCount(registry.coinCount, (38, 3))
-    keyCount = KeyCount(registry.keyCount, (VIEW_WIDTH - 3, 3))
+    keyCount = KeyCount(registry.keyCount, (0, 3))
     lives = Lives(2, (3, 3))
-    fixedSprites.add(fixedCoin, lives, coinCount, keyCount)
+    checkpointIcon = CheckpointIcon((-11, -11))
+    fixedSprites.add(fixedCoin, lives, coinCount, keyCount, checkpointIcon)
     
     # create player
     global player
@@ -96,6 +97,7 @@ def startGame(cont = False):
     player.coinCount = coinCount
     player.keyCount = keyCount
     player.lives = lives
+    player.checkpointIcon = checkpointIcon
     # create the map
     rpgMap = parser.loadRpgMap(registry.mapName)
     player.setup("ulmo", rpgMap, eventBus)
@@ -192,7 +194,7 @@ class PlayState:
         return None
             
     def handleEvents(self):
-        event = player.processEvents()
+        event = player.update()
         if event:
             return event.transition
         return None
