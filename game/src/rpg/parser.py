@@ -15,6 +15,7 @@ MAPS_FOLDER = "maps"
 OPEN_SQ_BRACKET = "["
 CLOSE_SQ_BRACKET = "]"
 SPECIAL_LEVEL = "S"
+DOWN_LEVEL = "D"
 VERTICAL_MASK = "V"
 COLON = ":"
 COMMA = ","
@@ -91,8 +92,11 @@ def createMapTiles(cols, rows, tileData):
             for level in levels:
                 if level[0] == SPECIAL_LEVEL:
                     mapTile.addSpecialLevel(float(level[1:]))
+                elif level[0] == DOWN_LEVEL:
+                    levelBits = level[1:].split(DASH)
+                    mapTile.addDownLevel(int(levelBits[0]), int(levelBits[1]))
                 else:
-                    mapTile.addLevel(float(level))
+                    mapTile.addLevel(int(level))
         # tiles images
         for tileIndex, tiles in enumerate(bits[startIndex:]):
             tileBits = tiles.split(COLON)

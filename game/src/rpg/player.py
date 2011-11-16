@@ -15,6 +15,8 @@ DIAGONAL_TICK = 3
 
 NO_BOUNDARY = 0
 
+FALL_UNIT = 2 * MOVE_UNIT
+
 """
 Valid movement combinations - movement is keyed on direction bits and is stored
 as a tuple (px, py, direction, diagonal)
@@ -52,6 +54,7 @@ class Player(RpgSprite):
         self.lives = None
         self.checkpointIcon = None
         self.ticks = 0
+        self.falling = 0
         
     """
     Base rect for the player extends beyond the bottom of the sprite image.
@@ -95,6 +98,8 @@ class Player(RpgSprite):
     > If still not valid, check for a change in direction.
     """
     def handleMovement(self, directionBits):
+        if self.falling:
+            return
         movement = getMovement(directionBits)
         # no movement
         if not movement:
@@ -262,7 +267,19 @@ class Player(RpgSprite):
     """
     def update(self):
         self.checkpointIcon.update()
-        return self.rpgMap.event
+        if self.falling:
+            self.wrapMovement(self.level, self.spriteFrames.direction, 0, FALL_UNIT);
+            self.falling -= FALL_UNIT
+            if self.falling % TILE_SIZE == 0:
+                self.level -= 1
+            return
+        event, downLevel = self.rpgMap.getActions(self.level, self.baseRect)
+        if event:
+            return event
+        if downLevel:
+            print "DOWN LEVEL : %s" % downLevel
+            self.falling = downLevel * TILE_SIZE
+        return None
     
     """
     Processes collisions with other sprites in the given sprite collection.

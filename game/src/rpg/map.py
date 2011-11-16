@@ -26,7 +26,6 @@ class RpgMap:
         self.mapSprites = mapSprites
         self.initialiseMapImage()
         self.initialiseEvents(mapEvents)
-        self.event = None
         
     def initialiseMapImage(self):
         self.mapImage = view.createRectangle((self.cols * TILE_SIZE, self.rows * TILE_SIZE),
@@ -92,25 +91,23 @@ class RpgMap:
     def isSpanValid(self, level, spanTiles):
         sameLevelCount = 0
         specialLevels = []
-        event = None
         # iterate through base tiles and gather information
         for tile in spanTiles:
-            increment, specialLevel, event = tile.testValidity(level)
+            increment, specialLevel = tile.testValidity(level)
             sameLevelCount += increment
             if specialLevel:
                 specialLevels.append(specialLevel)
-        self.event = event
-        # test validity of the requested movement           
-        if sameLevelCount == len(spanTiles):
+        # test validity of the requested movement
+        spanTileCount = len(spanTiles)
+        if sameLevelCount == spanTileCount:
             return True, level
-        elif len(specialLevels) == len(spanTiles):
+        elif len(specialLevels) == spanTileCount:
             minLevel = min(specialLevels)
             maxLevel = max(specialLevels)
             if maxLevel - minLevel < 1:
                 # ensure we return a whole number if possible
                 retLevel = maxLevel if int(maxLevel) == maxLevel else minLevel 
                 return True, retLevel
-        self.event = None
         return False, level
     
     def isMoveValid(self, level, baseRect):
@@ -143,7 +140,7 @@ class RpgMap:
     def isHorizontalValid(self, level, baseRect):
         return self.isStripeValid(level, self.horizontals,
                                   baseRect.top, baseRect.bottom)
-
+        
     """
     The given sprite must contain mapRect, level, z and upright attributes.  Typically
     this object will be a real sprite, but for ease of unit testing it can be anything.
@@ -187,7 +184,21 @@ class RpgMap:
         for y in range(y1, y2 + 1):
             self.horizontals[y] = [self.mapTiles[x][y] for x in range(x1, x2 + 1)]
         return rectTiles
-        
+    
+    def getActions(self, level, baseRect):
+        downLevels = []
+        spanTiles = self.getSpanTiles(baseRect)
+        for tile in spanTiles:
+            event = tile.getEvent(level)
+            if event:
+                return event, None
+            downLevel = tile.getDownLevel(level)
+            if downLevel:
+                downLevels.append(downLevel)
+        if len(downLevels) == len(spanTiles):
+            return None, downLevels[0]        
+        return None, None
+            
     def convertTopLeft(self, px, py):
         return max(0, px // TILE_SIZE), max(0, py // TILE_SIZE)
         
@@ -221,6 +232,7 @@ class MapTile:
         self.levels = []
         self.tiles = []
         self.specialLevels = None
+        self.downLevels = None
         self.masks = None
         self.events = None
         
@@ -238,7 +250,13 @@ class MapTile:
         else:
             self.specialLevels[math.floor(level)] = level
             self.specialLevels[math.ceil(level)] = level
-        
+    
+    def addDownLevel(self, level, downLevel):
+        print "DOWN: %s %s" % (level, downLevel)
+        if not self.downLevels:
+            self.downLevels = {}
+        self.downLevels[level] = downLevel
+           
     def addMask(self, tileIndex, level, flat = True):
         if not self.masks:
             self.masks = []
@@ -263,13 +281,16 @@ class MapTile:
     
     def testValidity(self, level):
         if level in self.levels:
-            return 1, None, self.getEvent(level)
+            return 1, None
+        downLevel = self.getDownLevel(level)
+        if downLevel:
+            return 1, None
         specialLevel = self.getSpecialLevel(level)
         if specialLevel:
             if specialLevel == level:
-                return 1, specialLevel, self.getEvent(level)
-            return 0, specialLevel, self.getEvent(level)
-        return 0, None, None
+                return 1, specialLevel
+            return 0, specialLevel
+        return 0, None
     
     def getSpecialLevel(self, level):
         if not self.specialLevels:
@@ -283,6 +304,12 @@ class MapTile:
         if key in self.specialLevels:
             return self.specialLevels[key]
         return None
+    
+    def getDownLevel(self, level):
+        if not self.downLevels:
+            return None
+        if level in self.downLevels:
+            return self.downLevels[level]
     
     def getEvent(self, level):
         if not self.events:
