@@ -100,8 +100,25 @@ public class TileLevelsEditor extends TileEditor {
 		boolean valid = false;
 		if (level.length() > 0) {
 			if (level.startsWith(Constants.SPECIAL)) {
+				// should look something like S1.5
 				level = level.substring(1);
 			}
+			else if (level.startsWith(Constants.DOWN)) {
+				// should look something like D3-2 
+				level = level.substring(1);
+				String[] levels = level.split(Constants.DASH);
+				if (levels.length != 2) {
+					return false;
+				}
+				level = levels[0];
+				try {
+					Integer.parseInt(levels[1]);
+				}
+				catch (Exception e) {
+					return false;
+				}
+			}
+			
 			try {
 				Float.parseFloat(level);
 				valid = true;

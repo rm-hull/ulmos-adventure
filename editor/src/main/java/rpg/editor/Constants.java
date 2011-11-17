@@ -13,6 +13,8 @@ public class Constants {
 	public static final String COMMA = ",";
 	public static final String COLON = ":";
 	public static final String SPECIAL = "S";
+	public static final String DOWN = "D";
+	public static final String DASH = "-";
 	public static final String VERTICAL = "V";
 	
 	public static final String LABEL_COMMA = ", ";
