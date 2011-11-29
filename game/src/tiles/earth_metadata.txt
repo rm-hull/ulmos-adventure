@@ -44,8 +44,8 @@
 3,4 t3
 4,4 mrs
 5,4 mls
-6,4
-7,4
+6,4 
+7,4 drop
 8,4 crackn
 
 0,5 tel
@@ -78,3 +78,12 @@
 7,7 acs
 8,7
 
+0,8 ttel
+1,8 tter
+2,8 aldrop
+3,8 ardrop
+4,8 acel
+5,8 acer
+6,8
+7,8
+8,8

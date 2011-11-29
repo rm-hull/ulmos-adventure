@@ -4,8 +4,7 @@ from sprites import *
 
 from spriteframes import StaticFrames
 from events import CoinCollectedEvent, KeyCollectedEvent, DoorOpenedEvent, DoorOpeningEvent, CheckpointReachedEvent
-from events import KeyMetadata, CoinMetadata, DoorMetadata, CheckpointMetadata
-from rpg.events import KeyUsedEvent
+from events import KeyMetadata, CoinMetadata, DoorMetadata, CheckpointMetadata, KeyUsedEvent
 
 class Flames(OtherSprite):
     
@@ -70,7 +69,7 @@ class Chest(OtherSprite):
             imagePath = os.path.join(SPRITES_FOLDER, "chest.png")
             Chest.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(Chest.framesImage, 1)
-        spriteFrames = StaticFrames(animationFrames, 6)
+        spriteFrames = StaticFrames(animationFrames)
         OtherSprite.__init__(self, spriteFrames)
         
     # override
@@ -88,7 +87,7 @@ class Rock(OtherSprite):
             imagePath = os.path.join(SPRITES_FOLDER, "rock.png")
             Rock.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(Rock.framesImage, 1)
-        spriteFrames = StaticFrames(animationFrames, 6)
+        spriteFrames = StaticFrames(animationFrames)
         OtherSprite.__init__(self, spriteFrames, (0, -4))
         
     # override
@@ -166,3 +165,22 @@ class Checkpoint(OtherSprite):
         self.eventBus.dispatchCheckpointReachedEvent(event)
         player.checkpointReached()
         self.toRemove = True
+        
+class Shadow(OtherSprite):
+    
+    framesImage = None
+    
+    def __init__(self):
+        if Shadow.framesImage is None:    
+            imagePath = os.path.join(SPRITES_FOLDER, "shadow.png")
+            Shadow.framesImage = view.loadScaledImage(imagePath, None)        
+        animationFrames = view.processStaticFrames(Shadow.framesImage, 1)
+        spriteFrames = StaticFrames(animationFrames)
+        OtherSprite.__init__(self, spriteFrames, (4, 2))
+        self.upright = False
+        
+    def setupFromPlayer(self, player, downLevel):
+        self.setup("shadow", player.rpgMap, player.eventBus)
+        px = player.mapRect.topleft[0]
+        py = player.mapRect.topleft[1] + downLevel * TILE_SIZE + player.image.get_height() - self.image.get_height()
+        self.setPixelPosition(px, py, player.level - downLevel)

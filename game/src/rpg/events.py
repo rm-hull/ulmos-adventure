@@ -27,6 +27,9 @@ class BeetleCrawlingEvent(Event):
 
 class KeyUsedEvent(Event):
     pass
+
+class PlayerFallingEvent(Event):
+    pass
         
 # ==============================================================================
 
@@ -53,7 +56,7 @@ class DoorOpenedEvent(MetadataEvent):
 class CheckpointReachedEvent(MetadataEvent):
     def __init__(self, metadata):
         MetadataEvent.__init__(self, metadata)
-
+        
 # ==============================================================================
 
 class SpriteMetadata:

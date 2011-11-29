@@ -3,12 +3,16 @@
 import events
 
 from sprites import *
+
 from view import UP, DOWN, LEFT, RIGHT
-from spriteframes import DirectionalFrames
-from events import PlayerFootstepEvent, LifeLostEvent
+
+from spriteframes import DirectionalFrames, StaticFrames
+from events import PlayerFootstepEvent, PlayerFallingEvent, LifeLostEvent
+from staticsprites import Shadow
 
 #DUMMY_EVENT = events.DummyEvent()
 PLAYER_FOOTSTEP_EVENT = PlayerFootstepEvent()
+PLAYER_FALLING_EVENT = PlayerFallingEvent()
 LIFE_LOST_EVENT = LifeLostEvent()
 
 DIAGONAL_TICK = 3
@@ -41,20 +45,29 @@ extending MaskSprite, but all animation functionality is encapsulated here.
 """        
 class Player(RpgSprite):
     
-    def __init__(self, spriteFrames, position = (0, 0)):
-        RpgSprite.__init__(self, spriteFrames, position)
+    def __init__(self, movingFrames, fallingFrames, position = (0, 0)):
+        RpgSprite.__init__(self, movingFrames, position)
+        # frames for when the player is moving/falling
+        self.fallingFrames = fallingFrames
+        self.movingFrames = movingFrames
         # view rect is the scrolling window onto the map
         self.viewRect = Rect((0, 0), pygame.display.get_surface().get_size())
         # movement
         self.movement = None
         self.deferredMovement = None
-        # counters
+        # sprites
+        self.shadow = None
+        # fixed sprites
         self.coinCount = None
         self.keyCount = None
         self.lives = None
         self.checkpointIcon = None
+        # counters
         self.ticks = 0
         self.falling = 0
+
+    def setup(self, uid, rpgMap, eventBus):
+        RpgSprite.setup(self, uid, rpgMap, eventBus)
         
     """
     Base rect for the player extends beyond the bottom of the sprite image.
@@ -265,20 +278,37 @@ class Player(RpgSprite):
     """
     Apply updates and return any map events.
     """
-    def update(self):
+    def update(self, gameSprites):
         self.checkpointIcon.update()
         if self.falling:
-            self.wrapMovement(self.level, self.spriteFrames.direction, 0, FALL_UNIT);
-            self.falling -= FALL_UNIT
+            self.wrapMovement(self.level, None, 0, FALL_UNIT);
             if self.falling % TILE_SIZE == 0:
                 self.level -= 1
+            self.falling -= FALL_UNIT
+            if self.falling == 0:
+                # falling is complete - swap back to moving frames
+                self.clearMasks()
+                self.spriteFrames = self.movingFrames.setState(self.spriteFrames)
+                self.image, frameIndex = self.spriteFrames.advanceFrame(0)
+                self.applyMasks()
+                # remove shadow on next update
+                self.shadow.toRemove = True
             return
         event, downLevel = self.rpgMap.getActions(self.level, self.baseRect)
         if event:
             return event
         if downLevel:
-            print "DOWN LEVEL : %s" % downLevel
+            # initialise falling state
+            print "down: %s" % downLevel
             self.falling = downLevel * TILE_SIZE
+            # swap to falling frames
+            self.clearMasks()
+            self.spriteFrames = self.fallingFrames.setState(self.spriteFrames)
+            self.shadow = Shadow()
+            self.shadow.setupFromPlayer(self, downLevel)
+            gameSprites.add(self.shadow)
+            self.eventBus.dispatchPlayerFallingEvent(PLAYER_FALLING_EVENT)
+
         return None
     
     """
@@ -346,13 +376,19 @@ Extends the player sprite by defining a set of frame images.
 """    
 class Ulmo(Player):
     
-    framesImage = None
+    movingFramesImage = None
+    fallingFramesImage = None
     
     def __init__(self):
-        if Ulmo.framesImage is None:          
+        if Ulmo.movingFramesImage is None:          
             imagePath = os.path.join(SPRITES_FOLDER, "ulmo-frames.png")
-            Ulmo.framesImage = view.loadScaledImage(imagePath, None)
-        animationFrames = view.processMovementFrames(Ulmo.framesImage)
-        spriteFrames = DirectionalFrames(animationFrames, 6)
-        Player.__init__(self, spriteFrames, (1, -12))
+            Ulmo.movingFramesImage = view.loadScaledImage(imagePath, None)
+        if Ulmo.fallingFramesImage is None:          
+            imagePath = os.path.join(SPRITES_FOLDER, "ulmo-falling.png")
+            Ulmo.fallingFramesImage = view.loadScaledImage(imagePath, None)
+        animationFrames = view.processMovementFrames(Ulmo.movingFramesImage)
+        movingFrames = DirectionalFrames(animationFrames, 6)
+        animationFrames = view.processStaticFrames(Ulmo.fallingFramesImage)
+        fallingFrames = StaticFrames(animationFrames)
+        Player.__init__(self, movingFrames, fallingFrames, (1, -12))
         

@@ -8,13 +8,13 @@ DIRECTION = "direction"
 
 class SpriteFrames:
     
-    def __init__(self, frameSkip):
+    def __init__(self, frameSkip = None):
         self.frameSkip = frameSkip
         self.frameCount = 0
         self.frameIndex = 0
 
     def advanceFrameIndex(self, increment = 1):
-        if increment:
+        if increment and self.frameSkip:
             self.frameCount = (self.frameCount + increment) % self.frameSkip
             if self.frameCount == 0:
                 self.frameIndex = (self.frameIndex + 1) % self.numFrames
@@ -26,10 +26,17 @@ class SpriteFrames:
     
     def advanceFrame(self, increment = 1, **kwargs):
         pass
-    
+
+    def getState(self):
+        return self.frameCount, self.frameIndex, DOWN
+
+    def setState(self, spriteFrames):
+        self.frameCount, self.frameIndex, direction = spriteFrames.getState() 
+        return self   
+            
 class StaticFrames(SpriteFrames):
     
-    def __init__(self, animationFrames, frameSkip):
+    def __init__(self, animationFrames, frameSkip = None):
         SpriteFrames.__init__(self, frameSkip)
         self.virginAnimationFrames = animationFrames
         self.animationFrames = view.copyStaticFrames(animationFrames)
@@ -42,10 +49,10 @@ class StaticFrames(SpriteFrames):
     def advanceFrame(self, increment = 1, **kwargs):
         newFrameIndex = self.advanceFrameIndex(increment)
         return self.animationFrames[self.frameIndex], newFrameIndex
-        
+    
 class DirectionalFrames(SpriteFrames):
     
-    def __init__(self, animationFrames, frameSkip):
+    def __init__(self, animationFrames, frameSkip = None):
         SpriteFrames.__init__(self, frameSkip)
         self.virginAnimationFrames = animationFrames
         self.animationFrames = view.copyMovementFrames(animationFrames)
@@ -61,3 +68,11 @@ class DirectionalFrames(SpriteFrames):
         if DIRECTION in kwargs:
             self.direction = kwargs[DIRECTION]
         return self.animationFrames[self.direction][self.frameIndex], newFrameIndex
+
+    def getState(self):
+        return self.frameCount, self.frameIndex, self.direction
+
+    def setState(self, spriteFrames):
+        self.frameCount, self.frameIndex, self.direction = spriteFrames.getState()
+        return self   
+            

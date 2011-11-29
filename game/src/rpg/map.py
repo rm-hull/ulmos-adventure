@@ -196,7 +196,7 @@ class RpgMap:
             if downLevel:
                 downLevels.append(downLevel)
         if len(downLevels) == len(spanTiles):
-            return None, downLevels[0]        
+            return None, downLevels[0]
         return None, None
             
     def convertTopLeft(self, px, py):
@@ -252,7 +252,7 @@ class MapTile:
             self.specialLevels[math.ceil(level)] = level
     
     def addDownLevel(self, level, downLevel):
-        print "DOWN: %s %s" % (level, downLevel)
+        # print "DOWN: %s %s" % (level, downLevel)
         if not self.downLevels:
             self.downLevels = {}
         self.downLevels[level] = downLevel

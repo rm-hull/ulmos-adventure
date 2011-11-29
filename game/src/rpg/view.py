@@ -55,7 +55,6 @@ def processMovementFrames(framesImage, numFrames = 4):
             frames.append(img)
         animationFrames[direction] = frames
         row += 1
-        #animationFrames[direction + OFFSET] = originalFrames
     return animationFrames
 
 # create a copy of the given animation frames
@@ -64,12 +63,10 @@ def copyMovementFrames(animationFrames):
     animationFramesCopy = {}
     for direction in DIRECTIONS:
         framesCopy = []
-        frames = animationFrames[direction]
-        for i in range(len(frames)):
-            img = createDuplicateSpriteImage(frames[i])
+        for frame in animationFrames[direction]:
+            img = createDuplicateSpriteImage(frame)
             framesCopy.append(img)
         animationFramesCopy[direction] = framesCopy
-        #animationFrames[direction + OFFSET] = originalFrames
     return animationFramesCopy
 
 # process animation frames from the composite image
@@ -81,7 +78,6 @@ def processStaticFrames(framesImage, numFrames = 4):
     animationFrames = []
     for i in range(numFrames):
         img = framesImage.subsurface((i * width, 0), (width, height))
-        #animationFrames.append(createDuplicateSpriteImage(img))
         animationFrames.append(img)
     return animationFrames
 
@@ -89,8 +85,8 @@ def processStaticFrames(framesImage, numFrames = 4):
 def copyStaticFrames(animationFrames):
     # map of image lists for animation keyed on direction
     animationFramesCopy = []
-    for i in range(len(animationFrames)):
-        img = createDuplicateSpriteImage(animationFrames[i])
+    for frame in animationFrames:
+        img = createDuplicateSpriteImage(frame)
         animationFramesCopy.append(img)
     return animationFramesCopy
 

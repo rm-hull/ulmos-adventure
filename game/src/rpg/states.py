@@ -80,6 +80,7 @@ def startGame(cont = False):
     eventBus.addWaspZoomingListener(soundHandler)
     eventBus.addBeetleCrawlingListener(soundHandler)
     eventBus.addCheckpointReachedListener(soundHandler)
+    eventBus.addPlayerFallingListener(soundHandler)
     
         # create fixed sprites
     global fixedSprites
@@ -194,7 +195,7 @@ class PlayState:
         return None
             
     def handleEvents(self):
-        event = player.update()
+        event = player.update(self.gameSprites)
         if event:
             return event.transition
         return None
