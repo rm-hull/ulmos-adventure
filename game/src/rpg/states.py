@@ -13,10 +13,10 @@ from pygame.locals import *
 
 from sprites import MOVE_UNIT
 from view import NONE, UP, DOWN, LEFT, RIGHT, TILE_SIZE, VIEW_WIDTH, VIEW_HEIGHT
-from mapevents import SCENE_TRANSITION, REPLAY_TRANSITION, BOUNDARY_TRANSITION, GAME_OVER_TRANSITION, END_GAME_TRANSITION
+from mapevents import SCENE_TRANSITION, BOUNDARY_TRANSITION, LIFE_LOST_TRANSITION, GAME_OVER_TRANSITION, END_GAME_TRANSITION
 
 from eventbus import EventBus
-from registry import Registry
+from registry import RegistryHandler, Registry
 from player import Ulmo
 from sounds import SoundHandler
 from events import MapTransitionEvent, EndGameEvent
@@ -40,7 +40,7 @@ gameFont = font.GameFont()
 
 # globals
 eventBus = None
-registry = None
+registryHandler = None
 soundHandler = None
 fixedSprites = None
 player = None
@@ -49,24 +49,26 @@ def startGame(cont = False):
     global eventBus
     eventBus = EventBus()
 
-    # create registry
-    global registry
+    # create registry handler
+    global registryHandler
     if cont:
-        registry = registry.snapshot
+        registryHandler.switchToSnapshot()
     else:
         #registry = Registry("unit", (4, 6), 1)
-        #registry = Registry("central", (6, 21), 2)
+        #registry = Registry("wasps", (12, 10), 5)
+        #registry = Registry("central", (6, 22), 2)
         #registry = Registry("central", (22, 20), 3)
-        registry = Registry("central", (30, 22), 3)
+        #registry = Registry("central", (8, 11), 1)
         #registry = Registry("central", (5, 8), 4)
-    # ensure we have a snapshot for next time
-    registry.takeSnapshot()
+        registry = Registry("east", (10, 18), 1)
+        registryHandler = RegistryHandler(registry)
+    # grab this for later
+    registry = registryHandler.registry
     # add event listeners
-    eventBus.addCoinCollectedListener(registry)
-    eventBus.addKeyCollectedListener(registry)
-    eventBus.addKeyUsedListener(registry)
-    eventBus.addDoorOpenedListener(registry)
-    eventBus.addCheckpointReachedListener(registry)
+    eventBus.addCoinCollectedListener(registryHandler)
+    eventBus.addKeyCollectedListener(registryHandler)
+    eventBus.addDoorOpenedListener(registryHandler)
+    eventBus.addCheckpointReachedListener(registryHandler)
     
     global soundHandler
     soundHandler = SoundHandler()
@@ -82,7 +84,7 @@ def startGame(cont = False):
     eventBus.addCheckpointReachedListener(soundHandler)
     eventBus.addPlayerFallingListener(soundHandler)
     
-        # create fixed sprites
+    # create fixed sprites
     global fixedSprites
     fixedSprites = pygame.sprite.Group()
     fixedCoin = FixedCoin((27, 3))
@@ -146,19 +148,13 @@ def sceneZoomOut(screenImage, ticks):
   
 class PlayState:
     
-    def __init__(self, lastTransition = None):
-        # we need this if the player loses a life
-        self.lastTransition = lastTransition
-        if self.lastTransition == None:
-            self.lastTransition = self.createReplayTransition()
-        if not self.lastTransition.firstMap:
-            registry.checkpoint = None
+    def __init__(self):
         # must set the player map + position before we create this state
         player.updateViewRect()
         # add the player to the visible group
         self.visibleSprites = sprites.RpgSprites(player)
         # create more sprites
-        self.gameSprites = spritebuilder.createSpritesForMap(player.rpgMap, eventBus, registry)
+        self.gameSprites = spritebuilder.createSpritesForMap(player.rpgMap, eventBus, registryHandler.registry)
              
     def execute(self, keyPresses):
         transition = self.getNextTransition(keyPresses)
@@ -168,12 +164,12 @@ class PlayState:
                 return BoundaryTransitionState(transition)
             if transition.type == SCENE_TRANSITION:
                 return SceneTransitionState(transition)
-            if transition.type == REPLAY_TRANSITION:
+            if transition.type == LIFE_LOST_TRANSITION:
                 return SceneTransitionState(transition)
             if transition.type == GAME_OVER_TRANSITION:
-                return GameOverState(transition)
+                return GameOverState()
             if transition.type == END_GAME_TRANSITION:
-                return EndGameState(transition)
+                return EndGameState()
         # draw the map view to the screen
         self.drawMapView(screen)
         pygame.display.flip()
@@ -205,7 +201,7 @@ class PlayState:
         if player.processCollisions(self.visibleSprites.sprites()):
             if player.gameOver():
                 return mapevents.GameOverTransition()
-            return self.lastTransition
+            return self.lifeLostTransition()
         return None
     
     def handleInput(self, keyPresses):
@@ -243,13 +239,15 @@ class PlayState:
         if increment:
             fixedSprites.draw(surface)
     
-    def createReplayTransition(self):
-        transition = mapevents.ReplayTransition(player.rpgMap.name,
-                                                player.mapRect.left,
-                                                player.mapRect.top,
-                                                player.level,
-                                                player.spriteFrames.direction)
-        transition.firstMap = True
+    def lifeLostTransition(self):
+        registryHandler.switchToSnapshot()
+        registry = registryHandler.registry
+        player.setCoinCount(registry.coinCount)
+        player.setKeyCount(registry.keyCount)
+        transition = mapevents.LifeLostTransition(registry.mapName,
+                                                  registry.playerPosition[0],
+                                                  registry.playerPosition[1],
+                                                  registry.playerLevel)
         return transition
         
     # method required by the ShowPlayer state
@@ -277,18 +275,11 @@ class SceneTransitionState:
             nextRpgMap = parser.loadRpgMap(self.transition.mapName)
             player.rpgMap = nextRpgMap
             # set player position
-            if self.transition.type == REPLAY_TRANSITION:
-                player.setPixelPosition(self.transition.pixelPosition[0],
-                                        self.transition.pixelPosition[1],
-                                        self.transition.level)
-                # create play state
-                self.nextState = PlayState(self.transition)
-            else: # self.transition.type == SCENE_TRANSITION    
-                player.setTilePosition(self.transition.tilePosition[0],
-                                       self.transition.tilePosition[1],
-                                       self.transition.level)
-                # create play state
-                self.nextState = PlayState(self.createReplayTransition())
+            player.setTilePosition(self.transition.tilePosition[0],
+                                   self.transition.tilePosition[1],
+                                   self.transition.level)
+            # create play state
+            self.nextState = PlayState()
             # hide player if required
             if self.transition.boundary:
                 hidePlayer(self.transition.boundary, nextRpgMap.mapRect)
@@ -299,22 +290,15 @@ class SceneTransitionState:
         elif self.ticks < 64:
             sceneZoomOut(self.screenImage, self.ticks)
         else:
-            if self.transition.firstMap:
+            if self.transition.type == LIFE_LOST_TRANSITION:
                 return self.nextState
+            # else just a regular scene transition
             direction = player.spriteFrames.direction
             if self.transition.boundary:
                 return ShowPlayerState(direction, self.nextState, BOUNDARY_TICKS[direction])
             return ShowPlayerState(direction, self.nextState, DOORWAY_TICKS[direction])
         self.ticks += 1
         return None
-
-    def createReplayTransition(self):
-        return mapevents.ReplayTransition(self.transition.mapName,
-                                          player.mapRect.left,
-                                          player.mapRect.top,
-                                          player.level,
-                                          player.spriteFrames.direction,
-                                          self.transition.boundary)
 
 class BoundaryTransitionState:
     
@@ -336,7 +320,7 @@ class BoundaryTransitionState:
             # set the new position
             hidePlayer(self.boundary, nextRpgMap.mapRect, self.transition.modifier)
             # create play state
-            self.nextState = PlayState(self.createReplayTransition())
+            self.nextState = PlayState()
             # extract the next image from the state
             self.nextState.drawMapView(self.nextImage, 0)
         elif self.ticks < 32:
@@ -359,30 +343,21 @@ class BoundaryTransitionState:
             # return self.nextState
         self.ticks += 1
         return None
-    
-    def createReplayTransition(self):
-        return mapevents.ReplayTransition(self.transition.mapName,
-                                          player.mapRect.left,
-                                          player.mapRect.top,
-                                          player.level,
-                                          player.spriteFrames.direction,
-                                          self.boundary)
 
 class GameOverState:
     
-    def __init__(self, transition):
-        self.transition = transition
+    def __init__(self):
         self.screenImage = screen.copy()
-        self.nextState = None
-        self.ticks = 0
         self.topLine1 = gameFont.getTextImage("BRAVE ADVENTURER")
         self.topLine2 = gameFont.getTextImage("YOU ARE DEAD")
         self.topLine3 = gameFont.getTextImage("CONTINUE... 10")
         self.lowLine1 = gameFont.getTextImage("PRESS SPACE")
         self.lowLine2 = gameFont.getTextImage("TO PLAY AGAIN")
         self.blackRect = view.createRectangle(self.topLine3.get_size(), view.BLACK)
+        self.continueOffered = True if registryHandler.snapshot.checkpoint else False
         self.countdown = None
         self.countdownTopleft = None
+        self.ticks = 0
              
     def execute(self, keyPresses):
         if self.countdown:
@@ -391,14 +366,15 @@ class GameOverState:
         if self.ticks < 32:
             sceneZoomIn(self.screenImage, self.ticks)
         elif self.ticks == 32:
-            x, y = (VIEW_WIDTH - self.topLine1.get_width()) // 2, 20 * view.SCALAR
+            x, y = (VIEW_WIDTH - self.topLine1.get_width()) // 2, 32 * view.SCALAR
             screen.blit(self.topLine1, (x, y))
-            x, y = (VIEW_WIDTH - self.topLine2.get_width()) // 2, 32 * view.SCALAR
+            x, y = (VIEW_WIDTH - self.topLine2.get_width()) // 2, 44 * view.SCALAR
             screen.blit(self.topLine2, (x, y))
-            x, y = (VIEW_WIDTH - self.topLine3.get_width()) // 2, 44 * view.SCALAR
-            screen.blit(self.topLine3, (x, y))
-            # set the countdown topleft for later
-            self.countdownTopleft = (x, y)
+            if self.continueOffered:
+                x, y = (VIEW_WIDTH - self.topLine3.get_width()) // 2, 56 * view.SCALAR
+                screen.blit(self.topLine3, (x, y))
+                # set the countdown topleft for later
+                self.countdownTopleft = (x, y)
             pygame.display.flip()
         elif self.ticks == 64:
             x, y = (VIEW_WIDTH - self.lowLine1.get_width()) // 2, VIEW_HEIGHT - 42 * view.SCALAR
@@ -406,7 +382,8 @@ class GameOverState:
             x, y = (VIEW_WIDTH - self.lowLine2.get_width()) // 2, VIEW_HEIGHT - 30 * view.SCALAR
             screen.blit(self.lowLine2, (x, y))
             pygame.display.flip()
-            self.countdown = 10
+            if self.continueOffered:
+                self.countdown = 10
         elif self.ticks > 64:
             if keyPresses[K_SPACE]:
                 if self.countdown:
@@ -426,15 +403,14 @@ class GameOverState:
 
 class EndGameState:
     
-    def __init__(self, transition):
-        self.transition = transition
+    def __init__(self):
         self.screenImage = screen.copy()
-        self.ticks = 0
         self.topLine1 = gameFont.getTextImage("YOUR ADVENTURE IS")
         self.topLine2 = gameFont.getTextImage("AT AN END... FOR NOW!")
         self.topLine3 = gameFont.getTextImage("YOU FOUND " + str(player.getCoinCount()) + "/10 COINS");
         self.lowLine1 = gameFont.getTextImage("PRESS SPACE")
         self.lowLine2 = gameFont.getTextImage("TO PLAY AGAIN")
+        self.ticks = 0
              
     def execute(self, keyPresses):
         if self.ticks < 32:
@@ -442,11 +418,11 @@ class EndGameState:
                 eventBus.dispatchEndGameEvent(EndGameEvent())
             sceneZoomIn(self.screenImage, self.ticks)
         elif self.ticks == 32:
-            x, y = (VIEW_WIDTH - self.topLine1.get_width()) // 2, 20 * view.SCALAR
+            x, y = (VIEW_WIDTH - self.topLine1.get_width()) // 2, 32 * view.SCALAR
             screen.blit(self.topLine1, (x, y))
-            x, y = (VIEW_WIDTH - self.topLine2.get_width()) // 2, 32 * view.SCALAR
+            x, y = (VIEW_WIDTH - self.topLine2.get_width()) // 2, 44 * view.SCALAR
             screen.blit(self.topLine2, (x, y))
-            x, y = (VIEW_WIDTH - self.topLine3.get_width()) // 2, 44 * view.SCALAR
+            x, y = (VIEW_WIDTH - self.topLine3.get_width()) // 2, 56 * view.SCALAR
             screen.blit(self.topLine3, (x, y))
             pygame.display.flip()
         elif self.ticks == 64:

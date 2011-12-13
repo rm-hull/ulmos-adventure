@@ -4,7 +4,7 @@ from sprites import *
 
 from spriteframes import StaticFrames
 from events import CoinCollectedEvent, KeyCollectedEvent, DoorOpenedEvent, DoorOpeningEvent, CheckpointReachedEvent
-from events import KeyMetadata, CoinMetadata, DoorMetadata, CheckpointMetadata, KeyUsedEvent
+from events import KeyMetadata, CoinMetadata, DoorMetadata, CheckpointMetadata
 
 class Flames(OtherSprite):
     
@@ -140,7 +140,6 @@ class Door(OtherSprite):
         if player.getKeyCount() > 0 and not self.opening:
             player.decrementKeyCount()
             self.opening = True
-            self.eventBus.dispatchKeyUsedEvent(KeyUsedEvent())
             self.eventBus.dispatchDoorOpeningEvent(DoorOpeningEvent())
 
 class Checkpoint(OtherSprite):
@@ -161,7 +160,9 @@ class Checkpoint(OtherSprite):
         event = CheckpointReachedEvent(CheckpointMetadata(self.uid,
                                                           self.rpgMap.name,
                                                           self.tilePosition,
-                                                          self.level))
+                                                          self.level,
+                                                          player.getCoinCount(),
+                                                          player.getKeyCount()))
         self.eventBus.dispatchCheckpointReachedEvent(event)
         player.checkpointReached()
         self.toRemove = True

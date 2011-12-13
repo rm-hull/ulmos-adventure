@@ -1,12 +1,14 @@
 #! /usr/bin/env python
 
+from view import DOWN
+
 DUMMY_EVENT = 0
 TILE_EVENT = 1
 BOUNDARY_EVENT = 2
 
-SCENE_TRANSITION = 1
-REPLAY_TRANSITION = 2
-BOUNDARY_TRANSITION = 3
+BOUNDARY_TRANSITION = 1
+SCENE_TRANSITION = 2
+LIFE_LOST_TRANSITION = 3
 GAME_OVER_TRANSITION = 4
 END_GAME_TRANSITION = 5
 
@@ -76,20 +78,18 @@ class SceneTransition(Transition):
         self.level = level
         self.direction = direction
         self.boundary = boundary
-        self.firstMap = False
 
 """
 Defines a transition that occurs when the player loses a life and the scene is
 reset.  Note that this is very similar to a scene transition.
 """        
-class ReplayTransition(Transition):
-    def __init__(self, mapName, px, py, level, direction, boundary = None):
-        Transition.__init__(self, REPLAY_TRANSITION, mapName)
-        self.pixelPosition = (px, py)
+class LifeLostTransition(Transition):
+    def __init__(self, mapName, x, y, level):
+        Transition.__init__(self, LIFE_LOST_TRANSITION, mapName)
+        self.tilePosition = (x, y)
         self.level = level
-        self.direction = direction
-        self.boundary = boundary
-        self.firstMap = False
+        self.direction = DOWN
+        self.boundary = None
 
 """
 Defines a transition that occurs when the player walks off the edge of one map

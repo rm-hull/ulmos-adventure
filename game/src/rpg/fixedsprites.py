@@ -58,6 +58,10 @@ class CoinCount(FixedSprite):
         self.newImage()
         print "coins:", self.count
 
+    def setCount(self, count):
+        self.count = count
+        self.newImage()
+
 class KeyCount(FixedSprite):
     
     initialImage = None
@@ -84,6 +88,10 @@ class KeyCount(FixedSprite):
         self.count += n
         self.newImage()
         print "keys:", self.count
+
+    def setCount(self, count):
+        self.count = count
+        self.newImage()
 
 class Lives(FixedSprite):
     

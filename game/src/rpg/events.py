@@ -25,9 +25,6 @@ class WaspZoomingEvent(Event):
 class BeetleCrawlingEvent(Event):
     pass
 
-class KeyUsedEvent(Event):
-    pass
-
 class PlayerFallingEvent(Event):
     pass
         
@@ -92,9 +89,11 @@ class DoorMetadata(SpriteMetadata):
         rpgMap.addLevel(self.x, self.y + 1, self.level)
 
 class CheckpointMetadata(SpriteMetadata):    
-    def __init__(self, uid, mapName, tilePosition, level):
+    def __init__(self, uid, mapName, tilePosition, level, coinCount, keyCount):
         SpriteMetadata.__init__(self, uid)
         self.mapName = mapName
         self.tilePosition = tilePosition
         self.level = level
+        self.coinCount = coinCount
+        self.keyCount = keyCount
         

@@ -346,21 +346,27 @@ class Player(RpgSprite):
     def handleAction(self, sprites):
         self.processActions(sprites)
                     
+    def getCoinCount(self):
+        return self.coinCount.count;
+
+    def setCoinCount(self, count):
+        self.coinCount.setCount(count);
+
     def incrementCoinCount(self):
         self.coinCount.incrementCount()
         
+    def getKeyCount(self):
+        return self.keyCount.count;
+
+    def setKeyCount(self, count):
+        self.keyCount.setCount(count);
+
     def incrementKeyCount(self):
         self.keyCount.incrementCount()
         
     def decrementKeyCount(self):
         self.keyCount.incrementCount(-1)
         
-    def getCoinCount(self):
-        return self.coinCount.count;
-
-    def getKeyCount(self):
-        return self.keyCount.count;
-
     def loseLife(self):
         self.eventBus.dispatchLifeLostEvent(LIFE_LOST_EVENT)
         self.lives.incrementCount(-1)
