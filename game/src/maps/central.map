@@ -334,7 +334,7 @@
 3,10 [4] grass:rs
 4,10 [4] grass:n1
 5,10 [4] grass:n1
-6,10 [4] grass:n1 grass:drop
+6,10 [4] grass:bb
 7,10 [4] grass:n1
 8,10 [4] water:dark grass:r2
 9,10 water:w2 wood:lls_supp
@@ -786,7 +786,7 @@
 26,23 water:w2 water:w4
 27,23 water:w3
 28,23 [3] water:dark grass:l2
-29,23 [3] grass:n1 grass:drop
+29,23 [3] grass:bb
 30,23 [3] earth:dark grass:rj
 31,23 earth:tls
 
@@ -1055,7 +1055,7 @@
 31,31 water:w2
 
 sprite door 4 6,2
-sprite beetle 3 13,23 16,23 16,21 17,21 16,21 16,23
+sprite beetle 3 13,22 13,23 16,23 16,21 17,21 16,21 16,23
 sprite beetle 4 12,7 12,9 9,9 12,9
 sprite beetle 4 6,5 6,10 8,10 8,8 6,8
 sprite wasp 3 24,7

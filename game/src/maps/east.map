@@ -130,7 +130,7 @@
 10,7 [3] grass:n1 grass:l3
 11,7 [3] grass:n1 grass:treels2
 12,7 [3] grass:n6 grass:treers2
-13,7 [S3] grass:bb
+13,7 [3] grass:n1
 14,7 [3] water:dark grass:r1
 15,7 water:w5
 
@@ -145,10 +145,10 @@
 8,8 [1] grass:n1
 9,8 [1] grass:n1
 10,8 earth:tl
-11,8 grass:dark earth:m2
-12,8 grass:dark earth:mrs
-13,8 [S2.5] earth:dark wood:st1
-14,8 grass:dark earth:mrls
+11,8 earth:trs
+12,8 [3] earth:dark grass:lj
+13,8 [3] grass:bb
+14,8 [3] grass:r1
 15,8 water:w6
 
 0,9 earth:n
@@ -161,11 +161,11 @@
 7,9 earth:r
 8,9 water:ts
 9,9 [1] water:dark earth:td grass:lj
-10,9 grass:dark earth:blrs
-11,9 [2] earth:dark grass:lls
-12,9 [2] grass:ms
-13,9 [S2.5] grass:light wood:st2
-14,9 [2] water:dark grass:rrs
+10,9 grass:dark earth:bl
+11,9 grass:dark earth:brs
+12,9 earth:tter
+13,9 [D3-2] earth:drop
+14,9 earth:ttel
 15,9 water:w5
 
 0,10 water:n1
@@ -179,10 +179,10 @@
 8,10 water:w5
 9,10 [1] water:dark grass:l2
 10,10 [1] grass:ls
-11,10 [2] grass:n1 grass:l1
-12,10 [S2] grass:bb
-13,10 [S2] grass:st2
-14,10 [2] water:dark grass:r1
+11,10 [1] grass:ms
+12,10 grass:dark earth:bl
+13,10 grass:dark earth:b1
+14,10 earth:r
 15,10 water:w6
 
 0,11 water:w3
@@ -196,10 +196,10 @@
 8,11 water:w5
 9,11 water:tlrs
 10,11 [1] water:dark earth:td grass:lj
-11,11 grass:dark earth:ml
-12,11 [S1.5] earth:dark wood:st1
-13,11 grass:dark earth:mls
-14,11 earth:tr
+11,11 [1] grass:n1
+12,11 [1] grass:ls
+13,11 [1] water:dark earth:td grass:rrs
+14,11 water:rls
 15,11 water:w5
 
 0,12 water:w2
@@ -213,10 +213,10 @@
 8,12 water:w8
 9,12 water:w3
 10,12 [1] water:dark grass:l2
-11,12 [1] grass:ls
-12,12 [S1.5] grass:light wood:st2
-13,12 [1] water:dark earth:td grass:rrs
-14,12 water:rls
+11,12 [1] grass:n3
+12,12 [1] grass:n1
+13,12 [1] water:dark grass:r1
+14,12 water:w4
 15,12 water:w1
 
 0,13 water:w2
@@ -231,7 +231,7 @@
 9,13 water:w3
 10,13 water:tlrs
 11,13 [1] water:dark earth:td grass:lj
-12,13 [S1] grass:st2
+12,13 [1] grass:n1
 13,13 [1] water:dark grass:r2
 14,13 water:w6
 15,13 water:w1
@@ -559,3 +559,4 @@ sprite checkpoint 3 1,21
 
 event boundary left 4-7 : boundary central left 0
 event boundary left 20-22 : boundary central left 0
+

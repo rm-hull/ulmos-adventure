@@ -55,12 +55,10 @@ def startGame(cont = False):
         registryHandler.switchToSnapshot()
     else:
         #registry = Registry("unit", (4, 6), 1)
-        #registry = Registry("wasps", (12, 10), 5)
-        #registry = Registry("central", (6, 22), 2)
+        registry = Registry("central", (6, 22), 2)
         #registry = Registry("central", (22, 20), 3)
-        #registry = Registry("central", (8, 11), 1)
-        #registry = Registry("central", (5, 8), 4)
-        registry = Registry("east", (10, 18), 1)
+        #registry = Registry("east", (10, 18), 1)
+        #registry = Registry("wasps", (12, 10), 5)
         registryHandler = RegistryHandler(registry)
     # grab this for later
     registry = registryHandler.registry
