@@ -276,11 +276,11 @@ class SceneTransitionState:
             player.setTilePosition(self.transition.tilePosition[0],
                                    self.transition.tilePosition[1],
                                    self.transition.level)
-            # create play state
-            self.nextState = PlayState()
             # hide player if required
             if self.transition.boundary:
                 hidePlayer(self.transition.boundary, nextRpgMap.mapRect)
+            # create play state
+            self.nextState = PlayState()
             # setting the direction will also apply masks
             player.setDirection(self.transition.direction)
             # extract the next image from the state
