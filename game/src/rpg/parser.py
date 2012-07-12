@@ -26,6 +26,8 @@ DASH = "-"
 
 BOUNDARIES = {"up": UP, "down": DOWN, "left": LEFT, "right": RIGHT}
 
+mapCache = {}
+
 def getXY(xyStr, delimiter = COMMA):
     return [int(n) for n in xyStr.split(delimiter)]
 
@@ -36,6 +38,9 @@ def getTilePoints(xyList, delimiter = COMMA):
     return tilePoints
     
 def loadRpgMap(name):
+    # check cache first
+    if name in mapCache:
+        return mapCache[name].restore()
     # tileData is keyed on an x,y tuple
     tileData = {}
     spriteData = []
@@ -72,7 +77,9 @@ def loadRpgMap(name):
     mapSprites = createMapSprites(spriteData, name)
     mapEvents = createMapEvents(eventData)
     # create map and return
-    return map.RpgMap(name, mapTiles, mapSprites, mapEvents)
+    myMap = map.RpgMap(name, mapTiles, mapSprites, mapEvents)
+    mapCache[name] = myMap
+    return myMap
 
 def createMapTiles(cols, rows, tileData):
     # create the map tiles

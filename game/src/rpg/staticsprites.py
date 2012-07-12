@@ -6,6 +6,12 @@ from spriteframes import StaticFrames
 from events import CoinCollectedEvent, KeyCollectedEvent, DoorOpenedEvent, DoorOpeningEvent, CheckpointReachedEvent
 from events import KeyMetadata, CoinMetadata, DoorMetadata, CheckpointMetadata
 
+FLAMES_FRAME_SKIP = 6 // VELOCITY
+COIN_FRAME_SKIP = 6 // VELOCITY
+KEY_FRAME_SKIP = 6 // VELOCITY
+DOOR_FRAME_SKIP = 6 // VELOCITY
+CHECKPOINT_FRAME_SKIP = 12 // VELOCITY
+
 class Flames(OtherSprite):
     
     framesImage = None
@@ -15,7 +21,7 @@ class Flames(OtherSprite):
             imagePath = os.path.join(SPRITES_FOLDER, "flame-frames.png")
             Flames.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(Flames.framesImage)
-        spriteFrames = StaticFrames(animationFrames, 6)
+        spriteFrames = StaticFrames(animationFrames, FLAMES_FRAME_SKIP)
         OtherSprite.__init__(self, spriteFrames, (4, 2))
 
 class Coin(OtherSprite):
@@ -29,7 +35,7 @@ class Coin(OtherSprite):
             imagePath = os.path.join(SPRITES_FOLDER, "coin-frames.png")
             Coin.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(Coin.framesImage)
-        spriteFrames = StaticFrames(animationFrames, 6)
+        spriteFrames = StaticFrames(animationFrames, COIN_FRAME_SKIP)
         OtherSprite.__init__(self, spriteFrames, (2, 2))
         
     def processCollision(self, player):
@@ -49,7 +55,7 @@ class Key(OtherSprite):
             imagePath = os.path.join(SPRITES_FOLDER, "key-frames.png")
             Key.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(Key.framesImage, 6)
-        spriteFrames = StaticFrames(animationFrames, 6)
+        spriteFrames = StaticFrames(animationFrames, KEY_FRAME_SKIP)
         OtherSprite.__init__(self, spriteFrames, (2, 2))
         
     def processCollision(self, player):
@@ -105,7 +111,7 @@ class Door(OtherSprite):
             imagePath = os.path.join(SPRITES_FOLDER, "door-frames.png")
             Door.framesImage = view.loadScaledImage(imagePath, None)
         animationFrames = view.processStaticFrames(Door.framesImage, 8)
-        spriteFrames = StaticFrames(animationFrames, 6)
+        spriteFrames = StaticFrames(animationFrames, DOOR_FRAME_SKIP)
         OtherSprite.__init__(self, spriteFrames)
         self.opening = False
         self.frameCount = 0
@@ -153,7 +159,7 @@ class Checkpoint(OtherSprite):
             imagePath = os.path.join(SPRITES_FOLDER, "check-frames.png")
             Checkpoint.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(Checkpoint.framesImage, 4)
-        spriteFrames = StaticFrames(animationFrames, 12)
+        spriteFrames = StaticFrames(animationFrames, CHECKPOINT_FRAME_SKIP)
         OtherSprite.__init__(self, spriteFrames, (3, -3))
         
     def processCollision(self, player):

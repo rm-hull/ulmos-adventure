@@ -25,6 +25,9 @@ ZOOM_MOVEMENT = {UP: (0, -2 * MOVE_UNIT, UP_METADATA),
                  LEFT: (-2 * MOVE_UNIT, 0, LEFT_METADATA),
                  RIGHT: (2 * MOVE_UNIT, 0, RIGHT_METADATA)}
 
+BEETLE_FRAME_SKIP = 12 // VELOCITY
+WASP_FRAME_SKIP = 4 // VELOCITY
+
 class Beetle(OtherSprite):
     
     framesImage = None
@@ -36,7 +39,7 @@ class Beetle(OtherSprite):
             imagePath = os.path.join(SPRITES_FOLDER, "beetle-frames.png")
             Beetle.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processMovementFrames(Beetle.framesImage, 2)
-        spriteFrames = DirectionalFrames(animationFrames, 12)
+        spriteFrames = DirectionalFrames(animationFrames, BEETLE_FRAME_SKIP)
         OtherSprite.__init__(self, spriteFrames)
         self.upright = False
 
@@ -90,7 +93,7 @@ class Wasp(OtherSprite):
             imagePath = os.path.join(SPRITES_FOLDER, "wasp-frames.png")
             Wasp.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processMovementFrames(Wasp.framesImage, 2)
-        spriteFrames = DirectionalFrames(animationFrames, 4)
+        spriteFrames = DirectionalFrames(animationFrames, WASP_FRAME_SKIP)
         OtherSprite.__init__(self, spriteFrames)
         
     def processCollision(self, player):

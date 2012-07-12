@@ -21,6 +21,8 @@ NO_BOUNDARY = 0
 
 FALL_UNIT = 2 * MOVE_UNIT
 
+ULMO_FRAME_SKIP = 6 // VELOCITY
+
 """
 Valid movement combinations - movement is keyed on direction bits and is stored
 as a tuple (px, py, direction, diagonal)
@@ -267,7 +269,7 @@ class Player(RpgSprite):
     def getTileRange(self, boundary):
         tx1, ty1 = self.getTilePoint(self.baseRect.left, self.baseRect.top)
         tx2, ty2 = self.getTilePoint(self.baseRect.right - 1, self.baseRect.bottom - 1)
-        print "(%s, %s) -> (%s, %s)" % (tx1, ty1, tx2, ty2)
+        #print "(%s, %s) -> (%s, %s)" % (tx1, ty1, tx2, ty2)
         if boundary == UP or boundary == DOWN:
             return range(tx1, tx2 + 1)
         return range(ty1, ty2 + 1)
@@ -299,7 +301,7 @@ class Player(RpgSprite):
             return event
         if downLevel:
             # initialise falling state
-            print "down: %s" % downLevel
+            #print "down: %s" % downLevel
             self.falling = downLevel * TILE_SIZE
             # swap to falling frames
             self.clearMasks()
@@ -308,7 +310,6 @@ class Player(RpgSprite):
             self.shadow.setupFromPlayer(self, downLevel)
             gameSprites.add(self.shadow)
             self.eventBus.dispatchPlayerFallingEvent(PLAYER_FALLING_EVENT)
-
         return None
     
     """
@@ -393,7 +394,7 @@ class Ulmo(Player):
             imagePath = os.path.join(SPRITES_FOLDER, "ulmo-falling.png")
             Ulmo.fallingFramesImage = view.loadScaledImage(imagePath, None)
         animationFrames = view.processMovementFrames(Ulmo.movingFramesImage)
-        movingFrames = DirectionalFrames(animationFrames, 6)
+        movingFrames = DirectionalFrames(animationFrames, ULMO_FRAME_SKIP)
         animationFrames = view.processStaticFrames(Ulmo.fallingFramesImage)
         fallingFrames = StaticFrames(animationFrames)
         Player.__init__(self, movingFrames, fallingFrames, (1, -12))

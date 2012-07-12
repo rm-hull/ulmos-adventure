@@ -11,7 +11,7 @@ import font
 
 from pygame.locals import *
 
-from sprites import MOVE_UNIT
+from sprites import VELOCITY, MOVE_UNIT
 from view import NONE, UP, DOWN, LEFT, RIGHT, TILE_SIZE, VIEW_WIDTH, VIEW_HEIGHT
 from mapevents import SCENE_TRANSITION, BOUNDARY_TRANSITION, LIFE_LOST_TRANSITION, GAME_OVER_TRANSITION, END_GAME_TRANSITION
 
@@ -22,14 +22,25 @@ from sounds import SoundHandler
 from events import MapTransitionEvent, EndGameEvent
 from fixedsprites import FixedCoin, CoinCount, KeyCount, Lives, CheckpointIcon
 
+FRAMES_PER_SEC = 60 // VELOCITY
+
 ORIGIN = (0, 0)
-X_MULT = VIEW_WIDTH // 64
-Y_MULT = VIEW_HEIGHT // 64
+X_MULT = VIEW_WIDTH // (64 // VELOCITY)
+Y_MULT = VIEW_HEIGHT // (64 // VELOCITY)
 DIMENSIONS = (VIEW_WIDTH, VIEW_HEIGHT)
 
+THIRTY_TWO = 32 // VELOCITY
+SIXTY_FOUR = 64 // VELOCITY
+
 # number of frames required to bring the player into view from an off-screen position
-BOUNDARY_TICKS = {UP: 24, DOWN: 24, LEFT: 14, RIGHT: 14}
-DOORWAY_TICKS = {UP: 16, DOWN: 16, LEFT: 16, RIGHT: 16}
+BOUNDARY_TICKS = {UP: 24 // VELOCITY,
+                  DOWN: 24 // VELOCITY,
+                  LEFT: 14 // VELOCITY,
+                  RIGHT: 14 // VELOCITY}
+DOORWAY_TICKS = {UP: 16 // VELOCITY,
+                 DOWN: 16 // VELOCITY,
+                 LEFT: 16 // VELOCITY,
+                 RIGHT: 16 // VELOCITY}
 
 pygame.display.set_caption("Ulmo's Adventure")
 screen = pygame.display.set_mode(DIMENSIONS)
@@ -137,7 +148,7 @@ def sceneZoomIn(screenImage, ticks):
     pygame.display.flip()
 
 def sceneZoomOut(screenImage, ticks):
-    xBorder, yBorder = (64 - ticks) * X_MULT, (64 - ticks) * Y_MULT
+    xBorder, yBorder = (SIXTY_FOUR - ticks) * X_MULT, (SIXTY_FOUR - ticks) * Y_MULT
     extract = screenImage.subsurface(xBorder, yBorder,
                                           VIEW_WIDTH - xBorder * 2,
                                           VIEW_HEIGHT - yBorder * 2)
@@ -264,11 +275,11 @@ class SceneTransitionState:
         self.ticks = 0
              
     def execute(self, keyPresses):
-        if self.ticks < 32:
+        if self.ticks < THIRTY_TWO:
             if self.ticks == 0 and self.transition.type == SCENE_TRANSITION:
                 eventBus.dispatchMapTransitionEvent(MapTransitionEvent())
             sceneZoomIn(self.screenImage, self.ticks)
-        elif self.ticks == 32:
+        elif self.ticks == THIRTY_TWO:
             # load the next map
             nextRpgMap = parser.loadRpgMap(self.transition.mapName)
             player.rpgMap = nextRpgMap
@@ -285,7 +296,7 @@ class SceneTransitionState:
             player.setDirection(self.transition.direction)
             # extract the next image from the state
             self.nextState.drawMapView(self.screenImage, 0)           
-        elif self.ticks < 64:
+        elif self.ticks < SIXTY_FOUR:
             sceneZoomOut(self.screenImage, self.ticks)
         else:
             if self.transition.type == LIFE_LOST_TRANSITION:
@@ -321,7 +332,7 @@ class BoundaryTransitionState:
             self.nextState = PlayState()
             # extract the next image from the state
             self.nextState.drawMapView(self.nextImage, 0)
-        elif self.ticks < 32:
+        elif self.ticks < THIRTY_TWO:
             xSlice, ySlice = self.ticks * X_MULT * 2, self.ticks * Y_MULT * 2
             if self.boundary == UP:
                 screen.blit(self.oldImage.subsurface(0, 0, VIEW_WIDTH, VIEW_HEIGHT - ySlice), (0, ySlice))
@@ -359,11 +370,11 @@ class GameOverState:
              
     def execute(self, keyPresses):
         if self.countdown:
-            if (self.ticks - 64) % 60 == 0:
+            if (self.ticks - SIXTY_FOUR) % FRAMES_PER_SEC == 0:
                 self.updateCountdown()                
-        if self.ticks < 32:
+        if self.ticks < THIRTY_TWO:
             sceneZoomIn(self.screenImage, self.ticks)
-        elif self.ticks == 32:
+        elif self.ticks == THIRTY_TWO:
             x, y = (VIEW_WIDTH - self.topLine1.get_width()) // 2, 32 * view.SCALAR
             screen.blit(self.topLine1, (x, y))
             x, y = (VIEW_WIDTH - self.topLine2.get_width()) // 2, 44 * view.SCALAR
@@ -374,7 +385,7 @@ class GameOverState:
                 # set the countdown topleft for later
                 self.countdownTopleft = (x, y)
             pygame.display.flip()
-        elif self.ticks == 64:
+        elif self.ticks == SIXTY_FOUR:
             x, y = (VIEW_WIDTH - self.lowLine1.get_width()) // 2, VIEW_HEIGHT - 42 * view.SCALAR
             screen.blit(self.lowLine1, (x, y))
             x, y = (VIEW_WIDTH - self.lowLine2.get_width()) // 2, VIEW_HEIGHT - 30 * view.SCALAR
@@ -382,7 +393,7 @@ class GameOverState:
             pygame.display.flip()
             if self.continueOffered:
                 self.countdown = 10
-        elif self.ticks > 64:
+        elif self.ticks > SIXTY_FOUR:
             if keyPresses[K_SPACE]:
                 if self.countdown:
                     return startGame(True)
@@ -411,11 +422,11 @@ class EndGameState:
         self.ticks = 0
              
     def execute(self, keyPresses):
-        if self.ticks < 32:
+        if self.ticks < THIRTY_TWO:
             if self.ticks == 0:
                 eventBus.dispatchEndGameEvent(EndGameEvent())
             sceneZoomIn(self.screenImage, self.ticks)
-        elif self.ticks == 32:
+        elif self.ticks == THIRTY_TWO:
             x, y = (VIEW_WIDTH - self.topLine1.get_width()) // 2, 32 * view.SCALAR
             screen.blit(self.topLine1, (x, y))
             x, y = (VIEW_WIDTH - self.topLine2.get_width()) // 2, 44 * view.SCALAR
@@ -423,13 +434,13 @@ class EndGameState:
             x, y = (VIEW_WIDTH - self.topLine3.get_width()) // 2, 56 * view.SCALAR
             screen.blit(self.topLine3, (x, y))
             pygame.display.flip()
-        elif self.ticks == 64:
+        elif self.ticks == SIXTY_FOUR:
             x, y = (VIEW_WIDTH - self.lowLine1.get_width()) // 2, VIEW_HEIGHT - 42 * view.SCALAR
             screen.blit(self.lowLine1, (x, y))
             x, y = (VIEW_WIDTH - self.lowLine2.get_width()) // 2, VIEW_HEIGHT - 30 * view.SCALAR
             screen.blit(self.lowLine2, (x, y))
             pygame.display.flip()
-        elif self.ticks > 64:
+        elif self.ticks > SIXTY_FOUR:
             if keyPresses[K_SPACE]:
                 return startGame()
         self.ticks += 1

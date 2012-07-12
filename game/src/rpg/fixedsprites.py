@@ -138,6 +138,8 @@ class CheckpointIcon(FixedSprite):
         self.setImage(self.offImage)
         self.on = False
         self.ticks = -1
+        self.tickLimit = 100 // VELOCITY
+        self.tickToggle = 20 // VELOCITY
         
     def activate(self):
         self.ticks = 0
@@ -147,11 +149,11 @@ class CheckpointIcon(FixedSprite):
         if self.ticks < 0:
             return
         # test if the icon cycle has finished
-        if self.ticks > 100:
+        if self.ticks > self.tickLimit:
             self.ticks = -1
             return
         # update icon
-        if self.ticks % 20 == 0:
+        if self.ticks % self.tickToggle == 0:
             if self.on:
                 self.setImage(self.offImage)
                 self.on = False

@@ -26,6 +26,7 @@ class RpgMap:
         self.mapSprites = mapSprites
         self.initialiseMapImage()
         self.initialiseEvents(mapEvents)
+        self.toRestore = None
         
     def initialiseMapImage(self):
         self.mapImage = view.createRectangle((self.cols * TILE_SIZE, self.rows * TILE_SIZE),
@@ -185,6 +186,9 @@ class RpgMap:
             self.horizontals[y] = [self.mapTiles[x][y] for x in range(x1, x2 + 1)]
         return rectTiles
     
+    """
+    Returns a tile event or a down level.
+    """
     def getActions(self, level, baseRect):
         downLevels = []
         spanTiles = self.getSpanTiles(baseRect)
@@ -195,6 +199,8 @@ class RpgMap:
             downLevel = tile.getDownLevel(level)
             if downLevel:
                 downLevels.append(downLevel)
+        # note that a down level is only returned if all the span tiles have a
+        # matching down level
         if len(downLevels) == len(spanTiles):
             return None, downLevels[0]
         return None, None
@@ -205,8 +211,24 @@ class RpgMap:
     def convertBottomRight(self, px, py):
         return min(self.cols - 1, px // TILE_SIZE), min(self.rows - 1, py // TILE_SIZE)
     
+    """
+    Adds a new level to the specified tile and stores it for restoration.
+    """
     def addLevel(self, x, y, level):
-        self.mapTiles[x][y].addLevel(level)
+        if self.toRestore == None:
+            self.toRestore = set()
+        self.toRestore.add(self.mapTiles[x][y].addNewLevel(level))
+    
+    """
+    Restores any modified tiles to their original state.
+    """    
+    def restore(self):
+        if self.toRestore == None:
+            return self
+        for tile in self.toRestore:
+            tile.restore()
+        self.toRestore = None
+        return self
 
 """
 A repository of named tile images.  Instances of this class are created and used
@@ -231,6 +253,7 @@ class MapTile:
         self.x, self.y = x, y
         self.levels = []
         self.tiles = []
+        self.originalLevels = None
         self.specialLevels = None
         self.downLevels = None
         self.masks = None
@@ -238,6 +261,23 @@ class MapTile:
         
     def addLevel(self, level):
         self.levels.append(level)
+    
+    """
+    If we add a new level (eg. when the player opens a door) we need to restore
+    the map to its original state when we next pull it from the cache - hence we
+    store the original levels before adding to them.
+    """    
+    def addNewLevel(self, level):
+        if self.originalLevels == None:
+            self.originalLevels = [l for l in self.levels]
+        self.addLevel(level)
+        return self
+        
+    def restore(self):
+        if self.originalLevels == None:
+            return
+        self.levels = self.originalLevels
+        self.originalLevels = None		
         
     def addTile(self, tile):
         self.tiles.append(tile)

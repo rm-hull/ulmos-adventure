@@ -8,10 +8,12 @@ SOUNDS_FOLDER = "sounds"
 BEETLE_SOUND_TICKS = 15
 
 def getSound(name, volume):
-    soundPath = os.path.join(SOUNDS_FOLDER, name)
-    sound = pygame.mixer.Sound(soundPath)
-    sound.set_volume(volume)
-    return sound
+    if pygame.mixer.get_init():
+        soundPath = os.path.join(SOUNDS_FOLDER, name)
+        sound = pygame.mixer.Sound(soundPath)
+        sound.set_volume(volume)
+        return sound
+    return None
 
 pickupSound = getSound("pickup.wav", 1.0)
 doorSound = getSound("door.wav", 1.0)
@@ -97,7 +99,7 @@ class SoundHandler:
         self.handleNextSound()
         # play sounds
         for sound in self.sounds:
-            if self.soundOn:
+            if sound and self.soundOn:
                 sound.play()
         self.sounds.clear()
         
