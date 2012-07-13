@@ -7,7 +7,7 @@ import view
 from pygame.locals import Rect
 from view import SCALAR, TILE_SIZE
 
-VELOCITY = 1
+VELOCITY = 2
 MOVE_UNIT = VELOCITY * SCALAR
 
 # we may need to specify these on a sprite by sprite basis 

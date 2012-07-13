@@ -390,9 +390,9 @@
 15,22 grass:n6
 
 0,23 earth:t1
-1,23 grass:dark earth:m2
+1,23 grass:dark earth:mrs
 2,23 [S2.5] earth:dark wood:st1
-3,23 grass:dark earth:mrs
+3,23 grass:dark earth:ms
 4,23 [3] earth:dark grass:lj
 5,23 [3] grass:n6
 6,23 [3] water:dark grass:r2
