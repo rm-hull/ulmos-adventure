@@ -5,10 +5,10 @@ from pygame.locals import *
 import pygame
 
 """
-If running on the Raspberry Pi, do this to get working sound:
-# sudo apt-get install alsa-utils
-# sudo modprobe snd_bcm2835
-You should only need to run the apt-get command once.
+If using an older Raspberry Pi distro, you might need to run the following commands to get working sound:
+
+sudo apt-get install alsa-utils
+sudo modprobe snd_bcm2835
 """
 
 # initialise pygame before we import anything else
