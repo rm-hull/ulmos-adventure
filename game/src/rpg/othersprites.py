@@ -28,6 +28,8 @@ ZOOM_MOVEMENT = {UP: (0, -2 * MOVE_UNIT, UP_METADATA),
 BEETLE_FRAME_SKIP = 12 // VELOCITY
 WASP_FRAME_SKIP = 4 // VELOCITY
 
+WASP_COUNTDOWN = 12 // VELOCITY
+
 class Beetle(OtherSprite):
     
     framesImage = None
@@ -107,7 +109,7 @@ class Wasp(OtherSprite):
         self.downRect = Rect(self.baseRect.left, self.baseRect.bottom, self.baseRect.width, VIEW_HEIGHT)
         self.leftRect = Rect(self.baseRect.left - VIEW_WIDTH, self.baseRect.top, VIEW_WIDTH, self.baseRect.height)
         self.rightRect = Rect(self.baseRect.right, self.baseRect.top, VIEW_WIDTH, self.baseRect.height)
-        self.countdown = 10;
+        self.countdown = WASP_COUNTDOWN;
         self.zooming = False
         self.direction = None # this is also used to detect if the sprite has 'seen' the player
     
