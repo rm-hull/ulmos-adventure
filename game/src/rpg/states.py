@@ -12,7 +12,7 @@ import font
 from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT, K_SPACE, Rect
 
 from sprites import VELOCITY, MOVE_UNIT
-from view import NONE, UP, DOWN, LEFT, RIGHT, TILE_SIZE, VIEW_WIDTH, VIEW_HEIGHT
+from view import NONE, UP, DOWN, LEFT, RIGHT, SCALAR, VIEW_WIDTH, VIEW_HEIGHT
 from mapevents import SCENE_TRANSITION, BOUNDARY_TRANSITION, LIFE_LOST_TRANSITION, GAME_OVER_TRANSITION, END_GAME_TRANSITION
 
 from eventbus import EventBus
@@ -21,8 +21,6 @@ from player import Ulmo
 from sounds import SoundHandler
 from events import MapTransitionEvent, EndGameEvent
 from fixedsprites import FixedCoin, CoinCount, KeyCount, Lives, CheckpointIcon
-from rpg.view import SCALAR
-from rpg.mapevents import LifeLostTransition
 
 FRAMES_PER_SEC = 60 // VELOCITY
 
@@ -132,7 +130,7 @@ def hidePlayer(boundary, mapRect, modifier = None):
     playerRect = player.mapRect
     px, py = playerRect.topleft
     if modifier:
-        px, py = [i + modifier * TILE_SIZE for i in playerRect.topleft]
+        px, py = [i + modifier * view.TILE_SIZE for i in playerRect.topleft]
     # we position the player just off the screen and then use the ShowPlayer
     # state to bring the player into view                 
     if boundary == UP:
@@ -183,12 +181,12 @@ class TitleState:
                 screen.blit(self.backgroundImage, ORIGIN, Rect(x, y, VIEW_WIDTH, VIEW_HEIGHT))        
                 pygame.display.flip()
         elif self.ticks == self.titleTicks + THIRTY_TWO:
-            x, y = (VIEW_WIDTH - self.titleImage.get_width()) // 2, 26 * view.SCALAR
+            x, y = (VIEW_WIDTH - self.titleImage.get_width()) // 2, 26 * SCALAR
             screen.blit(self.titleImage, (x, y))
             pygame.display.flip()
         elif self.ticks == self.titleTicks + SIXTY_FOUR:
             self.playState = startGame()
-            x, y = (VIEW_WIDTH - self.playLine.get_width()) // 2, 88 * view.SCALAR
+            x, y = (VIEW_WIDTH - self.playLine.get_width()) // 2, 88 * SCALAR
             screen.blit(self.playLine, (x, y))
             pygame.display.flip()
         elif self.ticks > self.titleTicks + SIXTY_FOUR:
@@ -450,20 +448,20 @@ class GameOverState:
         if self.ticks < THIRTY_TWO:
             sceneZoomIn(self.screenImage, self.ticks)
         elif self.ticks == THIRTY_TWO:
-            x, y = (VIEW_WIDTH - self.topLine1.get_width()) // 2, 32 * view.SCALAR
+            x, y = (VIEW_WIDTH - self.topLine1.get_width()) // 2, 32 * SCALAR
             screen.blit(self.topLine1, (x, y))
-            x, y = (VIEW_WIDTH - self.topLine2.get_width()) // 2, 44 * view.SCALAR
+            x, y = (VIEW_WIDTH - self.topLine2.get_width()) // 2, 44 * SCALAR
             screen.blit(self.topLine2, (x, y))
             if self.continueOffered:
-                x, y = (VIEW_WIDTH - self.topLine3.get_width()) // 2, 56 * view.SCALAR
+                x, y = (VIEW_WIDTH - self.topLine3.get_width()) // 2, 56 * SCALAR
                 screen.blit(self.topLine3, (x, y))
                 # set the countdown topleft for later
                 self.countdownTopleft = (x, y)
             pygame.display.flip()
         elif self.ticks == SIXTY_FOUR:
-            x, y = (VIEW_WIDTH - self.lowLine1.get_width()) // 2, VIEW_HEIGHT - 42 * view.SCALAR
+            x, y = (VIEW_WIDTH - self.lowLine1.get_width()) // 2, VIEW_HEIGHT - 42 * SCALAR
             screen.blit(self.lowLine1, (x, y))
-            x, y = (VIEW_WIDTH - self.lowLine2.get_width()) // 2, VIEW_HEIGHT - 30 * view.SCALAR
+            x, y = (VIEW_WIDTH - self.lowLine2.get_width()) // 2, VIEW_HEIGHT - 30 * SCALAR
             screen.blit(self.lowLine2, (x, y))
             pygame.display.flip()
             if self.continueOffered:
@@ -502,17 +500,17 @@ class EndGameState:
                 eventBus.dispatchEndGameEvent(EndGameEvent())
             sceneZoomIn(self.screenImage, self.ticks)
         elif self.ticks == THIRTY_TWO:
-            x, y = (VIEW_WIDTH - self.topLine1.get_width()) // 2, 32 * view.SCALAR
+            x, y = (VIEW_WIDTH - self.topLine1.get_width()) // 2, 32 * SCALAR
             screen.blit(self.topLine1, (x, y))
-            x, y = (VIEW_WIDTH - self.topLine2.get_width()) // 2, 44 * view.SCALAR
+            x, y = (VIEW_WIDTH - self.topLine2.get_width()) // 2, 44 * SCALAR
             screen.blit(self.topLine2, (x, y))
-            x, y = (VIEW_WIDTH - self.topLine3.get_width()) // 2, 56 * view.SCALAR
+            x, y = (VIEW_WIDTH - self.topLine3.get_width()) // 2, 56 * SCALAR
             screen.blit(self.topLine3, (x, y))
             pygame.display.flip()
         elif self.ticks == SIXTY_FOUR:
-            x, y = (VIEW_WIDTH - self.lowLine1.get_width()) // 2, VIEW_HEIGHT - 42 * view.SCALAR
+            x, y = (VIEW_WIDTH - self.lowLine1.get_width()) // 2, VIEW_HEIGHT - 42 * SCALAR
             screen.blit(self.lowLine1, (x, y))
-            x, y = (VIEW_WIDTH - self.lowLine2.get_width()) // 2, VIEW_HEIGHT - 30 * view.SCALAR
+            x, y = (VIEW_WIDTH - self.lowLine2.get_width()) // 2, VIEW_HEIGHT - 30 * SCALAR
             screen.blit(self.lowLine2, (x, y))
             pygame.display.flip()
         elif self.ticks > SIXTY_FOUR:
