@@ -37,7 +37,7 @@ class FixedCoin(FixedSprite):
     def __init__(self, position = (0, 0)):
         if FixedCoin.initialImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "small-coin.png")
-            FixedCoin.initialImage = view.loadScaledImage(imagePath, None)
+            FixedCoin.initialImage = view.loadScaledImage(imagePath)
         FixedSprite.__init__(self, position)
         self.setImage(view.createDuplicateSpriteImage(FixedCoin.initialImage))
 
@@ -69,7 +69,7 @@ class KeyCount(FixedSprite):
     def __init__(self, count = 0, position = (0, 0)):
         if KeyCount.initialImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "small-key.png")
-            KeyCount.initialImage = view.loadScaledImage(imagePath, None)
+            KeyCount.initialImage = view.loadScaledImage(imagePath)
         self.keyImage = view.createDuplicateSpriteImage(KeyCount.initialImage)
         FixedSprite.__init__(self, position)
         self.count = count
@@ -100,7 +100,7 @@ class Lives(FixedSprite):
     def __init__(self, count = 0, position = (0, 0)):
         if Lives.initialImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "life.png")
-            Lives.initialImage = view.loadScaledImage(imagePath, None)
+            Lives.initialImage = view.loadScaledImage(imagePath)
         self.livesImage = view.createDuplicateSpriteImage(Lives.initialImage)
         FixedSprite.__init__(self, position)
         self.count = count
@@ -131,7 +131,7 @@ class CheckpointIcon(FixedSprite):
     def __init__(self, position = (0, 0)):
         if CheckpointIcon.initialImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "small-check.png")
-            CheckpointIcon.initialImage = view.loadScaledImage(imagePath, None)
+            CheckpointIcon.initialImage = view.loadScaledImage(imagePath)
         FixedSprite.__init__(self, position)
         self.onImage = view.createDuplicateSpriteImage(CheckpointIcon.initialImage)
         self.offImage = view.createTransparentRect((0, 0))

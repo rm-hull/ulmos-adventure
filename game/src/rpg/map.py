@@ -49,9 +49,6 @@ class RpgMap:
                     self.boundaryEvents[event.boundary].append(event)
                 else:
                     self.boundaryEvents[event.boundary] = [event]
-                
-    def getMapView(self, viewRect):
-        return self.mapImage.subsurface(viewRect)
     
     """
     The map restricts movement via the following system:

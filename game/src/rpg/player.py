@@ -10,7 +10,6 @@ from spriteframes import DirectionalFrames, StaticFrames
 from events import PlayerFootstepEvent, PlayerFallingEvent, LifeLostEvent
 from staticsprites import Shadow
 
-#DUMMY_EVENT = events.DummyEvent()
 PLAYER_FOOTSTEP_EVENT = PlayerFootstepEvent()
 PLAYER_FALLING_EVENT = PlayerFallingEvent()
 LIFE_LOST_EVENT = LifeLostEvent()
@@ -161,14 +160,12 @@ class Player(RpgSprite):
         xBaseRect = self.baseRect.move(px, 0)
         valid, level = self.rpgMap.isMoveValid(self.level, xBaseRect)
         if valid:
-            #self.movement = movement
             self.deferMovement(level, direction, px, 0)
             return valid
         # check if we can slide vertically
         yBaseRect = self.baseRect.move(0, py)
         valid, level = self.rpgMap.isMoveValid(self.level, yBaseRect)                
         if valid:
-            #self.movement = movement
             self.deferMovement(level, direction, 0, py)
         return valid
         
@@ -184,13 +181,11 @@ class Player(RpgSprite):
         if px == 0:
             valid, level, shuffle = self.rpgMap.isVerticalValid(self.level, self.baseRect)
             if valid:
-                #self.movement = movement
                 self.deferMovement(level, direction, px + shuffle * MOVE_UNIT, 0)
             return valid
         # check if we can shuffle vertically
         valid, level, shuffle = self.rpgMap.isHorizontalValid(self.level, self.baseRect)
         if valid:
-            #self.movement = movement
             self.deferMovement(level, direction, 0, py + shuffle * MOVE_UNIT)
         return valid
     
@@ -236,7 +231,6 @@ class Player(RpgSprite):
     a boundary event containing information on the breach. 
     """ 
     def getBoundaryEvent(self):
-        #testMapRect = self.mapRect.move(px, py)
         if self.rpgMap.mapRect.contains(self.mapRect):
             # we're within the boundary
             return None
@@ -336,10 +330,10 @@ class Player(RpgSprite):
                 sprite.processAction(self)
     
     """
-    Gets the current view of the map.
+    Convenience method that returns the map image and the player's view of it.
     """            
     def getMapView(self):
-        return self.rpgMap.getMapView(self.viewRect)
+        return self.rpgMap.mapImage, self.viewRect
                         
     """
     Handles action input from the user.
@@ -389,10 +383,10 @@ class Ulmo(Player):
     def __init__(self):
         if Ulmo.movingFramesImage is None:          
             imagePath = os.path.join(SPRITES_FOLDER, "ulmo-frames.png")
-            Ulmo.movingFramesImage = view.loadScaledImage(imagePath, None)
+            Ulmo.movingFramesImage = view.loadScaledImage(imagePath)
         if Ulmo.fallingFramesImage is None:          
             imagePath = os.path.join(SPRITES_FOLDER, "ulmo-falling.png")
-            Ulmo.fallingFramesImage = view.loadScaledImage(imagePath, None)
+            Ulmo.fallingFramesImage = view.loadScaledImage(imagePath)
         animationFrames = view.processMovementFrames(Ulmo.movingFramesImage)
         movingFrames = DirectionalFrames(animationFrames, ULMO_FRAME_SKIP)
         animationFrames = view.processStaticFrames(Ulmo.fallingFramesImage)

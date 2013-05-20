@@ -5,7 +5,7 @@ import view
 
 from view import SCALAR
 
-FONT_FOLDER = "sprites"
+FONT_FOLDER = "images"
 
 CHARS = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
          'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '.', '!',
@@ -40,9 +40,20 @@ class GameFont(Font):
     
     def __init__(self):
         if GameFont.fontImage is None:    
-            imagePath = os.path.join(FONT_FOLDER, "font.png")
-            GameFont.fontImage = view.loadScaledImage(imagePath, None)        
+            imagePath = os.path.join(FONT_FOLDER, "font-white.png")
+            GameFont.fontImage = view.loadScaledImage(imagePath)        
         charImages = view.processFontImage(GameFont.fontImage, 8 * SCALAR, 3)
+        Font.__init__(self, CHARS, charImages)
+        
+class TitleFont(Font):
+
+    fontImage = None
+    
+    def __init__(self):
+        if TitleFont.fontImage is None:    
+            imagePath = os.path.join(FONT_FOLDER, "font-black.png")
+            TitleFont.fontImage = view.loadScaledImage(imagePath)        
+        charImages = view.processFontImage(TitleFont.fontImage, 8 * SCALAR, 3)
         Font.__init__(self, CHARS, charImages)
         
 class NumbersFont(Font):
@@ -52,6 +63,6 @@ class NumbersFont(Font):
     def __init__(self):
         if NumbersFont.fontImage is None:    
             imagePath = os.path.join(FONT_FOLDER, "numbers.png")
-            NumbersFont.fontImage = view.loadScaledImage(imagePath, None)        
+            NumbersFont.fontImage = view.loadScaledImage(imagePath)        
         charImages = view.processFontImage(NumbersFont.fontImage, 8 * SCALAR)
         Font.__init__(self, NUMBERS, charImages)

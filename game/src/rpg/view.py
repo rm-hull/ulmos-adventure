@@ -1,22 +1,23 @@
 #!/usr/bin/env python
 
-from pygame.transform import scale
+import os, pygame
 
-from base import *
+from pygame.transform import scale
+from pygame.locals import RLEACCEL
+
+BLACK = (0, 0, 0)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
 
 SCALAR = 2
 
 TILE_SIZE = 16 * SCALAR
 
-#VIEW_WIDTH = TILE_SIZE * 12
-#VIEW_HEIGHT = TILE_SIZE * 8
-
 VIEW_WIDTH = TILE_SIZE * 16
 VIEW_HEIGHT = TILE_SIZE * 10
 
-# 0, 51, 102, 153, 204, 255
 TRANSPARENT_COLOUR = GREEN
-TRANSPARENT_COLOUR_WITH_ALPHA = (0, 255, 0, 255)
 
 NONE = 0
 UP = 1
@@ -26,7 +27,22 @@ RIGHT = 8
 
 DIRECTIONS = [UP, DOWN, LEFT, RIGHT]
 
-SPRITES_FOLDER = "sprites"
+def createRectangle(dimensions, colour = None):
+    rectangle = pygame.Surface(dimensions).convert()
+    if colour is not None:
+        rectangle.fill(colour)
+    return rectangle
+
+def loadImage(imagePath, colourKey = None):
+    try:
+        image = pygame.image.load(imagePath)
+    except pygame.error, message:
+        print "Cannot load image: ", os.path.abspath(imagePath)
+        raise SystemExit, message
+    image = image.convert()
+    if colourKey is not None:
+        image.set_colorkey(colourKey, RLEACCEL)
+    return image
 
 def loadScaledImage(imagePath, colourKey = None, scalar = SCALAR):
     img = loadImage(imagePath, colourKey)
@@ -35,7 +51,6 @@ def loadScaledImage(imagePath, colourKey = None, scalar = SCALAR):
 def createDuplicateSpriteImage(spriteImage):
     # transparency is set on the duplicate - this allows us to draw over
     # the duplicate image with areas that are actually transparent
-    # img = spriteImage.convert(spriteImage.image)
     img = createRectangle((spriteImage.get_width(), spriteImage.get_height()))
     img.blit(spriteImage, (0, 0))
     img.set_colorkey(TRANSPARENT_COLOUR, RLEACCEL)
@@ -92,9 +107,6 @@ def copyStaticFrames(animationFrames):
         img = createDuplicateSpriteImage(frame)
         animationFramesCopy.append(img)
     return animationFramesCopy
-
-def createBaseRectImage(baseRect):
-    return createRectangle((baseRect.width, baseRect.height), RED)
 
 def createTransparentRect(dimensions):
     transparentRect = createRectangle(dimensions, TRANSPARENT_COLOUR)

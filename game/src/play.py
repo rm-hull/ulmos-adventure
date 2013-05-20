@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-from pygame.locals import *
+from pygame.locals import KEYDOWN, K_ESCAPE, K_x, QUIT
 
 import pygame
 
@@ -19,7 +19,7 @@ import rpg.states
 
 def playMain():
     # get the first state
-    currentState = rpg.states.startGame()
+    currentState = rpg.states.showTitle()
     # start the main loop
     clock = pygame.time.Clock()    
     while True:

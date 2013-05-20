@@ -39,7 +39,7 @@ class Beetle(OtherSprite):
     def __init__(self):
         if Beetle.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "beetle-frames.png")
-            Beetle.framesImage = view.loadScaledImage(imagePath, None)        
+            Beetle.framesImage = view.loadScaledImage(imagePath)        
         animationFrames = view.processMovementFrames(Beetle.framesImage, 2)
         spriteFrames = DirectionalFrames(animationFrames, BEETLE_FRAME_SKIP)
         OtherSprite.__init__(self, spriteFrames)
@@ -93,7 +93,7 @@ class Wasp(OtherSprite):
     def __init__(self):
         if Wasp.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "wasp-frames.png")
-            Wasp.framesImage = view.loadScaledImage(imagePath, None)        
+            Wasp.framesImage = view.loadScaledImage(imagePath)        
         animationFrames = view.processMovementFrames(Wasp.framesImage, 2)
         spriteFrames = DirectionalFrames(animationFrames, WASP_FRAME_SKIP)
         OtherSprite.__init__(self, spriteFrames)
