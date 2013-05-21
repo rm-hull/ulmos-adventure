@@ -1,7 +1,5 @@
 #!/usr/bin/env python
 
-import events
-
 from sprites import *
 
 from view import UP, DOWN, LEFT, RIGHT
@@ -9,6 +7,7 @@ from view import UP, DOWN, LEFT, RIGHT
 from spriteframes import DirectionalFrames, StaticFrames
 from events import PlayerFootstepEvent, PlayerFallingEvent, LifeLostEvent
 from staticsprites import Shadow
+from rpg import mapevents
 
 PLAYER_FOOTSTEP_EVENT = PlayerFootstepEvent()
 PLAYER_FALLING_EVENT = PlayerFallingEvent()
@@ -102,7 +101,7 @@ class Player(RpgSprite):
             py = self.viewRect.bottom - rpgMapRect.bottom
         self.rect.move_ip(px, py)
         self.viewRect.move_ip(-px, -py)
-    
+
     """
     Moves the player + updates the view rect.  The control flow is as follows:
     > Check for deferred movement and apply if necessary.
@@ -115,9 +114,8 @@ class Player(RpgSprite):
         if self.falling:
             return
         movement = getMovement(directionBits)
-        # no movement
         if not movement:
-            return self.viewRect
+            return
         # check for deferred movement
         if movement == self.movement:
             self.ticks = (self.ticks + 1) % DIAGONAL_TICK
@@ -245,7 +243,7 @@ class Player(RpgSprite):
         return None
     
     """
-    Returns the boundary that has been breached.
+    Determines which boundary has been breached.
     """
     def getBoundary(self):
         boundary = NO_BOUNDARY
@@ -259,7 +257,10 @@ class Player(RpgSprite):
         elif self.mapRect.bottom > rpgMapRect.bottom:
             boundary = DOWN
         return boundary
-
+    
+    """
+    Gets the range of tiles involved in the boundary breach.
+    """
     def getTileRange(self, boundary):
         tx1, ty1 = self.getTilePoint(self.baseRect.left, self.baseRect.top)
         tx2, ty2 = self.getTilePoint(self.baseRect.right - 1, self.baseRect.bottom - 1)
@@ -268,6 +269,9 @@ class Player(RpgSprite):
             return range(tx1, tx2 + 1)
         return range(ty1, ty2 + 1)
     
+    """
+    Gets the tile at the given pixel position.
+    """
     def getTilePoint(self, px, py):
         return px // TILE_SIZE, py // TILE_SIZE
             
@@ -277,34 +281,48 @@ class Player(RpgSprite):
     def update(self, gameSprites):
         self.checkpointIcon.update()
         if self.falling:
-            self.wrapMovement(self.level, None, 0, FALL_UNIT);
-            if self.falling % TILE_SIZE == 0:
-                self.level -= 1
-            self.falling -= FALL_UNIT
-            if self.falling == 0:
-                # falling is complete - swap back to moving frames
-                self.clearMasks()
-                self.spriteFrames = self.movingFrames.setState(self.spriteFrames)
-                self.image, frameIndex = self.spriteFrames.advanceFrame(0)
-                self.applyMasks()
-                # remove shadow on next update
-                self.shadow.toRemove = True
-            return
-        event, downLevel = self.rpgMap.getActions(self.level, self.baseRect)
+            return self.continueFalling()
+        event = self.getBoundaryEvent()
         if event:
             return event
-        if downLevel:
-            # initialise falling state
-            #print "down: %s" % downLevel
-            self.falling = downLevel * TILE_SIZE
-            # swap to falling frames
-            self.clearMasks()
-            self.spriteFrames = self.fallingFrames.setState(self.spriteFrames)
-            self.shadow = Shadow()
-            self.shadow.setupFromPlayer(self, downLevel)
-            gameSprites.add(self.shadow)
-            self.eventBus.dispatchPlayerFallingEvent(PLAYER_FALLING_EVENT)
+        event = self.rpgMap.getActions(self.level, self.baseRect)
+        if event:
+            if event.type == mapevents.TILE_EVENT:
+                return event
+            elif event.type == mapevents.FALLING_EVENT:
+                self.startFalling(gameSprites, event.downLevel)
         return None
+    
+    """
+    Continues falling + detects if falling is complete.
+    """    
+    def continueFalling(self):
+        self.wrapMovement(self.level, None, 0, FALL_UNIT);
+        if self.falling % TILE_SIZE == 0:
+            self.level -= 1
+        self.falling -= FALL_UNIT
+        if self.falling == 0:
+            # falling is complete - swap back to moving frames
+            self.clearMasks()
+            self.spriteFrames = self.movingFrames.setState(self.spriteFrames)
+            self.image, frameIndex = self.spriteFrames.advanceFrame(0)
+            self.applyMasks()
+            # remove shadow on next update
+            self.shadow.toRemove = True
+    
+    """
+    Starts falling by switching frames and adding a shadow to game sprites.
+    """
+    def startFalling(self, gameSprites, downLevel):
+        #print "down: %s" % downLevel
+        self.falling = downLevel * TILE_SIZE
+        # swap to falling frames
+        self.clearMasks()
+        self.spriteFrames = self.fallingFrames.setState(self.spriteFrames)
+        self.shadow = Shadow()
+        self.shadow.setupFromPlayer(self, downLevel)
+        gameSprites.add(self.shadow)
+        self.eventBus.dispatchPlayerFallingEvent(PLAYER_FALLING_EVENT)
     
     """
     Processes collisions with other sprites in the given sprite collection.

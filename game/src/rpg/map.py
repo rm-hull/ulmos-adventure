@@ -184,7 +184,7 @@ class RpgMap:
         return rectTiles
     
     """
-    Returns a tile event or a down level.
+    Returns a tile event or a falling event.
     """
     def getActions(self, level, baseRect):
         downLevels = []
@@ -192,15 +192,14 @@ class RpgMap:
         for tile in spanTiles:
             event = tile.getEvent(level)
             if event:
-                return event, None
+                return event
             downLevel = tile.getDownLevel(level)
             if downLevel:
                 downLevels.append(downLevel)
-        # note that a down level is only returned if all the span tiles have a
-        # matching down level
+        # a falling event is returned only if all the span tiles have a down level
         if len(downLevels) == len(spanTiles):
-            return None, downLevels[0]
-        return None, None
+            return mapevents.FallingEvent(downLevels[0])
+        return None
             
     def convertTopLeft(self, px, py):
         return max(0, px // TILE_SIZE), max(0, py // TILE_SIZE)

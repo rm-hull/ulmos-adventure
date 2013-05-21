@@ -85,9 +85,9 @@ def startGame(cont = False):
         registryHandler.switchToSnapshot()
     else:
         #registry = Registry("unit", (4, 6), 1)
-        registry = Registry("central", (6, 22), 2)
+        #registry = Registry("central", (6, 22), 2)
         #registry = Registry("central", (22, 20), 3)
-        #registry = Registry("east", (10, 18), 1)
+        registry = Registry("east", (13, 8), 3)
         #registry = Registry("wasps", (12, 10), 5)
         registryHandler = RegistryHandler(registry)
     # grab this for later
@@ -167,7 +167,6 @@ class TitleState:
         self.titleImage = view.loadScaledImage(imagePath, view.TRANSPARENT_COLOUR)
         self.playLine = titleFont.getTextImage("PRESS SPACE TO PLAY")
         self.titleTicks = self.getTitleTicks()
-        print self.titleTicks
         self.playState = None
         self.ticks = 0
         
@@ -249,10 +248,8 @@ class PlayState:
         transition = self.handleCollisions()
         if transition:
             return transition
-        # have we hit any boundaries?
-        transition = self.handleInput(keyPresses)
-        if transition:
-            return transition
+        # handle player input
+        self.handleInput(keyPresses)
         return None
             
     def handleEvents(self):
@@ -262,7 +259,7 @@ class PlayState:
         return None
     
     def handleCollisions(self):
-        # the processCollision method returns True to indicate that the player lost a life
+        # the processCollisions method returns True to indicate that the player lost a life
         if player.processCollisions(self.visibleSprites.sprites()):
             if player.gameOver():
                 return mapevents.GameOverTransition()
@@ -271,19 +268,12 @@ class PlayState:
     
     def handleInput(self, keyPresses):
         directionBits, action = self.processKeyPresses(keyPresses)
-        if directionBits > 0:
-            self.viewRect = player.handleMovement(directionBits)
-            boundaryEvent = player.getBoundaryEvent()
-            if boundaryEvent:
-                # we've hit a boundary - return the associated transition
-                return boundaryEvent.transition
+        player.handleMovement(directionBits)
         if action:
             player.handleAction(self.visibleSprites.sprites())
-        return None
     
     def processKeyPresses(self, keyPresses):
         directionBits = NONE
-        action = False
         if keyPresses[K_UP]:
             directionBits += UP
         if keyPresses[K_DOWN]:
@@ -293,8 +283,8 @@ class PlayState:
         if keyPresses[K_RIGHT]:
             directionBits += RIGHT
         if keyPresses[K_SPACE]:
-            action = True
-        return directionBits, action
+            return directionBits, True
+        return directionBits, False
     
     def drawMapView(self, surface, increment = 1):
         rpgMapImage, playerViewRect = player.getMapView()

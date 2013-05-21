@@ -2,7 +2,7 @@
 
 from view import DOWN
 
-DUMMY_EVENT = 0
+FALLING_EVENT = 0
 TILE_EVENT = 1
 BOUNDARY_EVENT = 2
 
@@ -31,12 +31,12 @@ class MapEvent:
         self.transition = transition
 
 """
-Defines an event that doesn't do anything.
-"""
-class DummyEvent(MapEvent):
-    def __init__(self, boundary = None):
-        MapEvent.__init__(self, DUMMY_EVENT)
-        self.boundary = boundary
+Defines a falling event that occurs when the player walks off a ledge.
+"""            
+class FallingEvent(MapEvent):
+    def __init__(self, downLevel):
+        MapEvent.__init__(self, FALLING_EVENT)
+        self.downLevel = downLevel
 
 """
 Defines an event that occurs when the player steps on a tile that has an event.
@@ -58,7 +58,7 @@ class BoundaryEvent(MapEvent):
             self.range = range(min, max + 1)
         else:
             self.range = [min]
-
+            
 """
 Transition base class.
 """
