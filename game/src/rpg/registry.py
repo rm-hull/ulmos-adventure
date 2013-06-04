@@ -2,9 +2,6 @@
 
 class RegistryHandler:
     
-    def __init__(self, registry):
-        self.setRegistry(registry)
-
     def setRegistry(self, registry):
         self.registry = registry
         self.snapshot = registry.takeSnapshot()

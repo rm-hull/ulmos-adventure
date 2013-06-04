@@ -5,9 +5,10 @@ from __future__ import with_statement
 import os
 import view
 import map
-import mapevents
 
 from pygame.locals import Rect
+
+from playevents import BoundaryEvent, TileEvent, BoundaryTransition, SceneTransition, EndGameTransition
 from view import UP, DOWN, LEFT, RIGHT
 
 TILES_FOLDER = "tiles"
@@ -21,7 +22,6 @@ COLON = ":"
 COMMA = ","
 SPRITE = "sprite"
 TRIGGER = "event"
-#PIPE = "|"
 DASH = "-"
 
 BOUNDARIES = {"up": UP, "down": DOWN, "left": LEFT, "right": RIGHT}
@@ -75,9 +75,9 @@ def loadRpgMap(name):
     # create map tiles
     mapTiles = createMapTiles(maxX + 1, maxY + 1, tileData)
     mapSprites = createMapSprites(spriteData, name)
-    mapEvents = createMapEvents(eventData)
+    playevents = createMapEvents(eventData)
     # create map and return
-    myMap = map.RpgMap(name, mapTiles, mapSprites, mapEvents)
+    myMap = map.RpgMap(name, mapTiles, mapSprites, playevents)
     mapCache[name] = myMap
     return myMap
 
@@ -212,8 +212,8 @@ def createBoundaryTransition(transitionBits):
     boundary = BOUNDARIES[transitionBits[2]]
     if len(transitionBits) > 3:
         modifier = int(transitionBits[3])
-        return mapevents.BoundaryTransition(mapName, boundary, modifier)
-    return mapevents.BoundaryTransition(mapName, boundary)
+        return BoundaryTransition(mapName, boundary, modifier)
+    return BoundaryTransition(mapName, boundary)
 
 def createSceneTransition(transitionBits):
     if len(transitionBits) < 5:
@@ -224,11 +224,11 @@ def createSceneTransition(transitionBits):
     direction = BOUNDARIES[transitionBits[4]]
     if len(transitionBits) > 5:
         boundary = BOUNDARIES[transitionBits[5]]
-        return mapevents.SceneTransition(mapName, x, y, level, direction, boundary)
-    return mapevents.SceneTransition(mapName, x, y, level, direction)
+        return SceneTransition(mapName, x, y, level, direction, boundary)
+    return SceneTransition(mapName, x, y, level, direction)
 
 def createEndTransition():
-    return mapevents.EndGameTransition()
+    return EndGameTransition()
     
 def createBoundaryEvent(eventBits, transition):
     if len(eventBits) < 3:
@@ -237,12 +237,12 @@ def createBoundaryEvent(eventBits, transition):
     range = eventBits[2]
     if DASH in range:
         min, max = getXY(range, DASH)
-        return mapevents.BoundaryEvent(transition, boundary, min, max)
-    return mapevents.BoundaryEvent(transition, boundary, int(range))
+        return BoundaryEvent(transition, boundary, min, max)
+    return BoundaryEvent(transition, boundary, int(range))
 
 def createTileEvent(eventBits, transition):
     if len(eventBits) < 3:
         return None
     x, y = getXY(eventBits[1])
     level = int(eventBits[2])
-    return mapevents.TileEvent(transition, x, y, level)
+    return TileEvent(transition, x, y, level)

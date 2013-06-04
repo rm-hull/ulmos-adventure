@@ -4,7 +4,7 @@ from __future__ import with_statement
 
 import math
 import view
-import mapevents
+import playevents
 
 from view import TILE_SIZE
 
@@ -14,7 +14,7 @@ MAX_SHUFFLE = (-1, 1, 0, -1)
 """
 Encapsulates the logic required for the main map.  You should not instantiate
 this class directly - instead, use parser.loadRpgMap and the mapTiles, mapSprites
-and mapEvents will be populated from the named map file.
+and playevents will be populated from the named map file.
 """
 class RpgMap:
     
@@ -42,9 +42,9 @@ class RpgMap:
         self.boundaryEvents = {}
         self.tileEvents = {}
         for event in mapEvents:
-            if event.type == mapevents.TILE_EVENT:
+            if event.type == playevents.TILE_EVENT:
                 self.mapTiles[event.x][event.y].addEvent(event)
-            elif event.type == mapevents.BOUNDARY_EVENT:
+            elif event.type == playevents.BOUNDARY_EVENT:
                 if event.boundary in self.boundaryEvents:
                     self.boundaryEvents[event.boundary].append(event)
                 else:
@@ -198,7 +198,7 @@ class RpgMap:
                 downLevels.append(downLevel)
         # a falling event is returned only if all the span tiles have a down level
         if len(downLevels) == len(spanTiles):
-            return mapevents.FallingEvent(downLevels[0])
+            return playevents.FallingEvent(downLevels[0])
         return None
             
     def convertTopLeft(self, px, py):

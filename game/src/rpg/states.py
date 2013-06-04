@@ -6,14 +6,13 @@ import parser
 import sprites
 import view
 import spritebuilder
-import mapevents
 import font
+import playevents
 
-from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT, K_SPACE, Rect
+from pygame.locals import K_SPACE, Rect
 
 from sprites import VELOCITY, MOVE_UNIT
-from view import NONE, UP, DOWN, LEFT, RIGHT, SCALAR, VIEW_WIDTH, VIEW_HEIGHT
-from mapevents import SCENE_TRANSITION, BOUNDARY_TRANSITION, LIFE_LOST_TRANSITION, GAME_OVER_TRANSITION, END_GAME_TRANSITION
+from view import UP, DOWN, LEFT, RIGHT, SCALAR, VIEW_WIDTH, VIEW_HEIGHT
 
 from eventbus import EventBus
 from registry import RegistryHandler, Registry
@@ -74,29 +73,19 @@ def showTitle():
     eventBus.addBeetleCrawlingListener(soundHandler)
     eventBus.addCheckpointReachedListener(soundHandler)
     eventBus.addPlayerFallingListener(soundHandler)
+
+    global registryHandler
+    registryHandler = RegistryHandler()
+    eventBus.addCoinCollectedListener(registryHandler)
+    eventBus.addKeyCollectedListener(registryHandler)
+    eventBus.addDoorOpenedListener(registryHandler)
+    eventBus.addCheckpointReachedListener(registryHandler)
     
     # return the title state
     return TitleState()
 
 def startGame(cont = False):
-    # create registry handler
-    global registryHandler
-    if cont:
-        registryHandler.switchToSnapshot()
-    else:
-        #registry = Registry("unit", (4, 6), 1)
-        #registry = Registry("central", (6, 22), 2)
-        #registry = Registry("central", (22, 20), 3)
-        registry = Registry("east", (13, 8), 3)
-        #registry = Registry("wasps", (12, 10), 5)
-        registryHandler = RegistryHandler(registry)
-    # grab this for later
-    registry = registryHandler.registry
-    # add event listeners
-    eventBus.addCoinCollectedListener(registryHandler)
-    eventBus.addKeyCollectedListener(registryHandler)
-    eventBus.addDoorOpenedListener(registryHandler)
-    eventBus.addCheckpointReachedListener(registryHandler)
+    registry = getRegistry(cont)
     
     # create fixed sprites
     global fixedSprites
@@ -126,6 +115,18 @@ def startGame(cont = False):
     # return the play state
     return PlayState()
 
+def getRegistry(cont):
+    if cont:
+        registryHandler.switchToSnapshot()
+        return registryHandler.registry
+    #registry = Registry("unit", (4, 6), 1)
+    registry = Registry("central", (6, 22), 2)
+    #registry = Registry("central", (22, 20), 3)
+    #registry = Registry("east", (13, 8), 3)
+    #registry = Registry("wasps", (12, 10), 5)
+    registryHandler.setRegistry(registry)
+    return registry
+    
 def hidePlayer(boundary, mapRect, modifier = None):
     playerRect = player.mapRect
     px, py = playerRect.topleft
@@ -222,69 +223,28 @@ class PlayState:
         self.gameSprites = spritebuilder.createSpritesForMap(player.rpgMap, eventBus, registryHandler.registry)
              
     def execute(self, keyPresses):
-        transition = self.getNextTransition(keyPresses)
-        if transition:
-            print "transition: %s" % transition.__class__.__name__
-            if transition.type == BOUNDARY_TRANSITION:
-                return BoundaryTransitionState(transition)
-            if transition.type == SCENE_TRANSITION:
-                return SceneTransitionState(transition)
-            if transition.type == LIFE_LOST_TRANSITION:
-                return SceneTransitionState(transition)
-            if transition.type == GAME_OVER_TRANSITION:
-                return GameOverState()
-            if transition.type == END_GAME_TRANSITION:
-                return EndGameState()
+        event = player.handleInteractions(keyPresses, self.gameSprites, self.visibleSprites)
+        if event:
+            return self.handleEvent(event)
         # draw the map view to the screen
         self.drawMapView(screen)
         pygame.display.flip()
-    
-    def getNextTransition(self, keyPresses):
-        # have we triggered any events?
-        transition = self.handleEvents()
+        
+    def handleEvent(self, event):
+        if event.type == playevents.LIFE_LOST_EVENT:
+            if event.gameOver:
+                return GameOverState()
+            return SceneTransitionState(self.lifeLostTransition())
+        transition = event.transition 
         if transition:
-            return transition
-        # have we collided with any sprites?
-        transition = self.handleCollisions()
-        if transition:
-            return transition
-        # handle player input
-        self.handleInput(keyPresses)
+            if transition.type == playevents.BOUNDARY_TRANSITION:
+                return BoundaryTransitionState(transition)
+            if transition.type == playevents.SCENE_TRANSITION:
+                return SceneTransitionState(transition)
+            if transition.type == playevents.END_GAME_TRANSITION:
+                return EndGameState()
+        # this should never happen!
         return None
-            
-    def handleEvents(self):
-        event = player.update(self.gameSprites)
-        if event:
-            return event.transition
-        return None
-    
-    def handleCollisions(self):
-        # the processCollisions method returns True to indicate that the player lost a life
-        if player.processCollisions(self.visibleSprites.sprites()):
-            if player.gameOver():
-                return mapevents.GameOverTransition()
-            return self.lifeLostTransition()
-        return None
-    
-    def handleInput(self, keyPresses):
-        directionBits, action = self.processKeyPresses(keyPresses)
-        player.handleMovement(directionBits)
-        if action:
-            player.handleAction(self.visibleSprites.sprites())
-    
-    def processKeyPresses(self, keyPresses):
-        directionBits = NONE
-        if keyPresses[K_UP]:
-            directionBits += UP
-        if keyPresses[K_DOWN]:
-            directionBits += DOWN
-        if keyPresses[K_LEFT]:
-            directionBits += LEFT
-        if keyPresses[K_RIGHT]:
-            directionBits += RIGHT
-        if keyPresses[K_SPACE]:
-            return directionBits, True
-        return directionBits, False
     
     def drawMapView(self, surface, increment = 1):
         rpgMapImage, playerViewRect = player.getMapView()
@@ -300,11 +260,10 @@ class PlayState:
         registry = registryHandler.registry
         player.setCoinCount(registry.coinCount)
         player.setKeyCount(registry.keyCount)
-        transition = mapevents.LifeLostTransition(registry.mapName,
-                                                  registry.playerPosition[0],
-                                                  registry.playerPosition[1],
-                                                  registry.playerLevel)
-        return transition
+        return playevents.LifeLostTransition(registry.mapName,
+                                             registry.playerPosition[0],
+                                             registry.playerPosition[1],
+                                             registry.playerLevel)
         
     # method required by the ShowPlayer state
     def showPlayer(self, px, py):
@@ -323,7 +282,7 @@ class SceneTransitionState:
              
     def execute(self, keyPresses):
         if self.ticks < THIRTY_TWO:
-            if self.ticks == 0 and self.transition.type == SCENE_TRANSITION:
+            if self.ticks == 0 and self.transition.type == playevents.SCENE_TRANSITION:
                 eventBus.dispatchMapTransitionEvent(MapTransitionEvent())
             sceneZoomIn(self.screenImage, self.ticks)
         elif self.ticks < SIXTY_FOUR:
@@ -331,7 +290,7 @@ class SceneTransitionState:
                 self.initPlayState()
             sceneZoomOut(self.screenImage, self.ticks - THIRTY_TWO)
         else:
-            if self.transition.type == LIFE_LOST_TRANSITION:
+            if self.transition.type == playevents.LIFE_LOST_TRANSITION:
                 return self.playState
             # else just a regular scene transition
             direction = player.spriteFrames.direction

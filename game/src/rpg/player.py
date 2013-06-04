@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 
+import playevents
+
+from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT, K_SPACE
+
 from sprites import *
-
-from view import UP, DOWN, LEFT, RIGHT
-
-from spriteframes import DirectionalFrames, StaticFrames
 from events import PlayerFootstepEvent, PlayerFallingEvent, LifeLostEvent
+from spriteframes import DirectionalFrames, StaticFrames
 from staticsprites import Shadow
-from rpg import mapevents
+from view import NONE, UP, DOWN, LEFT, RIGHT
+
 
 PLAYER_FOOTSTEP_EVENT = PlayerFootstepEvent()
 PLAYER_FALLING_EVENT = PlayerFallingEvent()
@@ -66,9 +68,6 @@ class Player(RpgSprite):
         self.ticks = 0
         self.falling = 0
 
-    def setup(self, uid, rpgMap, eventBus):
-        RpgSprite.setup(self, uid, rpgMap, eventBus)
-        
     """
     Base rect for the player extends beyond the bottom of the sprite image.
     """
@@ -101,7 +100,45 @@ class Player(RpgSprite):
             py = self.viewRect.bottom - rpgMapRect.bottom
         self.rect.move_ip(px, py)
         self.viewRect.move_ip(-px, -py)
-
+        
+    """
+    Main entry point into the player class.  Handles key presses, movement and
+    interactions with the given sprite groups
+    """
+    def handleInteractions(self, keyPresses, gameSprites, visibleSprites):
+        # have we triggered any events?
+        event = self.update(gameSprites)
+        if event:
+            return event
+        # have we collided with any sprites?
+        event = self.processCollisions(visibleSprites.sprites())
+        if event:
+            return event
+        # go ahead and handle user input
+        directionBits, action = self.processKeyPresses(keyPresses)
+        self.handleMovement(directionBits)
+        if action:
+            self.processActions(visibleSprites.sprites())
+        return None
+    
+    """
+    Takes the given key presses and converts them into direction bits + a boolean
+    to indicate if the action key was pressed. 
+    """
+    def processKeyPresses(self, keyPresses):
+        directionBits = NONE
+        if keyPresses[K_UP]:
+            directionBits += UP
+        if keyPresses[K_DOWN]:
+            directionBits += DOWN
+        if keyPresses[K_LEFT]:
+            directionBits += LEFT
+        if keyPresses[K_RIGHT]:
+            directionBits += RIGHT
+        if keyPresses[K_SPACE]:
+            return directionBits, True
+        return directionBits, False
+    
     """
     Moves the player + updates the view rect.  The control flow is as follows:
     > Check for deferred movement and apply if necessary.
@@ -287,9 +324,9 @@ class Player(RpgSprite):
             return event
         event = self.rpgMap.getActions(self.level, self.baseRect)
         if event:
-            if event.type == mapevents.TILE_EVENT:
+            if event.type == playevents.TILE_EVENT:
                 return event
-            elif event.type == mapevents.FALLING_EVENT:
+            elif event.type == playevents.FALLING_EVENT:
                 self.startFalling(gameSprites, event.downLevel)
         return None
     
@@ -332,8 +369,8 @@ class Player(RpgSprite):
         if len(sprites) < 2:
             return False
         for sprite in sprites:
-            if sprite.isIntersecting(self):
-                return sprite.processCollision(self)
+            if sprite.isIntersecting(self) and sprite.processCollision(self):
+                return playevents.LifeLostEvent(self.gameOver())
         return False
 
     """
@@ -353,12 +390,6 @@ class Player(RpgSprite):
     def getMapView(self):
         return self.rpgMap.mapImage, self.viewRect
                         
-    """
-    Handles action input from the user.
-    """
-    def handleAction(self, sprites):
-        self.processActions(sprites)
-                    
     def getCoinCount(self):
         return self.coinCount.count;
 
