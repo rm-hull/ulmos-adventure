@@ -6,6 +6,7 @@ A fork of Sam Eldred's http://code.google.com/p/rpg-world/
 What's New
 ----------
 * (10/06/2013) Forked from svn into git
+* (10/06/2013) Use a Wii-mote to control Ulmo
 
 Now optimised for the Raspberry Pi!
 -----------------------------------
