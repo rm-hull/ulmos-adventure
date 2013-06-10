@@ -5,6 +5,7 @@ A fork of Sam Eldred's http://code.google.com/p/rpg-world/
 
 What's New
 ----------
+* (11/06/2013) A demo video: https://vimeo.com/68094046
 * (10/06/2013) Forked from svn into git
 * (10/06/2013) Use a Wii-mote to control Ulmo
 * (10/06/2013) Optimized screen for QVGA LCD
