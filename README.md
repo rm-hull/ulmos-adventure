@@ -28,7 +28,7 @@ See also http://pygame.org/project-Ulmo%27s+Adventure-2042-3702.html
 
 Using the Wiimote
 -----------------
-Ensure that the pythonr-cwiid module is installed and bluetooth is
+Ensure that the python-cwiid module is installed and bluetooth is
 installed and enabled (apt package 'bluez').
 
     $ dmesg | grep -i blue
