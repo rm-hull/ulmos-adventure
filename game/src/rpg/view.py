@@ -14,8 +14,8 @@ SCALAR = 2
 
 TILE_SIZE = 16 * SCALAR
 
-VIEW_WIDTH = TILE_SIZE * 16
-VIEW_HEIGHT = TILE_SIZE * 10
+VIEW_WIDTH = TILE_SIZE * 10
+VIEW_HEIGHT = TILE_SIZE * 7
 
 TRANSPARENT_COLOUR = GREEN
 
@@ -47,7 +47,7 @@ def loadImage(imagePath, colourKey = None):
 def loadScaledImage(imagePath, colourKey = None, scalar = SCALAR):
     img = loadImage(imagePath, colourKey)
     return scale(img, (img.get_width() * scalar, img.get_height() * scalar))
-        
+
 def createDuplicateSpriteImage(spriteImage):
     # transparency is set on the duplicate - this allows us to draw over
     # the duplicate image with areas that are actually transparent
