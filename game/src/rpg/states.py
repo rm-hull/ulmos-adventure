@@ -20,6 +20,7 @@ from player import Ulmo
 from sounds import SoundHandler
 from events import MapTransitionEvent, EndGameEvent
 from fixedsprites import FixedCoin, CoinCount, KeyCount, Lives, CheckpointIcon
+from rpg.view import TILE_SIZE
 
 FRAMES_PER_SEC = 60 // VELOCITY
 
@@ -79,13 +80,14 @@ def showTitle():
     eventBus.addCoinCollectedListener(registryHandler)
     eventBus.addKeyCollectedListener(registryHandler)
     eventBus.addDoorOpenedListener(registryHandler)
+    eventBus.addBoatStoppedListener(registryHandler)
     eventBus.addCheckpointReachedListener(registryHandler)
     
     # return the title state
     return TitleState()
 
-def startGame(cont = False):
-    registry = getRegistry(cont)
+def startGame(cont = False, registry = None):
+    registry = getRegistry(cont, registry)
     
     # create fixed sprites
     global fixedSprites
@@ -115,15 +117,17 @@ def startGame(cont = False):
     # return the play state
     return PlayState()
 
-def getRegistry(cont):
+def getRegistry(cont, registry):
     if cont:
         registryHandler.switchToSnapshot()
         return registryHandler.registry
-    #registry = Registry("unit", (4, 6), 1)
-    registry = Registry("central", (6, 22), 2)
-    #registry = Registry("central", (22, 20), 3)
-    #registry = Registry("east", (13, 8), 3)
-    #registry = Registry("wasps", (12, 10), 5)
+    if not registry:
+        #registry = Registry("unit", (4, 6), 1)
+        #registry = Registry("central", (6, 22), 2)
+        #registry = Registry("east", (13, 8), 3)
+        registry = Registry("start", (6, 27), 1)
+        #registry = Registry("start", (14, 7), 4)
+        #registry = Registry("wasps", (12, 10), 5)
     registryHandler.setRegistry(registry)
     return registry
     
@@ -168,6 +172,7 @@ class TitleState:
         self.titleImage = view.loadScaledImage(imagePath, view.TRANSPARENT_COLOUR)
         self.playLine = titleFont.getTextImage("PRESS SPACE TO PLAY")
         self.titleTicks = self.getTitleTicks()
+        self.startRegistry = Registry("start", (-2, 27), 1)
         self.playState = None
         self.ticks = 0
         
@@ -185,7 +190,7 @@ class TitleState:
             screen.blit(self.titleImage, (x, y))
             pygame.display.flip()
         elif self.ticks == self.titleTicks + SIXTY_FOUR:
-            self.playState = startGame()
+            self.playState = startGame(False, self.startRegistry)
             x, y = (VIEW_WIDTH - self.playLine.get_width()) // 2, 88 * SCALAR
             screen.blit(self.playLine, (x, y))
             pygame.display.flip()
@@ -198,20 +203,31 @@ class StartState:
     
     def __init__(self, playState):
         self.screenImage = screen.copy()
+        self.nextImage = view.createRectangle(DIMENSIONS)
         self.playState = playState
+        self.viewRect = player.viewRect.copy()
+        self.viewRect.top = 0
         self.ticks = 0
         
     def execute(self, keyPresses):
-        if self.ticks < THIRTY_TWO:
-            sceneZoomIn(self.screenImage, self.ticks)
-        elif self.ticks < SIXTY_FOUR:
-            if self.ticks == THIRTY_TWO:
-                self.playState.drawMapView(self.screenImage, 0)           
-            sceneZoomOut(self.screenImage, self.ticks - THIRTY_TWO)
+        if self.ticks < VIEW_HEIGHT // MOVE_UNIT:
+            player.relativeView(self.viewRect)
+            self.playState.drawMapView(self.nextImage, self.viewRect)
+            self.screenWipeUp((self.ticks + 1) * MOVE_UNIT)
         else:
-            return self.playState    
+            self.viewRect.move_ip(0, MOVE_UNIT)
+            player.relativeView(self.viewRect)
+            self.playState.drawMapView(screen, self.viewRect)
+            if self.viewRect.top == player.viewRect.top:
+                #return self.playState
+                return ShowBoatState(self.playState, (6, 27))
+        pygame.display.flip()
         self.ticks += 1
-            
+
+    def screenWipeUp(self, sliceHeight):
+        screen.blit(self.screenImage, ORIGIN, Rect(0, sliceHeight, VIEW_WIDTH, VIEW_HEIGHT - sliceHeight))
+        screen.blit(self.nextImage, (0, VIEW_HEIGHT - sliceHeight), Rect(0, 0, VIEW_WIDTH, sliceHeight))
+                                    
 class PlayState:
     
     def __init__(self):
@@ -226,8 +242,8 @@ class PlayState:
         event = player.handleInteractions(keyPresses, self.gameSprites, self.visibleSprites)
         if event:
             return self.handleEvent(event)
-        # draw the map view to the screen
-        self.drawMapView(screen)
+        # draw the player map view to the screen
+        self.drawPlayerMapView(screen)
         pygame.display.flip()
         
     def handleEvent(self, event):
@@ -246,14 +262,15 @@ class PlayState:
         # this should never happen!
         return None
     
-    def drawMapView(self, surface, increment = 1):
-        rpgMapImage, playerViewRect = player.getMapView()
-        surface.blit(rpgMapImage, ORIGIN, playerViewRect)
+    def drawPlayerMapView(self, surface):
+        self.drawMapView(surface, player.viewRect)
+        fixedSprites.draw(surface)
+           
+    def drawMapView(self, surface, viewRect, increment = 1, trigger = 0):
+        surface.blit(player.rpgMap.mapImage, ORIGIN, viewRect)
         # if the sprite being updated is in view it will be added to visibleSprites as a side-effect
-        self.gameSprites.update(player, self.gameSprites, self.visibleSprites, increment)
+        self.gameSprites.update(player, self.visibleSprites, viewRect, increment, trigger)
         self.visibleSprites.draw(surface)
-        if increment:
-            fixedSprites.draw(surface)
     
     def lifeLostTransition(self):
         registryHandler.switchToSnapshot()
@@ -265,13 +282,6 @@ class PlayState:
                                              registry.playerPosition[1],
                                              registry.playerLevel)
         
-    # method required by the ShowPlayer state
-    def showPlayer(self, px, py):
-        player.wrapMovement(player.level,
-                            player.spriteFrames.direction,
-                            px, py)
-        self.drawMapView(screen, 0)
-
 class SceneTransitionState:
     
     def __init__(self, transition):
@@ -315,7 +325,7 @@ class SceneTransitionState:
         # setting the direction will also apply masks
         player.setDirection(self.transition.direction)
         # extract the next image from the play state
-        self.playState.drawMapView(self.screenImage, 0)           
+        self.playState.drawMapView(self.screenImage, player.viewRect, 0)           
             
 class BoundaryTransitionState:
     
@@ -357,7 +367,7 @@ class BoundaryTransitionState:
         # create play state
         self.playState = PlayState()
         # extract the next image from the play state
-        self.playState.drawMapView(self.nextImage, 0)
+        self.playState.drawMapView(self.nextImage, player.viewRect, 0)
 
     def screenWipeUp(self, sliceHeight):
         screen.blit(self.screenImage, ORIGIN, Rect(0, sliceHeight, VIEW_WIDTH, VIEW_HEIGHT - sliceHeight))
@@ -487,6 +497,43 @@ class ShowPlayerState:
             px = -MOVE_UNIT
         else: # self.boundary == RIGHT
             px = MOVE_UNIT
-        self.playState.showPlayer(px, py)
-        pygame.display.flip()
+        self.showPlayer(px, py)
         self.ticks += 1
+
+    def showPlayer(self, px, py):
+        player.wrapMovement(player.level,
+                            player.spriteFrames.direction,
+                            px, py)
+        self.playState.drawMapView(screen, player.viewRect)
+        pygame.display.flip()
+
+class ShowBoatState:
+    
+    def __init__(self, nextPlayState, targetPosition):
+        self.playState = nextPlayState
+        self.targetPosition = targetPosition
+        startPosition = registryHandler.getPlayerPosition()
+        px = (targetPosition[0] - startPosition[0]) * TILE_SIZE
+        self.targetMapRect = player.mapRect.move(px, 0)
+        self.ticks = 0
+        
+    def execute(self, keyPresses):
+        # bit of messing around here - we don't want to return the play state
+        # until the boat has fired its boat stopped event
+        if registryHandler.getMetadata("start:boat:0"):
+            registryHandler.setPlayerPosition(self.targetPosition)
+            registryHandler.takeSnapshot()
+            return self.playState
+        if player.mapRect.left == self.targetMapRect.left:
+            self.showPlayer(0, 0)
+        else:
+            self.showPlayer(MOVE_UNIT, 0)
+        self.ticks += 1
+        
+    def showPlayer(self, px, py):
+        if self.ticks % 2:
+            player.wrapMovement(player.level,
+                                player.spriteFrames.direction,
+                                px, py, 0)
+        self.playState.drawMapView(screen, player.viewRect, trigger = 1)
+        pygame.display.flip()

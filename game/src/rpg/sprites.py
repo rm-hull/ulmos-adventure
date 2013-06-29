@@ -57,7 +57,7 @@ class RpgSprite(pygame.sprite.Sprite):
         self.mapRect = self.image.get_rect()
         self.initBaseRect()
         # if required, move to the requested position
-        if level:
+        if level != None:
             self.level = level
         if px > 0 or py > 0:
             self.doMove(px, py)
@@ -80,9 +80,11 @@ class RpgSprite(pygame.sprite.Sprite):
         self.mapRect.move_ip(px, py)
         self.baseRect.move_ip(px, py)
         # a pseudo z order is used to test if one sprite is behind another
-        self.z = int(self.mapRect.bottom + self.level * TILE_SIZE)
-        # print self.uid, self.mapRect, self.baseRect
+        self.z = self.calculateZ()
 
+    def calculateZ(self):
+        return int(self.mapRect.bottom + self.level * TILE_SIZE)
+    
     def clearMasks(self):
         if self.masked:
             self.masked = False
@@ -115,6 +117,9 @@ class RpgSprite(pygame.sprite.Sprite):
     
     def processAction(self, player):
         pass
+    
+    def processMapExit(self):
+        return False
 
 """
 Base class for any sprites that aren't either the player or a fixed sprite.
@@ -125,19 +130,18 @@ class OtherSprite(RpgSprite):
         RpgSprite.__init__(self, spriteFrames, position)
         self.movement = None
     
-    def update(self, player, gameSprites, visibleSprites, increment):
+    def update(self, player, visibleSprites, viewRect, increment, trigger = 1):
         # remove the sprite if required
         if self.toRemove:
-            self.remove(visibleSprites)
-            self.remove(gameSprites)
+            self.kill()
             return
         # otherwise apply movement
-        px, py, metadata = self.getMovement(player)            
+        px, py, metadata = self.getMovement(player, trigger)            
         self.doMove(px, py)
         # make self.rect relative to the view
-        self.rect.topleft = (self.mapRect.left - player.viewRect.left,
-                             self.mapRect.top - player.viewRect.top)
-        if self.mapRect.colliderect(player.viewRect):
+        self.rect.topleft = (self.mapRect.left - viewRect.left,
+                             self.mapRect.top - viewRect.top)
+        if self.mapRect.colliderect(viewRect):
             # some part of this sprite is in view
             self.clearMasks()
             self.advanceFrame(increment, metadata)
@@ -147,8 +151,7 @@ class OtherSprite(RpgSprite):
                 self.add(visibleSprites)
             return
         # test if the sprite has exited the map completely
-        if not self.mapRect.colliderect(self.rpgMap.mapRect):
-            self.toRemove = True
+        if self.processMapExit():
             return
         # at this point we know the sprite is on the map but out of view 
         if self.inView:
@@ -162,7 +165,7 @@ class OtherSprite(RpgSprite):
         self.tilePoints = tilePoints
             
     # base movement method - this is sufficient for static sprites only        
-    def getMovement(self, player):
+    def getMovement(self, player, trigger):
         return NO_MOVEMENT
                                    
 """

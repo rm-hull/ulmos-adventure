@@ -53,7 +53,11 @@ class DoorOpenedEvent(MetadataEvent):
 class CheckpointReachedEvent(MetadataEvent):
     def __init__(self, metadata):
         MetadataEvent.__init__(self, metadata)
-        
+
+class BoatStoppedEvent(MetadataEvent):
+    def __init__(self, metadata):
+        MetadataEvent.__init__(self, metadata)
+                
 # ==============================================================================
 
 class SpriteMetadata:
@@ -77,8 +81,7 @@ class KeyMetadata(SpriteMetadata):
     def __init__(self, uid):
         SpriteMetadata.__init__(self, uid)
 
-class DoorMetadata(SpriteMetadata):
-    
+class DoorMetadata(SpriteMetadata):    
     def __init__(self, uid, tilePosition, level):
         SpriteMetadata.__init__(self, uid)
         self.x, self.y = tilePosition[0], tilePosition[1]
@@ -97,3 +100,17 @@ class CheckpointMetadata(SpriteMetadata):
         self.coinCount = coinCount
         self.keyCount = keyCount
         
+class BoatMetadata(SpriteMetadata):
+    def __init__(self, uid, tilePosition):
+        SpriteMetadata.__init__(self, uid)
+        self.endPosition = tilePosition
+
+    # sets the boat to its end position
+    def applyMapActions(self, rpgMap):
+        for mapSprite in rpgMap.mapSprites:
+            if mapSprite.uid == self.uid:
+                mapSprite.tilePoints = [self.endPosition]
+
+    def isRemovedFromMap(self):
+        return False
+

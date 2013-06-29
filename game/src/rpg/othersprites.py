@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 from sprites import *
-from spriteframes import DirectionalFrames, DIRECTION
+from spriteframes import StaticFrames, DirectionalFrames, DIRECTION
 from view import UP, DOWN, LEFT, RIGHT, VIEW_WIDTH, VIEW_HEIGHT
-from events import WaspZoomingEvent, BeetleCrawlingEvent
+from events import WaspZoomingEvent, BeetleCrawlingEvent, BoatStoppedEvent, BoatMetadata
 
 """
 Metadata is used to provide a loose coupling between the sprite movement and
@@ -60,7 +60,7 @@ class Beetle(OtherSprite):
         self.currentPathPoint = self.pathPoints[0]
         self.pathPointIndex = 0
             
-    def getMovement(self, player):
+    def getMovement(self, player, trigger):
         currentPosition = self.mapRect.topleft
         x = self.currentPathPoint[0] - currentPosition[0]
         y = self.currentPathPoint[1] - currentPosition[1]
@@ -102,6 +102,12 @@ class Wasp(OtherSprite):
         player.loseLife()
         return True
     
+    def processMapExit(self):
+        if self.mapRect.colliderect(self.rpgMap.mapRect):
+            return False
+        self.remove()
+        return True
+    
     # initialises a 'zoom' movement strategy - zooming towards the player vertically/horizontally
     def initMovement(self, level, tilePoints):
         OtherSprite.initMovement(self, level, tilePoints)
@@ -113,7 +119,7 @@ class Wasp(OtherSprite):
         self.zooming = False
         self.direction = None # this is also used to detect if the sprite has 'seen' the player
     
-    def getMovement(self, player):
+    def getMovement(self, player, trigger):
         if self.zooming:
             # print "zooming"
             return ZOOM_MOVEMENT[self.direction]
@@ -135,4 +141,64 @@ class Wasp(OtherSprite):
                 self.zooming = True
                 self.eventBus.dispatchWaspZoomingEvent(WaspZoomingEvent())
         return NO_MOVEMENT
+    
+class Boat(OtherSprite):
+    
+    framesImage = None
+
+    def __init__(self):
+        if Boat.framesImage is None:    
+            imagePath = os.path.join(SPRITES_FOLDER, "boat.png")
+            Boat.framesImage = view.loadScaledImage(imagePath, None)        
+        animationFrames = view.processStaticFrames(Boat.framesImage, 1)
+        spriteFrames = StaticFrames(animationFrames)
+        OtherSprite.__init__(self, spriteFrames, (6, 1))
+        self.upright = False
+        self.ticks = 0
+
+    # override this so boats can never mask other sprites         
+    def calculateZ(self):
+        return 0
+        
+    def combineFrames(self, topImage, wakeFrames):
+        animationFrames = []
+        for frame in wakeFrames:
+            img = view.createRectangle((topImage.get_width(), topImage.get_height() + frame.get_height()))
+            img.blit(topImage, (0, 0))
+            img.blit(frame, (0, topImage.get_height()))
+            animationFrames.append(img)
+        return animationFrames
+
+    def initMovement(self, level, tilePoints):
+        OtherSprite.initMovement(self, level, tilePoints)
+        self.tilePoints = tilePoints
+        self.numPoints = len(tilePoints)
+        self.currentPathPoint = self.toPathPoint(self.tilePoints[0])
+        self.moving = False
+            
+    def getMovement(self, player, trigger):
+        if self.numPoints < 2:
+            return NO_MOVEMENT
+        self.ticks = (self.ticks + 1) % 2
+        if self.ticks:
+            return NO_MOVEMENT
+        if trigger and not self.moving:
+            self.moving = True
+            self.currentPathPoint = self.toPathPoint(self.tilePoints[1])
+        currentPosition = self.mapRect.topleft
+        x = self.currentPathPoint[0] - currentPosition[0]
+        if x < 0:
+            return MOVEMENT[LEFT]
+        if x > 0:
+            return MOVEMENT[RIGHT]
+        # otherwise there is nowhere to move to
+        if self.moving:
+            self.moving = False
+            metadata = BoatMetadata(self.uid, self.tilePoints[1])
+            self.eventBus.dispatchBoatStoppedEvent(BoatStoppedEvent(metadata))
+        return NO_MOVEMENT
+    
+    def toPathPoint(self, tilePoint):
+        return (tilePoint[0] * TILE_SIZE + self.position[0],
+                tilePoint[1] * TILE_SIZE + self.position[1])
     

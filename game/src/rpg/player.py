@@ -227,9 +227,9 @@ class Player(RpgSprite):
     """
     Calls applyMovement and performs some additional operations.
     """      
-    def wrapMovement(self, level, direction, px, py):
+    def wrapMovement(self, level, direction, px, py, increment = 1):
         self.deferredMovement = None
-        self.applyMovement(level, direction, px, py)
+        self.applyMovement(level, direction, px, py, increment)
         self.updateViewRect()
     
     """
@@ -244,13 +244,13 @@ class Player(RpgSprite):
     """
     Applies valid movement.
     """
-    def applyMovement(self, level, myDirection, px, py):
+    def applyMovement(self, level, myDirection, px, py, increment = 1):
         # move the player to its new location
         self.level = level
         self.doMove(px, py)
         # animate the player
         self.clearMasks()
-        self.image, frameIndex = self.spriteFrames.advanceFrame(direction = myDirection)
+        self.image, frameIndex = self.spriteFrames.advanceFrame(increment, direction = myDirection)
         if frameIndex == 1 or frameIndex == 3:
             self.eventBus.dispatchPlayerFootstepEvent(PLAYER_FOOTSTEP_EVENT)
         self.applyMasks()
@@ -311,7 +311,14 @@ class Player(RpgSprite):
     """
     def getTilePoint(self, px, py):
         return px // TILE_SIZE, py // TILE_SIZE
-            
+    
+    """
+    Positions the player relative to the given view.
+    """    
+    def relativeView(self, viewRect):
+        self.rect.topleft = (self.mapRect.left - viewRect.left,
+                             self.mapRect.top - viewRect.top)
+
     """
     Apply updates and return any map events.
     """
@@ -384,12 +391,6 @@ class Player(RpgSprite):
             if sprite.isIntersecting(self):
                 sprite.processAction(self)
     
-    """
-    Convenience method that returns the map image and the player's view of it.
-    """            
-    def getMapView(self):
-        return self.rpgMap.mapImage, self.viewRect
-                        
     def getCoinCount(self):
         return self.coinCount.count;
 

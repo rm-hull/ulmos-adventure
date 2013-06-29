@@ -27,8 +27,20 @@ class RegistryHandler:
     def doorOpened(self, doorOpenedEvent):
         self.registry.doorOpened(doorOpenedEvent)
         
+    def boatStopped(self, boatStoppedEvent):
+        self.registry.boatStopped(boatStoppedEvent)
+        
     def checkpointReached(self, checkpointReachedEvent):
         self.snapshot = self.registry.checkpointReached(checkpointReachedEvent)
+        
+    def getPlayerPosition(self):
+        return self.registry.playerPosition
+        
+    def setPlayerPosition(self, playerPosition):
+        self.registry.playerPosition = playerPosition
+        
+    def takeSnapshot(self):
+        self.snapshot = self.registry.takeSnapshot()
                             
 """
 Registry class that stores the state of the game.  A save game feature could be
@@ -85,6 +97,9 @@ class Registry:
     
     def doorOpened(self, doorOpenedEvent):
         self.registerMetadata(doorOpenedEvent.getMetadata())
+        
+    def boatStopped(self, boatStoppedEvent):
+        self.registerMetadata(boatStoppedEvent.getMetadata())
         
     def checkpointReached(self, checkpointReachedEvent):
         checkpoint = checkpointReachedEvent.getMetadata()

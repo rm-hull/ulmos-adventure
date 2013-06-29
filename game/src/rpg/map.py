@@ -197,7 +197,7 @@ class RpgMap:
             if downLevel:
                 downLevels.append(downLevel)
         # a falling event is returned only if all the span tiles have a down level
-        if len(downLevels) == len(spanTiles):
+        if downLevels and len(downLevels) == len(spanTiles):
             return playevents.FallingEvent(downLevels[0])
         return None
             
