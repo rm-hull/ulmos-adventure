@@ -515,12 +515,14 @@ class ShowBoatState:
         startPosition = registryHandler.getPlayerPosition()
         px = (targetPosition[0] - startPosition[0]) * TILE_SIZE
         self.targetMapRect = player.mapRect.move(px, 0)
+        eventBus.addBoatStoppedListener(self)
+        self.boatStoppedEvent = None
         self.ticks = 0
         
     def execute(self, keyPresses):
         # bit of messing around here - we don't want to return the play state
         # until the boat has fired its boat stopped event
-        if registryHandler.getMetadata("start:boat:0"):
+        if self.boatStoppedEvent:
             registryHandler.setPlayerPosition(self.targetPosition)
             registryHandler.takeSnapshot()
             return self.playState
@@ -537,3 +539,7 @@ class ShowBoatState:
                                 px, py, 0)
         self.playState.drawMapView(screen, player.viewRect, trigger = 1)
         pygame.display.flip()
+        
+    def boatStopped(self, boatStoppedEvent):
+        self.boatStoppedEvent = boatStoppedEvent
+        

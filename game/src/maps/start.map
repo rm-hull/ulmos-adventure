@@ -53,12 +53,12 @@
 1,3 water:w1
 2,3 water:w1
 3,3 water:w1
-4,3 water:w1
-5,3 [2] water:dark grass:tl1
+4,3 [2] water:dark grass:tl1
+5,3 [2] water:dark grass:t1
 6,3 [2] water:dark grass:t3
 7,3 [2] water:dark grass:t3
-8,3 [2] water:dark grass:t1
-9,3 [2] water:dark grass:tr1
+8,3 [2] water:dark grass:tr1
+9,3 water:w2
 10,3 water:w1
 11,3 water:w3
 12,3 water:w1
@@ -70,12 +70,12 @@
 1,4 water:w1
 2,4 water:w1
 3,4 [2] water:dark grass:tl1
-4,4 [2] water:dark grass:t3
-5,4 [2] grass:n1
+4,4 [2] grass:n1 objects:tree_tl2:V4
+5,4 [2] grass:n1 objects:tree_tr2:V4
 6,4 [2] grass:n1
 7,4 [2] grass:n6
 8,4 [2] grass:n1
-9,4 [2] grass:n1
+9,4 [2] water:dark grass:t3
 10,4 [2] water:dark grass:t1
 11,4 [2] water:dark grass:tr2
 12,4 water:w1
@@ -87,8 +87,8 @@
 1,5 water:w1
 2,5 water:w1
 3,5 [2] water:dark grass:l3
-4,5 [2] grass:n1
-5,5 [2] grass:n5
+4,5 [2] grass:n1 objects:tree_ml2:V3
+5,5 [2] grass:n5 objects:tree_mr2:V3
 6,5 [2] grass:n1
 7,5 [4,2] grass:n1 grass:tl1:4
 8,5 [4,2] grass:n1 grass:t2:4
@@ -104,8 +104,8 @@
 1,6 water:w1
 2,6 [2] water:dark grass:tl2
 3,6 [2] grass:n1
-4,6 [2] grass:n3
-5,6 [2] grass:n1
+4,6 grass:n3 grass:treels1 objects:tree_bl2
+5,6 grass:n1 grass:treers1 objects:tree_br2
 6,6 [2] grass:n1
 7,6 [4] grass:n1 grass:l3
 8,6 [4] grass:n6
@@ -121,8 +121,8 @@
 1,7 water:w1
 2,7 [2] water:dark grass:l2
 3,7 [2] grass:n1
-4,7 [2] grass:n1
-5,7 [2] grass:n1
+4,7 [2] grass:n1 grass:treels2
+5,7 [2] grass:n1 grass:treers2
 6,7 [4,2] grass:n1 grass:tl2:4
 7,7 [4] grass:n2
 8,7 [4] grass:n1
@@ -135,14 +135,14 @@
 15,7 [4] grass:n2
 
 0,8 [4] water:dark grass:t3
-1,8 [4] water:dark grass:t2
+1,8 water:dark grass:t2
 2,8 [4,2] grass:n1 grass:t2:4
 3,8 [4,2] grass:n1 grass:tr1:4
 4,8 [2] grass:n1
 5,8 [2] grass:n1
 6,8 [4] grass:n1 grass:l1
-7,8 [4] grass:n1
-8,8 [4] grass:n1
+7,8 [4] grass:n1 objects:tree_tl1:V6
+8,8 [4] grass:n1 objects:tree_tr1:V6
 9,8 [4] grass:n1 grass:r1
 10,8 [2] grass:n1
 11,8 [2] water:dark grass:r2
@@ -152,15 +152,15 @@
 15,8 [4] grass:n1
 
 0,9 [4] grass:n1
-1,9 [4] grass:n1
+1,9 grass:n1
 2,9 [4] grass:n1
 3,9 [4] grass:rb
 4,9 [2,4] grass:n1 wood:hbr1:4
 5,9 [2,4] grass:n1 wood:hbr2:4
 6,9 [4] grass:lb
-7,9 [4] grass:n1
-8,9 [4] grass:n1
-9,9 [4] grass:n1
+7,9 [4] grass:n1 objects:tree_ml1:V5
+8,9 [4] grass:n1 objects:tree_mr1:V5 objects:tree_tl2:V6
+9,9 [4] grass:n1 objects:tree_tr2:V6
 10,9 [4,2] grass:n1 grass:tr1:4
 11,9 [2] grass:n1
 12,9 [2] water:dark grass:t2
@@ -169,15 +169,15 @@
 15,9 earth:t1
 
 0,10 [4] grass:n2
-1,10 [4] grass:n1
+1,10 grass:n1
 2,10 [4] grass:n1
 3,10 [4] grass:n1 grass:r2
 4,10 [2] grass:n1 wood:lls_supp:V3
 5,10 [2] grass:n1 wood:lrs_supp:V3
 6,10 [4] grass:n1 grass:l3
-7,10 [4] grass:n1
-8,10 [4] grass:n4
-9,10 [4] grass:n1
+7,10 grass:n1 grass:treels1 objects:tree_bl2
+8,10 grass:n4 grass:treers1 objects:tree_br1 objects:tree_ml2
+9,10 [4] grass:n1 objects:tree_mr2:V5
 10,10 [4] grass:n1 grass:r2
 11,10 [2] grass:n1
 12,10 [2] grass:n1
@@ -192,9 +192,9 @@
 4,11 [2] grass:n1
 5,11 [2] grass:n2
 6,11 [4] grass:n1 grass:l3
-7,11 [4] grass:n6
-8,11 [4] grass:n1
-9,11 [4] grass:n1
+7,11 [4] grass:n6 grass:treels2
+8,11 grass:n1 grass:treels1 grass:treers2 objects:tree_bl1
+9,11 grass:n1 grass:treers1 objects:tree_br2
 10,11 [4] grass:n5
 11,11 [4,2] grass:n1 grass:tr2:4
 12,11 [2] grass:n1
@@ -210,12 +210,12 @@
 5,12 [2] grass:n1
 6,12 [4] grass:n1 grass:l1
 7,12 [4] grass:n1
-8,12 [4] grass:n1
-9,12 [4] grass:n2
+8,12 [4] grass:n1 grass:treels2
+9,12 [4] grass:n2 grass:treers2
 10,12 [4] grass:n1
 11,12 [4] earth:dark grass:r1
 12,12 earth:tls
-13,12 earth:t1
+13,12 earth:trs
 14,12 [2] earth:dark grass:lj
 15,12 [2] grass:n1
 
@@ -232,7 +232,7 @@
 10,13 [4] grass:n4
 11,13 [4] earth:dark grass:r3
 12,13 water:ls
-13,13 water:n2
+13,13 water:rs
 14,13 earth:tl
 15,13 earth:t1
 
@@ -251,7 +251,7 @@
 12,14 water:w1
 13,14 water:w1
 14,14 water:l
-15,14 water:n1
+15,14 water:n2
 
 0,15 water:w2
 1,15 water:w2
@@ -366,7 +366,7 @@
 8,21 [S3.5] earth:dark wood:st1
 9,21 grass:dark earth:ms
 10,21 [4] earth:dark grass:lj
-11,21 [4] grass:n6
+11,21 grass:n6
 12,21 [4] grass:n1
 13,21 earth:tlrs
 14,21 earth:dark grass:lj
@@ -400,7 +400,7 @@
 8,23 [S3] grass:st2
 9,23 [3] grass:n4
 10,23 [4] grass:n1 grass:l2
-11,23 [4] grass:n1
+11,23 grass:n1
 12,23 [4] grass:n3
 13,23 [4] grass:ls
 14,23 grass:dark earth:bl
@@ -418,7 +418,7 @@
 9,24 earth:trs
 10,24 [4] earth:dark grass:l1
 11,24 [4] grass:n1
-12,24 [4] grass:n1
+12,24 grass:n1
 13,24 [4] grass:n1
 14,24 [4] grass:ls
 15,24 [4] grass:ms
@@ -543,9 +543,16 @@
 15,31 water:w2
 
 sprite boat 0 -3,27 5,27
-sprite rock 4 11,22
+sprite rock 4 11,21
+sprite rock 4 11,23
 sprite rock 4 12,24
-sprite beetle 4 10,21 10,23 12,23 12,21
-sprite beetle 4 11,25 11,23 13,23 13,25
-sprite beetle 1 3,17 3,21
-
+sprite beetle 4 12,22 10,22 10,24 11,24 11,25 13,25 13,23 12,23
+sprite beetle 4 13,25 13,23 12,23 12,22 10,22 10,24 11,24 11,25
+sprite beetle 4 10,22 10,20 12,20 12,22
+sprite beetle 2 4,12 4,7 3,7 3,5 6,5 6,7 5,7 5,12
+sprite wasp 2 11,4
+sprite rock 4 1,8
+sprite rock 4 1,9
+sprite rock 4 1,10
+sprite coin 4 2,9
+sprite coin 4 8,19
