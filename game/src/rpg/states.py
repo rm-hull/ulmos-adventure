@@ -123,11 +123,8 @@ def getRegistry(cont, registry):
         return registryHandler.registry
     if not registry:
         #registry = Registry("unit", (4, 6), 1)
-        #registry = Registry("central", (6, 22), 2)
-        #registry = Registry("east", (13, 8), 3)
-        registry = Registry("start", (6, 27), 1)
-        #registry = Registry("start", (14, 7), 4)
-        #registry = Registry("wasps", (12, 10), 5)
+        registry = Registry("hub", (6, 27), 1)
+        #registry = Registry("drops", (12, 7), 5)
     registryHandler.setRegistry(registry)
     return registry
     
@@ -172,7 +169,7 @@ class TitleState:
         self.titleImage = view.loadScaledImage(imagePath, view.TRANSPARENT_COLOUR)
         self.playLine = titleFont.getTextImage("PRESS SPACE TO PLAY")
         self.titleTicks = self.getTitleTicks()
-        self.startRegistry = Registry("start", (-2, 27), 1)
+        self.startRegistry = Registry("hub", (-2, 27), 1)
         self.playState = None
         self.ticks = 0
         
@@ -191,12 +188,14 @@ class TitleState:
             pygame.display.flip()
         elif self.ticks == self.titleTicks + SIXTY_FOUR:
             self.playState = startGame(False, self.startRegistry)
+            #self.playState = startGame()
             x, y = (VIEW_WIDTH - self.playLine.get_width()) // 2, 88 * SCALAR
             screen.blit(self.playLine, (x, y))
             pygame.display.flip()
         elif self.ticks > self.titleTicks + SIXTY_FOUR:
             if keyPresses[K_SPACE]:
                 return StartState(self.playState)
+                #return self.playState
         self.ticks += 1
 
 class StartState:

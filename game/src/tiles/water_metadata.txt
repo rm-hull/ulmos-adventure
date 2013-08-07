@@ -42,3 +42,12 @@
 5,4 blw
 6,4 brw
 7,4 light
+
+0,5 tel
+1,5 ter
+2,5 telrs
+3,5 terls
+4,5
+5,5
+6,5
+7,5

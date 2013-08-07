@@ -117,9 +117,9 @@
 
 0,13 treelj1
 1,13 treerj1
-2,13 drop
+2,13 
 3,13 
-4,13 
-5,13 
+4,13 llrs
+5,13 rrls
 6,13 treelj2
 7,13 treerj2
