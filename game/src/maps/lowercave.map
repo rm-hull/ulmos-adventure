@@ -281,6 +281,6 @@ sprite beetle 1 11,13 11,10 13,10 13,13
 sprite coin 1 4,11
 sprite coin 1 12,3
 
-event boundary down 5 : transition hub 7,24 1 down
-event boundary down 12 : transition hub 14,26 2 down
+event boundary down 5 : transition start 8,24 1 down
+event boundary down 12 : transition start 14,26 2 down
 

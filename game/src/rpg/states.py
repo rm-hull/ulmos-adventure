@@ -123,8 +123,9 @@ def getRegistry(cont, registry):
         return registryHandler.registry
     if not registry:
         #registry = Registry("unit", (4, 6), 1)
-        registry = Registry("hub", (6, 27), 1)
         #registry = Registry("drops", (12, 7), 5)
+        #registry = Registry("forest", (11, 16), 3)
+        registry = Registry("start", (7, 27), 1)
     registryHandler.setRegistry(registry)
     return registry
     
@@ -169,7 +170,7 @@ class TitleState:
         self.titleImage = view.loadScaledImage(imagePath, view.TRANSPARENT_COLOUR)
         self.playLine = titleFont.getTextImage("PRESS SPACE TO PLAY")
         self.titleTicks = self.getTitleTicks()
-        self.startRegistry = Registry("hub", (-2, 27), 1)
+        self.startRegistry = Registry("start", (-2, 27), 1)
         self.playState = None
         self.ticks = 0
         
@@ -219,7 +220,7 @@ class StartState:
             self.playState.drawMapView(screen, self.viewRect)
             if self.viewRect.top == player.viewRect.top:
                 #return self.playState
-                return ShowBoatState(self.playState, (6, 27))
+                return ShowBoatState(self.playState, (7, 27))
         pygame.display.flip()
         self.ticks += 1
 
