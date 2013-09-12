@@ -85,7 +85,7 @@
 
 0,5 [3] water:dark wood:hbr1
 1,5 [3] grass:lb
-2,5 [3] grass:n1
+2,5 [3] grass:n5
 3,5 [3] grass:n1 grass:ls
 4,5 [3] grass:ms
 5,5 grass:ms
@@ -113,14 +113,14 @@
 10,6 grass:dark earth:ml
 11,6 grass:dark earth:mrs
 12,6 [S3.5] earth:dark wood:st1
-13,6 grass:dark earth:m3
+13,6 grass:dark earth:mls
 14,6 grass:dark earth:mr
 15,6 earth:ls
 
 0,7 water:w2
 1,7 earth:tlrs
 2,7 [3] earth:dark grass:lj
-3,7 [3] grass:n1
+3,7 [3] grass:n2
 4,7 [3] earth:dark grass:r1
 5,7 grass:dark earth:bls
 6,7 grass:dark earth:b1
@@ -207,7 +207,7 @@
 2,12 water:w2
 3,12 grass:dark earth:mlrs
 4,12 [S2.5] earth:dark wood:st1
-5,12 grass:dark earth:mls
+5,12 grass:dark earth:ms
 6,12 [3] earth:dark grass:lj
 7,12 [3] grass:n1
 8,12 [1,3] grass:n1 grass:tr2:3
@@ -256,11 +256,11 @@
 0,15 water:w3
 1,15 water:w2
 2,15 [2] water:dark grass:l2
-3,15 [2] grass:n1
+3,15 [2] grass:n4
 4,15 [2] grass:n1
 5,15 [2,3] grass:n1 grass:tl2:3
 6,15 grass:grads objects:easter_base
-7,15 [3] grass:n1
+7,15 grass:n1
 8,15 grass:grads objects:easter_base
 9,15 [1,3] grass:n1 grass:t2:3
 10,15 [1,3] grass:n1 grass:t3:3
@@ -281,7 +281,7 @@
 8,16 [3] grass:mms
 9,16 [3] grass:n1
 10,16 [3] grass:n1
-11,16 [3] grass:n1
+11,16 [3] grass:n5
 12,16 [1,3] grass:n1 grass:tr1:3
 13,16 [1] grass:n1
 14,16 grass:n1 grass:l1
@@ -324,7 +324,7 @@
 0,19 water:w2
 1,19 [3] water:dark grass:l1
 2,19 [3] grass:n1
-3,19 [3] grass:n1
+3,19 [3] grass:n2
 4,19 [3] earth:dark grass:rj
 5,19 earth:tls
 6,19 earth:tr
@@ -410,7 +410,7 @@
 1,24 [1] water:dark grass:l2
 2,24 [1] grass:bb
 3,24 grass:n1
-4,24 [1] grass:n1
+4,24 [1] grass:n6
 5,24 [1] grass:n1 objects:tree_tl2:V3
 6,24 grass:n1 grass:treels1 grass:treers2 objects:tree_bl2 objects:tree_tr2:V3
 7,24 grass:treers1 grass:treelds2 objects:tree_br2 objects:tree_tl1:V3
@@ -436,7 +436,7 @@
 10,25 grass:n1 grass:treels1 objects:tree_bl2
 11,25 grass:n1 grass:treers1 grass:treelds2 objects:tree_br2
 12,25 grass:grads objects:easter_base
-13,25 [1] grass:n1
+13,25 grass:n1
 14,25 grass:grads water:rhd objects:easter_base
 15,25 water:w1
 
@@ -449,7 +449,7 @@
 6,26 grass:n1 grass:treers1 objects:tree_br2
 7,26 grass:n1 grass:treels1 objects:tree_bl1
 8,26 grass:n1 grass:treers1 objects:tree_br1
-9,26 [1] grass:n1
+9,26 [1] grass:n4
 10,26 [1] grass:n1 grass:treels2
 11,26 [1] grass:n1 grass:treers2
 12,26 [1] grass:n1 grass:mms
@@ -467,9 +467,9 @@
 7,27 [1] grass:n1 grass:treels2
 8,27 [1] grass:n1 grass:treers2
 9,27 [1] grass:n1
-10,27 [1] grass:n1
+10,27 [1] grass:n6
 11,27 [1] grass:n1
-12,27 [1] grass:n1
+12,27 [1] grass:n2
 13,27 [1] earth:dark grass:rj
 14,27 water:trls
 15,27 water:w1
@@ -482,7 +482,7 @@
 5,28 water:tl
 6,28 water:trs
 7,28 [1] earth:dark water:bw grass:lj
-8,28 [1] grass:n1
+8,28 [1] grass:n6
 9,28 [1] grass:n1
 10,28 [1] grass:n1
 11,28 [1] grass:n1
@@ -552,7 +552,10 @@ sprite beetle 1 13,13 13,20 14,20 14,24 14,19 13,19
 sprite rock 3 5,5
 sprite rock 1 3,23
 sprite rock 1 3,24
+sprite blades 3 7,15
+sprite blades 1 13,25
 
+event tile 7,3 3 : transition skullcave 7,15 1 up up
 event boundary left 5 : boundary start left 0
 event boundary left 27-29 : boundary start left 0
 

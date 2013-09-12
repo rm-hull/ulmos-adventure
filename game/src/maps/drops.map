@@ -74,7 +74,7 @@
 5,4 [1] water:dark grass:l2 objects:tree_tr1:V7
 6,4 [1] grass:n6
 7,4 [1] grass:n1
-8,4 [1] grass:n5
+8,4 [1] grass:n3
 9,4 [1] grass:n1
 10,4 [1] grass:n1
 11,4 [1] water:dark grass:tr2
@@ -93,7 +93,7 @@
 7,5 [5,1] grass:n1 grass:tr1:5
 8,5 [1] grass:n1
 9,5 [5,1] grass:n1
-10,5 [5,1] grass:n2
+10,5 [5,1] grass:n6
 11,5 [1] water:dark grass:r2
 12,5 water:w2
 13,5 water:w2

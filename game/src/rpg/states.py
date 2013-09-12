@@ -20,7 +20,6 @@ from player import Ulmo
 from sounds import SoundHandler
 from events import MapTransitionEvent, EndGameEvent
 from fixedsprites import FixedCoin, CoinCount, KeyCount, Lives, CheckpointIcon
-from rpg.view import TILE_SIZE
 
 FRAMES_PER_SEC = 60 // VELOCITY
 
@@ -41,6 +40,9 @@ DOORWAY_TICKS = {UP: 16 // VELOCITY,
                  DOWN: 16 // VELOCITY,
                  LEFT: 16 // VELOCITY,
                  RIGHT: 16 // VELOCITY}
+
+PLAYER_OFF_SCREEN_START = (-2, 27)
+PLAYER_ON_SCREEN_START = (7, 27)
 
 pygame.display.set_caption("Ulmo's Adventure")
 screen = pygame.display.set_mode(DIMENSIONS)
@@ -124,8 +126,9 @@ def getRegistry(cont, registry):
     if not registry:
         #registry = Registry("unit", (4, 6), 1)
         #registry = Registry("drops", (12, 7), 5)
-        #registry = Registry("forest", (11, 16), 3)
-        registry = Registry("start", (7, 27), 1)
+        #registry = Registry("forest", (11, 8), 3)
+        #registry = Registry("start", (22, 24), 4)
+        registry = Registry("start", PLAYER_ON_SCREEN_START, 1)
     registryHandler.setRegistry(registry)
     return registry
     
@@ -170,7 +173,7 @@ class TitleState:
         self.titleImage = view.loadScaledImage(imagePath, view.TRANSPARENT_COLOUR)
         self.playLine = titleFont.getTextImage("PRESS SPACE TO PLAY")
         self.titleTicks = self.getTitleTicks()
-        self.startRegistry = Registry("start", (-2, 27), 1)
+        self.startRegistry = Registry("start", PLAYER_OFF_SCREEN_START, 1)
         self.playState = None
         self.ticks = 0
         
@@ -220,7 +223,7 @@ class StartState:
             self.playState.drawMapView(screen, self.viewRect)
             if self.viewRect.top == player.viewRect.top:
                 #return self.playState
-                return ShowBoatState(self.playState, (7, 27))
+                return ShowBoatState(self.playState)
         pygame.display.flip()
         self.ticks += 1
 
@@ -509,27 +512,20 @@ class ShowPlayerState:
 
 class ShowBoatState:
     
-    def __init__(self, nextPlayState, targetPosition):
+    def __init__(self, nextPlayState):
         self.playState = nextPlayState
-        self.targetPosition = targetPosition
-        startPosition = registryHandler.getPlayerPosition()
-        px = (targetPosition[0] - startPosition[0]) * TILE_SIZE
-        self.targetMapRect = player.mapRect.move(px, 0)
+        # listen for boat stopped events
         eventBus.addBoatStoppedListener(self)
         self.boatStoppedEvent = None
         self.ticks = 0
         
     def execute(self, keyPresses):
-        # bit of messing around here - we don't want to return the play state
-        # until the boat has fired its boat stopped event
         if self.boatStoppedEvent:
-            registryHandler.setPlayerPosition(self.targetPosition)
+            playerPosition = self.boatStoppedEvent.getMetadata().endPosition
+            registryHandler.setPlayerPosition(playerPosition)
             registryHandler.takeSnapshot()
             return self.playState
-        if player.mapRect.left == self.targetMapRect.left:
-            self.showPlayer(0, 0)
-        else:
-            self.showPlayer(MOVE_UNIT, 0)
+        self.showPlayer(MOVE_UNIT, 0)
         self.ticks += 1
         
     def showPlayer(self, px, py):

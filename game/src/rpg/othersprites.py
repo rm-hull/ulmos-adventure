@@ -27,8 +27,10 @@ ZOOM_MOVEMENT = {UP: (0, -2 * MOVE_UNIT, UP_METADATA),
 
 BEETLE_FRAME_SKIP = 12 // VELOCITY
 WASP_FRAME_SKIP = 4 // VELOCITY
+BLADES_FRAME_SKIP = 6 // VELOCITY
 
 WASP_COUNTDOWN = 12 // VELOCITY
+BLADES_COUNTDOWN = 24 // VELOCITY
 
 class Beetle(OtherSprite):
     
@@ -141,7 +143,59 @@ class Wasp(OtherSprite):
                 self.zooming = True
                 self.eventBus.dispatchWaspZoomingEvent(WaspZoomingEvent())
         return NO_MOVEMENT
+
+class Blades(OtherSprite):
     
+    framesImage = None
+    
+    baseRectSize = (TILE_SIZE, TILE_SIZE)    
+
+    def __init__(self):
+        if Blades.framesImage is None:    
+            imagePath = os.path.join(SPRITES_FOLDER, "blades-frames.png")
+            Blades.framesImage = view.loadScaledImage(imagePath)        
+        animationFrames = view.processStaticFrames(Blades.framesImage, 10)
+        spriteFrames = StaticFrames(animationFrames, BLADES_FRAME_SKIP)
+        OtherSprite.__init__(self, spriteFrames, (0, -14))
+        self.deactivate()
+
+    def getBaseRectTop(self, baseRectHeight):
+        return self.mapRect.bottom - baseRectHeight + 2 * SCALAR
+                
+    def processCollision(self, player):
+        #frameIndex = self.spriteFrames.frameIndex
+        if self.spriteFrames.frameIndex > 0:
+            player.loseLife()
+            return True
+        return False
+    
+    # override
+    def advanceFrame(self, increment, metadata):
+        if increment:
+            if self.active:
+                self.image, frameIndex = self.spriteFrames.advanceFrame()
+                if frameIndex == 0:
+                    self.deactivate(self.level)
+                return
+            self.countdown -= 1
+            if self.countdown == 0:
+                self.activate()
+
+    def deactivate(self, level = None):
+        self.countdown = BLADES_COUNTDOWN;
+        self.active = False
+        if level:
+            self.getMapTile().addNewLevel(level)
+
+    def activate(self):
+        self.active = True
+        self.getMapTile().restore()
+        #self.eventBus.dispatchBladesActiveEvent(WaspZoomingEvent())
+        
+    def getMapTile(self):
+        x, y = self.tilePosition[0], self.tilePosition[1]
+        return self.rpgMap.mapTiles[x][y]
+            
 class Boat(OtherSprite):
     
     framesImage = None
@@ -152,7 +206,7 @@ class Boat(OtherSprite):
             Boat.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(Boat.framesImage, 1)
         spriteFrames = StaticFrames(animationFrames)
-        OtherSprite.__init__(self, spriteFrames, (6, 1))
+        OtherSprite.__init__(self, spriteFrames, (-10, 1))
         self.upright = False
         self.ticks = 0
 
@@ -187,16 +241,19 @@ class Boat(OtherSprite):
             self.currentPathPoint = self.toPathPoint(self.tilePoints[1])
         currentPosition = self.mapRect.topleft
         x = self.currentPathPoint[0] - currentPosition[0]
+        self.handleBoatStopped(x)
         if x < 0:
             return MOVEMENT[LEFT]
         if x > 0:
             return MOVEMENT[RIGHT]
         # otherwise there is nowhere to move to
-        if self.moving:
+        return NO_MOVEMENT
+    
+    def handleBoatStopped(self, x):
+        if self.moving and abs(x) <= MOVE_UNIT:
             self.moving = False
             metadata = BoatMetadata(self.uid, self.tilePoints[1])
-            self.eventBus.dispatchBoatStoppedEvent(BoatStoppedEvent(metadata))
-        return NO_MOVEMENT
+            self.eventBus.dispatchBoatStoppedEvent(BoatStoppedEvent(metadata))            
     
     def toPathPoint(self, tilePoint):
         return (tilePoint[0] * TILE_SIZE + self.position[0],
