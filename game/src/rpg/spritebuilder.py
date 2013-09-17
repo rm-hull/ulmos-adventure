@@ -5,7 +5,7 @@ import pygame
 from othersprites import Beetle, Wasp, Blades, Boat
 from staticsprites import Flames, Coin, Key, Chest, Rock, Door, Checkpoint
 
-# map of sprite classes keyed on type
+# map of sprite classes keyed on name, as they appear in the map files 
 spriteClasses = {"flames": Flames,
                  "coin": Coin,
                  "key": Key,
@@ -19,9 +19,9 @@ spriteClasses = {"flames": Flames,
                  "boat": Boat}
 
 """
-Returns a sprite instance based on the given mapSprite.  If the registry
-indicates that the sprite has been removed from the map, this method returns
-None.
+Returns a sprite instance based on the given mapSprite.  If the registry indicates
+that the sprite has been removed from the map, this method returns None.  We also
+apply any map actions at this point.
 """
 def createSprite(mapSprite, rpgMap, eventBus, registry):
     spriteMetadata = registry.getMetadata(mapSprite.uid);

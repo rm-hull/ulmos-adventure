@@ -1,5 +1,8 @@
 #! /usr/bin/env python
 
+"""
+Simple events without metadata are typically used to play sound effects.
+"""
 class Event():    
     def getMetadata(self):
         pass
@@ -8,12 +11,6 @@ class DoorOpeningEvent(Event):
     pass
 
 class PlayerFootstepEvent(Event):
-    pass
-
-class MapTransitionEvent(Event):
-    pass
-
-class LifeLostEvent(Event):
     pass
 
 class EndGameEvent(Event):
@@ -27,11 +24,21 @@ class BeetleCrawlingEvent(Event):
 
 class PlayerFallingEvent(Event):
     pass
-        
-# ==============================================================================
 
-class MetadataEvent(Event):
-    
+"""
+Defines an event that occurs when the player loses a life and is also used to
+indicate game over. Note that although a LifeLostTransition does exist, this
+event does NOT contain it.
+"""
+class LifeLostEvent(Event):
+    def __init__(self, gameOver = False):
+        self.gameOver = gameOver        
+
+"""
+Metadata events are used to pass metadata into the registry.  This is used to track
+game state, eg. which items have been collected, which doors have been opened etc.
+"""        
+class MetadataEvent(Event):    
     def __init__(self, metadata):
         self.metadata = metadata
         
@@ -58,10 +65,12 @@ class BoatStoppedEvent(MetadataEvent):
     def __init__(self, metadata):
         MetadataEvent.__init__(self, metadata)
                 
-# ==============================================================================
-
-class SpriteMetadata:
-    
+"""
+Metadata is collated in the registry and is used to track game state, eg. which items
+have been collected, which doors have been opened etc. When sprites are created for a
+given map we also apply any map actions - see spritebuilder for more details.
+"""
+class SpriteMetadata:    
     def __init__(self, uid):
         self.uid = uid
     

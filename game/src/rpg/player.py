@@ -1,19 +1,17 @@
 #!/usr/bin/env python
 
-import playevents
+import mapevents
 
 from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT, K_SPACE
 
 from sprites import *
-from events import PlayerFootstepEvent, PlayerFallingEvent, LifeLostEvent
+from events import PlayerFootstepEvent, PlayerFallingEvent, LifeLostEvent, EndGameEvent
 from spriteframes import DirectionalFrames, StaticFrames
 from staticsprites import Shadow
 from view import NONE, UP, DOWN, LEFT, RIGHT
 
-
 PLAYER_FOOTSTEP_EVENT = PlayerFootstepEvent()
 PLAYER_FALLING_EVENT = PlayerFallingEvent()
-LIFE_LOST_EVENT = LifeLostEvent()
 
 DIAGONAL_TICK = 3
 
@@ -107,19 +105,14 @@ class Player(RpgSprite):
     """
     def handleInteractions(self, keyPresses, gameSprites, visibleSprites):
         # have we triggered any events?
-        event = self.update(gameSprites)
-        if event:
-            return event
+        self.update(gameSprites)
         # have we collided with any sprites?
-        event = self.processCollisions(visibleSprites.sprites())
-        if event:
-            return event
+        self.processCollisions(visibleSprites.sprites())
         # go ahead and handle user input
         directionBits, action = self.processKeyPresses(keyPresses)
         self.handleMovement(directionBits)
         if action:
             self.processActions(visibleSprites.sprites())
-        return None
     
     """
     Takes the given key presses and converts them into direction bits + a boolean
@@ -262,25 +255,23 @@ class Player(RpgSprite):
         self.applyMovement(self.level, direction, 0, 0)
         
     """
-    Checks the requested movement falls within the map boundary.  If not, returns
-    a boundary event containing information on the breach. 
+    Checks the requested movement falls within the map boundary.  If not,
+    dispatches a boundary event containing information on the breach. 
     """ 
-    def getBoundaryEvent(self):
+    def processBoundaryEvents(self):
         if self.rpgMap.mapRect.contains(self.mapRect):
             # we're within the boundary
-            return None
-        boundary = self.getBoundary()
-        if boundary in self.rpgMap.boundaryEvents:
-            tileRange = self.getTileRange(boundary)
-            for event in self.rpgMap.boundaryEvents[boundary]:
-                testList = [i in event.range for i in tileRange]
-                if all(testList):
-                    return event
+            return
+        boundary, tileRange = self.getBoundary()
+        event = self.rpgMap.getBoundaryEvent(boundary, tileRange)
+        if event:
+            self.dispatchMapTransitionEvent(event)
+            return
+        # unknown boundary
         print "boundary!"
-        return None
     
     """
-    Determines which boundary has been breached.
+    Returns the breached boundary and the tile range for that boundary.
     """
     def getBoundary(self):
         boundary = NO_BOUNDARY
@@ -293,7 +284,7 @@ class Player(RpgSprite):
             boundary = UP
         elif self.mapRect.bottom > rpgMapRect.bottom:
             boundary = DOWN
-        return boundary
+        return boundary, self.getTileRange(boundary)
     
     """
     Gets the range of tiles involved in the boundary breach.
@@ -325,18 +316,25 @@ class Player(RpgSprite):
     def update(self, gameSprites):
         self.checkpointIcon.update()
         if self.falling:
-            return self.continueFalling()
-        event = self.getBoundaryEvent()
+            self.continueFalling()
+            return
+        self.processBoundaryEvents()
+        event = self.rpgMap.getActionEvent(self.level, self.baseRect)
         if event:
-            return event
-        event = self.rpgMap.getActions(self.level, self.baseRect)
-        if event:
-            if event.type == playevents.TILE_EVENT:
-                return event
-            elif event.type == playevents.FALLING_EVENT:
+            if event.type == mapevents.TILE_EVENT:
+                self.dispatchMapTransitionEvent(event)
+            elif event.type == mapevents.FALLING_EVENT:
                 self.startFalling(gameSprites, event.downLevel)
-        return None
     
+    """
+    Checks for an end game transition before dispatching the event.
+    """        
+    def dispatchMapTransitionEvent(self, event):
+        if (event.transition.type == mapevents.END_GAME_TRANSITION):
+            self.eventBus.dispatchEndGameEvent(EndGameEvent())
+        else:
+            self.eventBus.dispatchMapTransitionEvent(event)
+        
     """
     Continues falling + detects if falling is complete.
     """    
@@ -374,11 +372,10 @@ class Player(RpgSprite):
     def processCollisions(self, sprites):
         # if there are less than two sprites then self is the only sprite
         if len(sprites) < 2:
-            return False
+            return
         for sprite in sprites:
-            if sprite.isIntersecting(self) and sprite.processCollision(self):
-                return playevents.LifeLostEvent(self.gameOver())
-        return False
+            if sprite.isIntersecting(self):
+                sprite.processCollision(self)
 
     """
     Processes interactions with other sprites in the given sprite collection.
@@ -413,10 +410,10 @@ class Player(RpgSprite):
         self.keyCount.incrementCount(-1)
         
     def loseLife(self):
-        self.eventBus.dispatchLifeLostEvent(LIFE_LOST_EVENT)
         self.lives.incrementCount(-1)
+        self.eventBus.dispatchLifeLostEvent(LifeLostEvent(self.isGameOver()))
         
-    def gameOver(self):
+    def isGameOver(self):
         return self.lives.noneLeft()
     
     def checkpointReached(self):

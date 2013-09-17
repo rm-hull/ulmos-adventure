@@ -4,7 +4,7 @@ from __future__ import with_statement
 
 import math
 import view
-import playevents
+import mapevents
 
 from view import TILE_SIZE
 
@@ -14,7 +14,7 @@ MAX_SHUFFLE = (-1, 1, 0, -1)
 """
 Encapsulates the logic required for the main map.  You should not instantiate
 this class directly - instead, use parser.loadRpgMap and the mapTiles, mapSprites
-and playevents will be populated from the named map file.
+and mapEvents will be populated from the named map file.
 """
 class RpgMap:
     
@@ -42,9 +42,9 @@ class RpgMap:
         self.boundaryEvents = {}
         self.tileEvents = {}
         for event in mapEvents:
-            if event.type == playevents.TILE_EVENT:
+            if event.type == mapevents.TILE_EVENT:
                 self.mapTiles[event.x][event.y].addEvent(event)
-            elif event.type == playevents.BOUNDARY_EVENT:
+            elif event.type == mapevents.BOUNDARY_EVENT:
                 if event.boundary in self.boundaryEvents:
                     self.boundaryEvents[event.boundary].append(event)
                 else:
@@ -184,9 +184,22 @@ class RpgMap:
         return rectTiles
     
     """
-    Returns a tile event or a falling event.
+    Returns the boundary event for the given boundary + tile range. Returns
+    None if no such event exists.
+    """    
+    def getBoundaryEvent(self, boundary, tileRange):
+        if boundary in self.boundaryEvents:
+            for event in self.boundaryEvents[boundary]:
+                testList = [i in event.range for i in tileRange]
+                if all(testList):
+                    return event
+        return None
+    
     """
-    def getActions(self, level, baseRect):
+    Returns a tile event or falling event. Returns None if such an event has not
+    been triggered.
+    """
+    def getActionEvent(self, level, baseRect):
         downLevels = []
         spanTiles = self.getSpanTiles(baseRect)
         for tile in spanTiles:
@@ -198,7 +211,7 @@ class RpgMap:
                 downLevels.append(downLevel)
         # a falling event is returned only if all the span tiles have a down level
         if downLevels and len(downLevels) == len(spanTiles):
-            return playevents.FallingEvent(downLevels[0])
+            return mapevents.FallingEvent(downLevels[0])
         return None
             
     def convertTopLeft(self, px, py):

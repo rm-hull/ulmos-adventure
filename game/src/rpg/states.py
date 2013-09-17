@@ -7,7 +7,7 @@ import sprites
 import view
 import spritebuilder
 import font
-import playevents
+import mapevents
 
 from pygame.locals import K_SPACE, Rect
 
@@ -18,7 +18,6 @@ from eventbus import EventBus
 from registry import RegistryHandler, Registry
 from player import Ulmo
 from sounds import SoundHandler
-from events import MapTransitionEvent, EndGameEvent
 from fixedsprites import FixedCoin, CoinCount, KeyCount, Lives, CheckpointIcon
 
 FRAMES_PER_SEC = 60 // VELOCITY
@@ -129,6 +128,7 @@ def getRegistry(cont, registry):
         #registry = Registry("forest", (11, 8), 3)
         #registry = Registry("start", (22, 24), 4)
         registry = Registry("start", PLAYER_ON_SCREEN_START, 1)
+        #registry = Registry("central", (6, 22), 2) # 0.93
     registryHandler.setRegistry(registry)
     return registry
     
@@ -240,30 +240,40 @@ class PlayState:
         self.visibleSprites = sprites.RpgSprites(player)
         # create more sprites
         self.gameSprites = spritebuilder.createSpritesForMap(player.rpgMap, eventBus, registryHandler.registry)
-             
+        # listen for map transition, life lost and end game events
+        self.eventCaptured = False
+        self.mapTransitionEvent = None
+        self.lifeLostEvent = None
+        self.endGameEvent = None
+        eventBus.addMapTransitionListener(self)
+        eventBus.addLifeLostListener(self)
+        eventBus.addEndGameListener(self)
+                     
     def execute(self, keyPresses):
-        event = player.handleInteractions(keyPresses, self.gameSprites, self.visibleSprites)
-        if event:
-            return self.handleEvent(event)
+        nextState = self.handleEvents()
+        if nextState:
+            return nextState
+        player.handleInteractions(keyPresses, self.gameSprites, self.visibleSprites)
         # draw the player map view to the screen
         self.drawPlayerMapView(screen)
         pygame.display.flip()
         
-    def handleEvent(self, event):
-        if event.type == playevents.LIFE_LOST_EVENT:
-            if event.gameOver:
+    def handleEvents(self):
+        if not self.eventCaptured:
+            return None
+        if self.mapTransitionEvent:
+            transition = self.mapTransitionEvent.transition 
+            if transition:
+                if transition.type == mapevents.BOUNDARY_TRANSITION:
+                    return BoundaryTransitionState(transition)
+                if transition.type == mapevents.SCENE_TRANSITION:
+                    return SceneTransitionState(transition)
+        if self.lifeLostEvent:
+            if self.lifeLostEvent.gameOver:
                 return GameOverState()
             return SceneTransitionState(self.lifeLostTransition())
-        transition = event.transition 
-        if transition:
-            if transition.type == playevents.BOUNDARY_TRANSITION:
-                return BoundaryTransitionState(transition)
-            if transition.type == playevents.SCENE_TRANSITION:
-                return SceneTransitionState(transition)
-            if transition.type == playevents.END_GAME_TRANSITION:
-                return EndGameState()
-        # this should never happen!
-        return None
+        if self.endGameEvent:
+            return EndGameState()    
     
     def drawPlayerMapView(self, surface):
         self.drawMapView(surface, player.viewRect)
@@ -280,10 +290,19 @@ class PlayState:
         registry = registryHandler.registry
         player.setCoinCount(registry.coinCount)
         player.setKeyCount(registry.keyCount)
-        return playevents.LifeLostTransition(registry.mapName,
-                                             registry.playerPosition[0],
-                                             registry.playerPosition[1],
-                                             registry.playerLevel)
+        return mapevents.LifeLostTransition(registry.mapName,
+                                            registry.playerPosition[0],
+                                            registry.playerPosition[1],
+                                            registry.playerLevel)
+        
+    def mapTransition(self, mapTransitionEvent):
+        self.mapTransitionEvent, self.eventCaptured = mapTransitionEvent, True
+        
+    def lifeLost(self, lifeLostEvent):
+        self.lifeLostEvent, self.eventCaptured = lifeLostEvent, True
+        
+    def endGame(self, endGameEvent):
+        self.endGameEvent, self.eventCaptured = endGameEvent, True
         
 class SceneTransitionState:
     
@@ -295,15 +314,13 @@ class SceneTransitionState:
              
     def execute(self, keyPresses):
         if self.ticks < THIRTY_TWO:
-            if self.ticks == 0 and self.transition.type == playevents.SCENE_TRANSITION:
-                eventBus.dispatchMapTransitionEvent(MapTransitionEvent())
             sceneZoomIn(self.screenImage, self.ticks)
         elif self.ticks < SIXTY_FOUR:
             if self.ticks == THIRTY_TWO:
                 self.initPlayState()
             sceneZoomOut(self.screenImage, self.ticks - THIRTY_TWO)
         else:
-            if self.transition.type == playevents.LIFE_LOST_TRANSITION:
+            if self.transition.type == mapevents.LIFE_LOST_TRANSITION:
                 return self.playState
             # else just a regular scene transition
             direction = player.spriteFrames.direction
@@ -343,7 +360,6 @@ class BoundaryTransitionState:
     def execute(self, keyPresses):
         if self.ticks < THIRTY_TWO:
             if self.ticks == 0:
-                eventBus.dispatchMapTransitionEvent(MapTransitionEvent())
                 self.initPlayState()
             sliceWidth = self.ticks * X_MULT * 2
             sliceHeight = sliceWidth * Y_X_RATIO
@@ -458,8 +474,6 @@ class EndGameState:
              
     def execute(self, keyPresses):
         if self.ticks < THIRTY_TWO:
-            if self.ticks == 0:
-                eventBus.dispatchEndGameEvent(EndGameEvent())
             sceneZoomIn(self.screenImage, self.ticks)
         elif self.ticks == THIRTY_TWO:
             x, y = (VIEW_WIDTH - self.topLine1.get_width()) // 2, 32 * SCALAR
@@ -514,10 +528,10 @@ class ShowBoatState:
     
     def __init__(self, nextPlayState):
         self.playState = nextPlayState
-        # listen for boat stopped events
-        eventBus.addBoatStoppedListener(self)
         self.boatStoppedEvent = None
         self.ticks = 0
+        # listen for boat stopped events
+        eventBus.addBoatStoppedListener(self)
         
     def execute(self, keyPresses):
         if self.boatStoppedEvent:

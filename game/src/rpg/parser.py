@@ -8,11 +8,12 @@ import map
 
 from pygame.locals import Rect
 
-from playevents import BoundaryEvent, TileEvent, BoundaryTransition, SceneTransition, EndGameTransition
+from mapevents import BoundaryEvent, TileEvent, BoundaryTransition, SceneTransition, EndGameTransition
 from view import UP, DOWN, LEFT, RIGHT
 
 TILES_FOLDER = "tiles"
 MAPS_FOLDER = "maps"
+#MAPS_FOLDER = "maps093"
 OPEN_SQ_BRACKET = "["
 CLOSE_SQ_BRACKET = "]"
 SPECIAL_LEVEL = "S"
@@ -75,9 +76,9 @@ def loadRpgMap(name):
     # create map tiles
     mapTiles = createMapTiles(maxX + 1, maxY + 1, tileData)
     mapSprites = createMapSprites(spriteData, name)
-    playevents = createMapEvents(eventData)
+    mapEvents = createMapEvents(eventData)
     # create map and return
-    myMap = map.RpgMap(name, mapTiles, mapSprites, playevents)
+    myMap = map.RpgMap(name, mapTiles, mapSprites, mapEvents)
     mapCache[name] = myMap
     return myMap
 

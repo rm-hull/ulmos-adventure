@@ -190,7 +190,6 @@ class Blades(OtherSprite):
     def activate(self):
         self.active = True
         self.getMapTile().restore()
-        #self.eventBus.dispatchBladesActiveEvent(WaspZoomingEvent())
         
     def getMapTile(self):
         x, y = self.tilePosition[0], self.tilePosition[1]
