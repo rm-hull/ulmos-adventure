@@ -186,8 +186,8 @@
 15,10 water:w2
 
 0,11 water:w2
-1,11 water:w6
-2,11 water:w2
+1,11 water:w3
+2,11 water:w7
 3,11 [3] water:dark grass:l1
 4,11 [S3] grass:bb
 5,11 [3] grass:n1
@@ -370,7 +370,7 @@
 12,21 grass:treels1 objects:tree_bl1 objects:tree_mr1
 13,21 grass:n1 grass:treers1 objects:tree_br2
 14,21 [1] water:dark grass:r1
-15,21 water:w1
+15,21 water:w7
 
 0,22 water:w3
 1,22 grass:dark earth:bl
@@ -494,18 +494,18 @@
 0,29 [1] grass:n1
 1,29 [1] earth:dark grass:rj
 2,29 water:trls
-3,29 water:w5
+3,29 water:w9
 4,29 water:w5
 5,29 water:w5
 6,29 water:w5
 7,29 water:tl
-8,29 water:t2
+8,29 water:t1
 9,29 water:t2
 10,29 water:t2
-11,29 water:t2
+11,29 water:t5
 12,29 water:t2
 13,29 water:tr
-14,29 water:w6
+14,29 water:w7
 15,29 water:w5
 
 0,30 water:t3
@@ -516,13 +516,13 @@
 5,30 water:w5
 6,30 water:w6
 7,30 water:w5
-8,30 water:w5
+8,30 water:w8
 9,30 water:w5
 10,30 water:w5
-11,30 water:w5
+11,30 water:w4
 12,30 water:w5
 13,30 water:w5
-14,30 water:w5
+14,30 water:w3
 15,30 water:w5
 
 0,31 water:w2
@@ -542,9 +542,8 @@
 14,31 water:w6
 15,31 water:w5
 
-sprite checkpoint 3 3,6
 sprite coin 2 3,15
-sprite coin 1 7,8
+sprite checkpoint 1 7,8
 sprite wasp 3 14,16
 sprite wasp 3 3,17
 sprite beetle 1 11,21 5,21 5,22 4,22 4,25 9,25 4,25 4,22 5,22 5,21

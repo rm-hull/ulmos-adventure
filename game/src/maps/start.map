@@ -314,7 +314,7 @@
 16,9 water:w2
 17,9 grass:dark earth:bl
 18,9 grass:dark earth:br
-19,9 [2] grass:sarch
+19,9 grass:sarch
 20,9 grass:dark earth:blrs
 21,9 [4] earth:dark grass:l1
 22,9 [4] earth:t2 grass:n1
@@ -589,7 +589,7 @@
 27,17 [4,2] grass:n1 grass:tr1:4
 28,17 [2] earth:dark grass:r3
 29,17 water:rls
-30,17 water:w2
+30,17 water:w4
 31,17 water:w2
 
 0,18 water:w2
@@ -622,7 +622,7 @@
 27,18 [4] grass:n1 grass:r1
 28,18 [2] water:dark grass:r2
 29,18 water:w2
-30,18 water:w2
+30,18 water:w8
 31,18 water:w2
 
 0,19 water:w2
@@ -655,7 +655,7 @@
 27,19 [4] grass:n1 grass:r2
 28,19 [2] water:dark grass:r1
 29,19 water:w2
-30,19 water:w2
+30,19 water:w4
 31,19 water:w2
 
 0,20 water:w2
@@ -688,7 +688,7 @@
 27,20 earth:tr
 28,20 [2] water:dark grass:r3
 29,20 water:w3
-30,20 water:w2
+30,20 water:w4
 31,20 water:w3
 
 0,21 water:w2
@@ -965,7 +965,7 @@
 7,29 water:w2
 8,29 water:w2
 9,29 water:w2
-10,29 water:w2
+10,29 water:w9
 11,29 water:w2
 12,29 water:lrs
 13,29 earth:tl
@@ -981,7 +981,7 @@
 23,29 earth:tr
 24,29 water:rls
 25,29 water:w2
-26,29 water:w2
+26,29 water:w7
 27,29 water:tl
 28,29 water:trs
 29,29 [1] earth:dark water:bw grass:lj
@@ -998,7 +998,7 @@
 7,30 water:w2
 8,30 water:w2
 9,30 water:w2
-10,30 water:w2
+10,30 water:w4
 11,30 water:w2
 12,30 water:w2
 13,30 water:l
@@ -1015,7 +1015,7 @@
 24,30 water:w2
 25,30 water:w2
 26,30 water:w2
-27,30 water:w2
+27,30 water:w8
 28,30 water:w2
 29,30 water:tl
 30,30 water:t1
@@ -1031,7 +1031,7 @@
 7,31 water:w2
 8,31 water:w2
 9,31 water:w2
-10,31 water:w2
+10,31 water:w4
 11,31 water:w2
 12,31 water:w2
 13,31 water:w2
@@ -1048,7 +1048,7 @@
 24,31 water:w2
 25,31 water:w2
 26,31 water:w2
-27,31 water:w2
+27,31 water:w4
 28,31 water:w2
 29,31 water:w2
 30,31 water:w2
@@ -1064,15 +1064,18 @@ sprite beetle 4 11,22 11,20 13,20 13,22
 sprite wasp 2 14,5
 sprite beetle 2 17,27 20,27 20,28 23,28 20,28 20,27
 sprite beetle 2 23,27 24,27 24,26 25,26 25,22 28,22 28,24 25,24 25,26 24,26 24,27
-sprite coin 3 7,22
-sprite coin 4 18,5
+sprite checkpoint 2 16,28
+sprite checkpoint 4 18,5
 sprite rock 2 19,13
 sprite rock 2 20,13
 sprite coin 4 1,9
+sprite door 2 19,9
+sprite coin 4 26,18
 
 event tile 8,24 1 : transition lowercave 5,15 1 up up
 event tile 14,26 2 : transition lowercave 12,15 1 up up
 event tile 20,20 4 : transition smallcave 9,15 1 up up
+event tile 19,8 2 : transition uppercave 7,15 1 up up
 event boundary left 8-10 : boundary drops left 0
 event boundary left 22 : boundary drops left 0
 event boundary right 5 : boundary forest right 0

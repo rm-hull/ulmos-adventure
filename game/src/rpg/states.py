@@ -75,6 +75,7 @@ def showTitle():
     eventBus.addBeetleCrawlingListener(soundHandler)
     eventBus.addCheckpointReachedListener(soundHandler)
     eventBus.addPlayerFallingListener(soundHandler)
+    eventBus.addBladesStabbingListener(soundHandler)
 
     global registryHandler
     registryHandler = RegistryHandler()
@@ -163,7 +164,12 @@ def sceneZoomOut(screenImage, ticks):
     extract = Rect(xBorder, yBorder, VIEW_WIDTH - xBorder * 2, VIEW_HEIGHT - yBorder * 2)
     screen.blit(screenImage, (xBorder, yBorder), extract)
     pygame.display.flip()
-    
+
+"""
+The title state brings the title screen into view, loading the first map and
+initiates the start state.  It's possible to skip the start state by commenting
+in a couple of lines below.
+"""    
 class TitleState:
     
     def __init__(self):
@@ -192,16 +198,21 @@ class TitleState:
             pygame.display.flip()
         elif self.ticks == self.titleTicks + SIXTY_FOUR:
             self.playState = startGame(False, self.startRegistry)
-            #self.playState = startGame()
+            #self.playState = startGame() # SKIP START
             x, y = (VIEW_WIDTH - self.playLine.get_width()) // 2, 88 * SCALAR
             screen.blit(self.playLine, (x, y))
             pygame.display.flip()
         elif self.ticks > self.titleTicks + SIXTY_FOUR:
             if keyPresses[K_SPACE]:
                 return StartState(self.playState)
-                #return self.playState
+                #return self.playState # SKIP START
         self.ticks += 1
 
+"""
+The start state vertically scrolls the first map into view and initiates the
+show boat state.  It's possible the skip the show boat state by commenting in a
+line below.
+"""
 class StartState:
     
     def __init__(self, playState):
@@ -221,16 +232,55 @@ class StartState:
             self.viewRect.move_ip(0, MOVE_UNIT)
             player.relativeView(self.viewRect)
             self.playState.drawMapView(screen, self.viewRect)
+            # stop when the view rect is in line with the player's view rect
             if self.viewRect.top == player.viewRect.top:
-                #return self.playState
                 return ShowBoatState(self.playState)
+                #return self.playState // SKIP SHOW BOAT
         pygame.display.flip()
         self.ticks += 1
 
     def screenWipeUp(self, sliceHeight):
         screen.blit(self.screenImage, ORIGIN, Rect(0, sliceHeight, VIEW_WIDTH, VIEW_HEIGHT - sliceHeight))
         screen.blit(self.nextImage, (0, VIEW_HEIGHT - sliceHeight), Rect(0, 0, VIEW_WIDTH, sliceHeight))
-                                    
+
+"""
+The show boat state brings the boat + player to the on screen start position.
+It returns the play state once the boat has stopped.
+"""
+class ShowBoatState:
+    
+    def __init__(self, nextPlayState):
+        self.playState = nextPlayState
+        self.boatStoppedEvent = None
+        self.ticks = 0
+        # listen for boat stopped events
+        eventBus.addBoatStoppedListener(self)
+        
+    def execute(self, keyPresses):
+        if self.boatStoppedEvent:
+            playerPosition = self.boatStoppedEvent.getMetadata().endPosition
+            registryHandler.setPlayerPosition(playerPosition)
+            registryHandler.takeSnapshot()
+            return self.playState
+        self.showPlayer(MOVE_UNIT, 0)
+        self.ticks += 1
+        
+    def showPlayer(self, px, py):
+        if self.ticks % 2:
+            player.wrapMovement(player.level,
+                                player.spriteFrames.direction,
+                                px, py, 0)
+        self.playState.drawMapView(screen, player.viewRect, trigger = 1)
+        pygame.display.flip()
+        
+    def boatStopped(self, boatStoppedEvent):
+        self.boatStoppedEvent = boatStoppedEvent
+
+"""
+Main play state for the game - handles player movement, sprite updates and drawing
+the map view.  It also listens for a number of events which result in new states
+being returned.
+"""                                            
 class PlayState:
     
     def __init__(self):
@@ -303,7 +353,12 @@ class PlayState:
         
     def endGame(self, endGameEvent):
         self.endGameEvent, self.eventCaptured = endGameEvent, True
-        
+
+"""
+The scene transition state switches from one scene to another and then brings the
+player into view.  Typically this would occur when the player walks into/out of a
+cave but it also handles life lost events.
+"""        
 class SceneTransitionState:
     
     def __init__(self, transition):
@@ -346,7 +401,12 @@ class SceneTransitionState:
         player.setDirection(self.transition.direction)
         # extract the next image from the play state
         self.playState.drawMapView(self.screenImage, player.viewRect, 0)           
-            
+
+"""
+The boundary transition state provides seamless fast scrolling onto the next map
+and then brings the player into view.  This would occur when the player walks off 
+the edge of the current map.    
+"""            
 class BoundaryTransitionState:
     
     def __init__(self, transition):
@@ -404,96 +464,10 @@ class BoundaryTransitionState:
         screen.blit(self.screenImage, (sliceWidth, 0), Rect(0, 0, VIEW_WIDTH - sliceWidth, VIEW_HEIGHT))
         screen.blit(self.nextImage, ORIGIN, Rect(VIEW_WIDTH - sliceWidth, 0, sliceWidth, VIEW_HEIGHT))                
 
-class GameOverState:
-    
-    def __init__(self):
-        self.screenImage = screen.copy()
-        self.topLine1 = gameFont.getTextImage("BRAVE ADVENTURER")
-        self.topLine2 = gameFont.getTextImage("YOU ARE DEAD")
-        self.topLine3 = gameFont.getTextImage("CONTINUE... 10")
-        self.lowLine1 = gameFont.getTextImage("PRESS SPACE")
-        self.lowLine2 = gameFont.getTextImage("TO PLAY AGAIN")
-        self.blackRect = view.createRectangle(self.topLine3.get_size(), view.BLACK)
-        self.continueOffered = True if registryHandler.snapshot.checkpoint else False
-        self.countdown = None
-        self.countdownTopleft = None
-        self.ticks = 0
-             
-    def execute(self, keyPresses):
-        if self.countdown:
-            if (self.ticks - SIXTY_FOUR) % FRAMES_PER_SEC == 0:
-                self.updateCountdown()                
-        if self.ticks < THIRTY_TWO:
-            sceneZoomIn(self.screenImage, self.ticks)
-        elif self.ticks == THIRTY_TWO:
-            x, y = (VIEW_WIDTH - self.topLine1.get_width()) // 2, 32 * SCALAR
-            screen.blit(self.topLine1, (x, y))
-            x, y = (VIEW_WIDTH - self.topLine2.get_width()) // 2, 44 * SCALAR
-            screen.blit(self.topLine2, (x, y))
-            if self.continueOffered:
-                x, y = (VIEW_WIDTH - self.topLine3.get_width()) // 2, 56 * SCALAR
-                screen.blit(self.topLine3, (x, y))
-                # set the countdown topleft for later
-                self.countdownTopleft = (x, y)
-            pygame.display.flip()
-        elif self.ticks == SIXTY_FOUR:
-            x, y = (VIEW_WIDTH - self.lowLine1.get_width()) // 2, VIEW_HEIGHT - 42 * SCALAR
-            screen.blit(self.lowLine1, (x, y))
-            x, y = (VIEW_WIDTH - self.lowLine2.get_width()) // 2, VIEW_HEIGHT - 30 * SCALAR
-            screen.blit(self.lowLine2, (x, y))
-            pygame.display.flip()
-            if self.continueOffered:
-                self.countdown = 10
-        elif self.ticks > SIXTY_FOUR:
-            if keyPresses[K_SPACE]:
-                if self.countdown:
-                    return startGame(True)
-                return startGame()
-        self.ticks += 1
-        
-    def updateCountdown(self):
-        self.countdown = self.countdown - 1
-        countdownLine = gameFont.getTextImage("CONTINUE... " + str(self.countdown))
-        screen.blit(self.blackRect, self.countdownTopleft)
-        if self.countdown > 0:
-            screen.blit(countdownLine, self.countdownTopleft)
-        else:
-            self.countdown = None
-        pygame.display.flip()
-
-class EndGameState:
-    
-    def __init__(self):
-        self.screenImage = screen.copy()
-        self.topLine1 = gameFont.getTextImage("YOUR ADVENTURE IS")
-        self.topLine2 = gameFont.getTextImage("AT AN END... FOR NOW!")
-        self.topLine3 = gameFont.getTextImage("YOU FOUND " + str(player.getCoinCount()) + "/10 COINS");
-        self.lowLine1 = gameFont.getTextImage("PRESS SPACE")
-        self.lowLine2 = gameFont.getTextImage("TO PLAY AGAIN")
-        self.ticks = 0
-             
-    def execute(self, keyPresses):
-        if self.ticks < THIRTY_TWO:
-            sceneZoomIn(self.screenImage, self.ticks)
-        elif self.ticks == THIRTY_TWO:
-            x, y = (VIEW_WIDTH - self.topLine1.get_width()) // 2, 32 * SCALAR
-            screen.blit(self.topLine1, (x, y))
-            x, y = (VIEW_WIDTH - self.topLine2.get_width()) // 2, 44 * SCALAR
-            screen.blit(self.topLine2, (x, y))
-            x, y = (VIEW_WIDTH - self.topLine3.get_width()) // 2, 56 * SCALAR
-            screen.blit(self.topLine3, (x, y))
-            pygame.display.flip()
-        elif self.ticks == SIXTY_FOUR:
-            x, y = (VIEW_WIDTH - self.lowLine1.get_width()) // 2, VIEW_HEIGHT - 42 * SCALAR
-            screen.blit(self.lowLine1, (x, y))
-            x, y = (VIEW_WIDTH - self.lowLine2.get_width()) // 2, VIEW_HEIGHT - 30 * SCALAR
-            screen.blit(self.lowLine2, (x, y))
-            pygame.display.flip()
-        elif self.ticks > SIXTY_FOUR:
-            if keyPresses[K_SPACE]:
-                return startGame()
-        self.ticks += 1
-        
+"""
+The show player state is used by scene and boundary transitions to bring the
+player into view from an off screen position, within a doorway, etc.
+"""        
 class ShowPlayerState:
     
     def __init__(self, boundary, nextPlayState, tickTarget):
@@ -524,32 +498,95 @@ class ShowPlayerState:
         self.playState.drawMapView(screen, player.viewRect)
         pygame.display.flip()
 
-class ShowBoatState:
+"""
+The game over state provides a 'continue' option before either starting the game
+or going back to the title screen.  
+"""
+class GameOverState:
     
-    def __init__(self, nextPlayState):
-        self.playState = nextPlayState
-        self.boatStoppedEvent = None
+    def __init__(self):
+        self.screenImage = screen.copy()
+        self.topLine1 = gameFont.getTextImage("BRAVE ADVENTURER")
+        self.topLine2 = gameFont.getTextImage("YOU ARE DEAD")
+        self.topLine3 = gameFont.getTextImage("CONTINUE... 10")
+        self.lowLine1 = gameFont.getTextImage("PRESS SPACE")
+        self.lowLine2 = gameFont.getTextImage("TO PLAY AGAIN")
+        self.blackRect = view.createRectangle(self.topLine3.get_size(), view.BLACK)
+        #self.continueOffered = True if registryHandler.snapshot.checkpoint else False
+        self.continueOffered = True
+        self.countdown = None
+        self.countdownTopleft = None
         self.ticks = 0
-        # listen for boat stopped events
-        eventBus.addBoatStoppedListener(self)
-        
+             
     def execute(self, keyPresses):
-        if self.boatStoppedEvent:
-            playerPosition = self.boatStoppedEvent.getMetadata().endPosition
-            registryHandler.setPlayerPosition(playerPosition)
-            registryHandler.takeSnapshot()
-            return self.playState
-        self.showPlayer(MOVE_UNIT, 0)
+        if self.countdown:
+            if (self.ticks - SIXTY_FOUR) % FRAMES_PER_SEC == 0:
+                self.updateCountdown()
+                if not self.countdown:
+                    return showTitle()
+        if self.ticks < THIRTY_TWO:
+            sceneZoomIn(self.screenImage, self.ticks)
+        elif self.ticks == THIRTY_TWO:
+            x, y = (VIEW_WIDTH - self.topLine1.get_width()) // 2, 32 * SCALAR
+            screen.blit(self.topLine1, (x, y))
+            x, y = (VIEW_WIDTH - self.topLine2.get_width()) // 2, 44 * SCALAR
+            screen.blit(self.topLine2, (x, y))
+            if self.continueOffered:
+                x, y = (VIEW_WIDTH - self.topLine3.get_width()) // 2, 56 * SCALAR
+                screen.blit(self.topLine3, (x, y))
+                # set the countdown topleft for later
+                self.countdownTopleft = (x, y)
+            pygame.display.flip()
+        elif self.ticks == SIXTY_FOUR:
+            x, y = (VIEW_WIDTH - self.lowLine1.get_width()) // 2, VIEW_HEIGHT - 42 * SCALAR
+            screen.blit(self.lowLine1, (x, y))
+            x, y = (VIEW_WIDTH - self.lowLine2.get_width()) // 2, VIEW_HEIGHT - 30 * SCALAR
+            screen.blit(self.lowLine2, (x, y))
+            pygame.display.flip()
+            if self.continueOffered:
+                self.countdown = 10
+        elif self.ticks > SIXTY_FOUR:
+            if keyPresses[K_SPACE]:
+                return startGame(True)
         self.ticks += 1
         
-    def showPlayer(self, px, py):
-        if self.ticks % 2:
-            player.wrapMovement(player.level,
-                                player.spriteFrames.direction,
-                                px, py, 0)
-        self.playState.drawMapView(screen, player.viewRect, trigger = 1)
-        pygame.display.flip()
-        
-    def boatStopped(self, boatStoppedEvent):
-        self.boatStoppedEvent = boatStoppedEvent
-        
+    def updateCountdown(self):
+        self.countdown = self.countdown - 1
+        countdownLine = gameFont.getTextImage("CONTINUE... " + str(self.countdown))
+        screen.blit(self.blackRect, self.countdownTopleft)
+        if self.countdown > 0:
+            screen.blit(countdownLine, self.countdownTopleft)
+            pygame.display.flip()
+
+"""
+The end game state provides an ending (of sorts!) before going back to the title screen. 
+"""
+class EndGameState:
+    
+    def __init__(self):
+        self.screenImage = screen.copy()
+        self.topLine1 = gameFont.getTextImage("YOUR ADVENTURE IS")
+        self.topLine2 = gameFont.getTextImage("AT AN END... FOR NOW!")
+        self.topLine3 = gameFont.getTextImage("YOU FOUND " + str(player.getCoinCount()) + "/10 COINS");
+        self.lowLine1 = gameFont.getTextImage("PRESS SPACE")
+        self.ticks = 0
+             
+    def execute(self, keyPresses):
+        if self.ticks < THIRTY_TWO:
+            sceneZoomIn(self.screenImage, self.ticks)
+        elif self.ticks == THIRTY_TWO:
+            x, y = (VIEW_WIDTH - self.topLine1.get_width()) // 2, 32 * SCALAR
+            screen.blit(self.topLine1, (x, y))
+            x, y = (VIEW_WIDTH - self.topLine2.get_width()) // 2, 44 * SCALAR
+            screen.blit(self.topLine2, (x, y))
+            x, y = (VIEW_WIDTH - self.topLine3.get_width()) // 2, 56 * SCALAR
+            screen.blit(self.topLine3, (x, y))
+            pygame.display.flip()
+        elif self.ticks == SIXTY_FOUR:
+            x, y = (VIEW_WIDTH - self.lowLine1.get_width()) // 2, VIEW_HEIGHT - 30 * SCALAR
+            screen.blit(self.lowLine1, (x, y))
+            pygame.display.flip()
+        elif self.ticks > SIXTY_FOUR:
+            if keyPresses[K_SPACE]:
+                return showTitle()
+        self.ticks += 1

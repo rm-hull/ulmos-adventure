@@ -3,7 +3,7 @@
 from sprites import *
 from spriteframes import StaticFrames, DirectionalFrames, DIRECTION
 from view import UP, DOWN, LEFT, RIGHT, VIEW_WIDTH, VIEW_HEIGHT
-from events import WaspZoomingEvent, BeetleCrawlingEvent, BoatStoppedEvent, BoatMetadata
+from events import WaspZoomingEvent, BeetleCrawlingEvent, BladesStabbingEvent, BoatStoppedEvent, BoatMetadata
 
 """
 Metadata is used to provide a loose coupling between the sprite movement and
@@ -176,6 +176,8 @@ class Blades(OtherSprite):
                 self.image, frameIndex = self.spriteFrames.advanceFrame()
                 if frameIndex == 0:
                     self.deactivate(self.level)
+                if frameIndex == 2:
+                    self.eventBus.dispatchBladesStabbingEvent(BladesStabbingEvent())
                 return
             self.countdown -= 1
             if self.countdown == 0:

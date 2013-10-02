@@ -110,12 +110,10 @@ class Door(OtherSprite):
         if Door.framesImage is None:    
             imagePath = os.path.join(SPRITES_FOLDER, "door-frames.png")
             Door.framesImage = view.loadScaledImage(imagePath, None)
-        animationFrames = view.processStaticFrames(Door.framesImage, 8)
+        animationFrames = view.processStaticFrames(Door.framesImage, 10)
         spriteFrames = StaticFrames(animationFrames, DOOR_FRAME_SKIP)
-        OtherSprite.__init__(self, spriteFrames)
+        OtherSprite.__init__(self, spriteFrames, (0, -16))
         self.opening = False
-        self.frameCount = 0
-        self.frameIndex = 0
 
     """
     Base rect extends beyond the bottom of the sprite image so player's base
@@ -127,19 +125,14 @@ class Door(OtherSprite):
     # override
     def advanceFrame(self, increment, metadata):
         if increment and self.opening:
-            self.frameCount = (self.frameCount + increment) % self.spriteFrames.frameSkip
-            if self.frameCount == 0:
-                self.frameIndex += 1       
-                if self.frameIndex == self.spriteFrames.numFrames:
-                    self.opened()
-                else:
-                    self.image = self.spriteFrames.animationFrames[self.frameIndex]
+            self.image, frameIndex = self.spriteFrames.advanceFrame()
+            if frameIndex == self.spriteFrames.numFrames - 1:
+                self.opened()
     
     def opened(self):
         metadata = DoorMetadata(self.uid, self.tilePosition, self.level)
         metadata.applyMapActions(self.rpgMap)
-        event = DoorOpenedEvent(metadata)
-        self.eventBus.dispatchDoorOpenedEvent(event)
+        self.eventBus.dispatchDoorOpenedEvent(DoorOpenedEvent(metadata))
         self.toRemove = True
         
     def processAction(self, player):

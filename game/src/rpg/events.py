@@ -25,6 +25,9 @@ class BeetleCrawlingEvent(Event):
 class PlayerFallingEvent(Event):
     pass
 
+class BladesStabbingEvent(Event):
+    pass
+
 """
 Defines an event that occurs when the player loses a life and is also used to
 indicate game over. Note that although a LifeLostTransition does exist, this
@@ -74,13 +77,14 @@ class SpriteMetadata:
     def __init__(self, uid):
         self.uid = uid
     
-    # placeholder method    
     def isRemovedFromMap(self):
         return True
     
-    # placeholder method
     def applyMapActions(self, rpgMap):
         pass
+    
+    def getTilePoints(self, tilePoints):
+        return tilePoints
     
 class CoinMetadata(SpriteMetadata):    
     def __init__(self, uid):
@@ -98,7 +102,7 @@ class DoorMetadata(SpriteMetadata):
 
     # makes the corresponding tile available for this level
     def applyMapActions(self, rpgMap):
-        rpgMap.addLevel(self.x, self.y + 1, self.level)
+        rpgMap.addLevel(self.x, self.y, self.level)
 
 class CheckpointMetadata(SpriteMetadata):    
     def __init__(self, uid, mapName, tilePosition, level, coinCount, keyCount):
@@ -114,12 +118,9 @@ class BoatMetadata(SpriteMetadata):
         SpriteMetadata.__init__(self, uid)
         self.endPosition = tilePosition
 
-    # sets the boat to its end position
-    def applyMapActions(self, rpgMap):
-        for mapSprite in rpgMap.mapSprites:
-            if mapSprite.uid == self.uid:
-                mapSprite.tilePoints = [self.endPosition]
-
+    def getTilePoints(self, tilePoints):
+        return [self.endPosition]
+    
     def isRemovedFromMap(self):
         return False
 

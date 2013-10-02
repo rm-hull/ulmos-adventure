@@ -16,8 +16,8 @@ class EventBus:
         self.waspHoveringListeners = []
         self.beetleCrawlingListeners = []
         self.playerFallingListeners = []
+        self.bladesStabbingListeners = []
         self.boatStoppedListeners = []
-        self.mapEventListeners = []
         
     def addCoinCollectedListener(self, coinCollectedListener):
         self.coinCollectedListeners.append(coinCollectedListener)
@@ -102,6 +102,13 @@ class EventBus:
     def dispatchPlayerFallingEvent(self, playerFallingEvent):
         for listener in self.playerFallingListeners:
             listener.playerFalling(playerFallingEvent)
+            
+    def addBladesStabbingListener(self, bladesStabbingListener):
+        self.bladesStabbingListeners.append(bladesStabbingListener)
+
+    def dispatchBladesStabbingEvent(self, bladesStabbingEvent):
+        for listener in self.bladesStabbingListeners:
+            listener.bladesStabbing(bladesStabbingEvent)
             
     def addBoatStoppedListener(self, boatStoppedListener):
         self.boatStoppedListeners.append(boatStoppedListener)

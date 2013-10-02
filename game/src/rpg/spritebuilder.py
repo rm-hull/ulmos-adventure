@@ -24,16 +24,20 @@ that the sprite has been removed from the map, this method returns None.  We als
 apply any map actions at this point.
 """
 def createSprite(mapSprite, rpgMap, eventBus, registry):
+    tilePoints = mapSprite.tilePoints
     spriteMetadata = registry.getMetadata(mapSprite.uid);
     if spriteMetadata:
         # allow any interactions with the map, eg. an open door
         spriteMetadata.applyMapActions(rpgMap)
+        # get tile points for later
+        tilePoints = spriteMetadata.getTilePoints(tilePoints)
         if spriteMetadata.isRemovedFromMap():
             return None
     if mapSprite.type in spriteClasses:
         spriteClass = spriteClasses[mapSprite.type]
         sprite = spriteClass()
         sprite.setup(mapSprite.uid, rpgMap, eventBus)
+        sprite.initMovement(mapSprite.level, tilePoints)
         return sprite
     print "sprite type not found:", mapSprite.type 
     return None
@@ -48,6 +52,5 @@ def createSpritesForMap(rpgMap, eventBus, registry):
         for mapSprite in rpgMap.mapSprites:
             sprite = createSprite(mapSprite, rpgMap, eventBus, registry)
             if sprite:
-                sprite.initMovement(mapSprite.level, mapSprite.tilePoints)
                 gameSprites.add(sprite)
     return gameSprites

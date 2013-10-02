@@ -16,7 +16,7 @@ def getSound(name, volume):
     return None
 
 pickupSound = getSound("pickup.wav", 1.0)
-doorSound = getSound("door.wav", 1.0)
+doorSound = getSound("door.wav", 0.5)
 checkpointSound = getSound("checkpoint.wav", 0.8)
 swooshSound = getSound("swoosh.wav", 0.4)
 lifeLostSound = getSound("lifelost.wav", 1.0)
@@ -25,6 +25,7 @@ footstepSound = getSound("footstep.wav", 0.5)
 waspSound = getSound("wasp.wav", 0.8)
 beetleSound = getSound("beetle.wav", 0.2)
 fallingSound = getSound("falling.wav", 0.2)
+bladesSound = getSound("blades.wav", 0.4)
 
 """
 Listens for specific events and builds up a set of sounds that are played back
@@ -69,6 +70,9 @@ class SoundHandler:
         
     def playerFalling(self, playerFallingEvent):
         self.sounds.add(fallingSound)
+    
+    def bladesStabbing(self, bladesStabbingEvent):
+        self.sounds.add(bladesSound)
     
     """
     Additional logic here to prevent a 'log jam' of beetle crawling sounds
