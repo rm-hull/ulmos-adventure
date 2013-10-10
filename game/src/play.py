@@ -2,7 +2,9 @@
 
 from pygame.locals import KEYDOWN, K_ESCAPE, K_x, K_UP, K_DOWN, K_LEFT, K_RIGHT, K_SPACE, QUIT
 
+import time
 import pygame
+import cwiid
 
 """
 If using an older Raspberry Pi distro, you might need to run the following commands to get working sound:
@@ -19,30 +21,31 @@ import rpg.states
 
 def initWiimote():
     try:
-        println "Press 1+2 on the Wii-mote to connect"
-        wii = cwiid.WiiRemote()
+        print "Press 1+2 on the Wii-mote to connect"
+        wii = cwiid.Wiimote()
         wii.rpt_mode = cwiid.RPT_BTN
-        println "Detected controller:" wii
-        rumble()
-    exception RuntimeError:
-        println "No wiimote found, continuing without..."
+        print "Detected controller:", wii
+        wii.rumble = 1
+        time.sleep(1)
+        wii.rumble = 0
+        return wii;
+    except RuntimeError:
+        print "No wiimote found, continuing without..."
 
 def getPressed():
-    keyPresses = []
     if wii:
         buttons = wii.state['buttons']
-        if (buttons & cwiid.BTN_RIGHT):
-            keyPresses.add(K_RIGHT)
-        if (buttons & cwiid.BTN_LEFT):
-            keyPresses.add(K_LEFT)
-        if (buttons & cwiid.BTN_UP):
-            keyPresses.add(K_UP)
-        if (buttons & cwiid.BTN_DOWN):
-            keyPresses.add(K_DOWN)
-        if (buttons & cwiid.BTN_A):
-            keyPresses.add(K_SPACE)
+        return {
+            K_RIGHT: (buttons & cwiid.BTN_RIGHT),
+            K_LEFT:  (buttons & cwiid.BTN_LEFT),
+            K_UP:    (buttons & cwiid.BTN_UP),
+            K_DOWN:  (buttons & cwiid.BTN_DOWN),
+            K_SPACE: (buttons & cwiid.BTN_A)
+        }
     else:
-        keyPressespygame.key.get_pressed()
+        return pygame.key.get_pressed()
+
+    return keyPresses
 
 def playMain():
     # get the first state
@@ -58,7 +61,7 @@ def playMain():
                 # mute sound handler
                 rpg.states.soundHandler.toggleSound()
         # detect key presses
-        keyPresses = getPresses()
+        keyPresses = getPressed()
         # delegate key presses to the current state
         newState = currentState.execute(keyPresses)
         # flush sounds
@@ -69,5 +72,5 @@ def playMain():
 
 # this calls the testMain function when this script is executed
 if __name__ == '__main__':
-    initWiimote()
+    wii = initWiimote()
     playMain()
