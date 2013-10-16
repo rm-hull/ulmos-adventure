@@ -188,10 +188,9 @@ class TitleState:
              
     def execute(self, keyPresses):
         if self.ticks < self.titleTicks:
-            if (self.ticks % 2) == 0:
-                x, y = 0, self.ticks * MOVE_UNIT // 2
-                screen.blit(self.backgroundImage, ORIGIN, Rect(x, y, VIEW_WIDTH, VIEW_HEIGHT))        
-                pygame.display.flip()
+            x, y = 0, self.ticks * MOVE_UNIT // 2
+            screen.blit(self.backgroundImage, ORIGIN, Rect(x, y, VIEW_WIDTH, VIEW_HEIGHT))        
+            pygame.display.flip()
         elif self.ticks == self.titleTicks + THIRTY_TWO:
             x, y = (VIEW_WIDTH - self.titleImage.get_width()) // 2, 26 * SCALAR
             screen.blit(self.titleImage, (x, y))
