@@ -531,7 +531,6 @@ sprite flames 2 23,1
 sprite flames 2 25,2
 sprite beetle 1 19,8 19,12 23,12 23,8
 sprite beetle 1 23,12 23,8 19,8 19,12
-sprite beetle 1 25,9 27,9 27,13 23,13 23,9
 sprite beetle 1 27,13 23,13 23,9 27,9
 sprite beetle 1 20,7 20,4 24,4 24,7
 sprite beetle 1 24,7 20,7 20,4 24,4 24,8 28,8 28,5 24,5
@@ -541,3 +540,4 @@ sprite checkpoint 1 10,6
 event boundary down 7 : transition start 19,8 2 down
 event boundary up 24 : end
 
+music cave

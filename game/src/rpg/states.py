@@ -14,10 +14,12 @@ from pygame.locals import K_SPACE, Rect
 from sprites import VELOCITY, MOVE_UNIT
 from view import UP, DOWN, LEFT, RIGHT, SCALAR, VIEW_WIDTH, VIEW_HEIGHT
 
+from events import TitleShownEvent
 from eventbus import EventBus
 from registry import RegistryHandler, Registry
 from player import Ulmo
 from sounds import SoundHandler
+from music import MusicHandler
 from fixedsprites import FixedCoin, CoinCount, KeyCount, Lives, CheckpointIcon
 
 FRAMES_PER_SEC = 60 // VELOCITY
@@ -55,6 +57,7 @@ titleFont = font.TitleFont()
 eventBus = None
 soundHandler = None
 registryHandler = None
+musicHandler = None
 fixedSprites = None
 player = None
 
@@ -76,6 +79,8 @@ def showTitle():
     eventBus.addCheckpointReachedListener(soundHandler)
     eventBus.addPlayerFallingListener(soundHandler)
     eventBus.addBladesStabbingListener(soundHandler)
+    eventBus.addBoatMovingListener(soundHandler)
+    eventBus.addTitleShownListener(soundHandler)
 
     global registryHandler
     registryHandler = RegistryHandler()
@@ -84,6 +89,9 @@ def showTitle():
     eventBus.addDoorOpenedListener(registryHandler)
     eventBus.addBoatStoppedListener(registryHandler)
     eventBus.addCheckpointReachedListener(registryHandler)
+    
+    global musicHandler
+    musicHandler = MusicHandler()
     
     # return the title state
     return TitleState()
@@ -188,6 +196,8 @@ class TitleState:
              
     def execute(self, keyPresses):
         if self.ticks < self.titleTicks:
+            if self.ticks == 40:
+                musicHandler.playTrack("title")
             x, y = 0, self.ticks * MOVE_UNIT // 2
             screen.blit(self.backgroundImage, ORIGIN, Rect(x, y, VIEW_WIDTH, VIEW_HEIGHT))        
             pygame.display.flip()
@@ -195,21 +205,23 @@ class TitleState:
             x, y = (VIEW_WIDTH - self.titleImage.get_width()) // 2, 26 * SCALAR
             screen.blit(self.titleImage, (x, y))
             pygame.display.flip()
+            eventBus.dispatchTitleShownEvent(TitleShownEvent());
         elif self.ticks == self.titleTicks + SIXTY_FOUR:
             self.playState = startGame(False, self.startRegistry)
             #self.playState = startGame() # SKIP START
             x, y = (VIEW_WIDTH - self.playLine.get_width()) // 2, 88 * SCALAR
             screen.blit(self.playLine, (x, y))
             pygame.display.flip()
+            eventBus.dispatchTitleShownEvent(TitleShownEvent());
         elif self.ticks > self.titleTicks + SIXTY_FOUR:
             if keyPresses[K_SPACE]:
                 return StartState(self.playState)
-                #return self.playState # SKIP START
+                #return self.playState.start() # SKIP START
         self.ticks += 1
 
 """
 The start state vertically scrolls the first map into view and initiates the
-show boat state.  It's possible the skip the show boat state by commenting in a
+show boat state.  It's possible to skip the show boat state by commenting in a
 line below.
 """
 class StartState:
@@ -221,6 +233,7 @@ class StartState:
         self.viewRect = player.viewRect.copy()
         self.viewRect.top = 0
         self.ticks = 0
+        musicHandler.longFadeoutCurrentTrack()
         
     def execute(self, keyPresses):
         if self.ticks < VIEW_HEIGHT // MOVE_UNIT:
@@ -234,7 +247,7 @@ class StartState:
             # stop when the view rect is in line with the player's view rect
             if self.viewRect.top == player.viewRect.top:
                 return ShowBoatState(self.playState)
-                #return self.playState // SKIP SHOW BOAT
+                #return self.playState.start() // SKIP SHOW BOAT
         pygame.display.flip()
         self.ticks += 1
 
@@ -260,7 +273,7 @@ class ShowBoatState:
             playerPosition = self.boatStoppedEvent.getMetadata().endPosition
             registryHandler.setPlayerPosition(playerPosition)
             registryHandler.takeSnapshot()
-            return self.playState
+            return self.playState.start()
         self.showPlayer(MOVE_UNIT, 0)
         self.ticks += 1
         
@@ -289,7 +302,9 @@ class PlayState:
         self.visibleSprites = sprites.RpgSprites(player)
         # create more sprites
         self.gameSprites = spritebuilder.createSpritesForMap(player.rpgMap, eventBus, registryHandler.registry)
-        # listen for map transition, life lost and end game events
+        
+    # listen for map transition, life lost and end game events
+    def start(self):
         self.eventCaptured = False
         self.mapTransitionEvent = None
         self.lifeLostEvent = None
@@ -297,7 +312,9 @@ class PlayState:
         eventBus.addMapTransitionListener(self)
         eventBus.addLifeLostListener(self)
         eventBus.addEndGameListener(self)
-                     
+        musicHandler.playTrack(player.rpgMap.music)
+        return self
+                             
     def execute(self, keyPresses):
         nextState = self.handleEvents()
         if nextState:
@@ -375,7 +392,7 @@ class SceneTransitionState:
             sceneZoomOut(self.screenImage, self.ticks - THIRTY_TWO)
         else:
             if self.transition.type == mapevents.LIFE_LOST_TRANSITION:
-                return self.playState
+                return self.playState.start()
             # else just a regular scene transition
             direction = player.spriteFrames.direction
             if self.transition.boundary:
@@ -477,7 +494,7 @@ class ShowPlayerState:
         
     def execute(self, keyPresses):
         if self.ticks > self.tickTarget:
-            return self.playState
+            return self.playState.start()
         px, py = 0, 0
         if self.boundary == UP:
             py = -MOVE_UNIT
@@ -516,6 +533,7 @@ class GameOverState:
         self.countdown = None
         self.countdownTopleft = None
         self.ticks = 0
+        musicHandler.fadeoutCurrentTrack()
              
     def execute(self, keyPresses):
         if self.countdown:
@@ -546,7 +564,7 @@ class GameOverState:
                 self.countdown = 10
         elif self.ticks > SIXTY_FOUR:
             if keyPresses[K_SPACE]:
-                return startGame(True)
+                return startGame(True).start()
         self.ticks += 1
         
     def updateCountdown(self):
@@ -569,6 +587,7 @@ class EndGameState:
         self.topLine3 = gameFont.getTextImage("YOU FOUND " + str(player.getCoinCount()) + "/10 COINS");
         self.lowLine1 = gameFont.getTextImage("PRESS SPACE")
         self.ticks = 0
+        musicHandler.fadeoutCurrentTrack()
              
     def execute(self, keyPresses):
         if self.ticks < THIRTY_TWO:

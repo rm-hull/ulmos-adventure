@@ -283,3 +283,4 @@ sprite beetle 1 10,11 13,11 13,1 9,1 9,11
 
 event boundary down 9 : transition start 20,20 4 down
 
+music cave

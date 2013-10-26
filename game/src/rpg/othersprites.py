@@ -3,7 +3,7 @@
 from sprites import *
 from spriteframes import StaticFrames, DirectionalFrames, DIRECTION
 from view import UP, DOWN, LEFT, RIGHT, VIEW_WIDTH, VIEW_HEIGHT
-from events import WaspZoomingEvent, BeetleCrawlingEvent, BladesStabbingEvent, BoatStoppedEvent, BoatMetadata
+from events import WaspZoomingEvent, BeetleCrawlingEvent, BladesStabbingEvent, BoatMovingEvent, BoatStoppedEvent, BoatMetadata
 
 """
 Metadata is used to provide a loose coupling between the sprite movement and
@@ -206,7 +206,7 @@ class Boat(OtherSprite):
             imagePath = os.path.join(SPRITES_FOLDER, "boat.png")
             Boat.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(Boat.framesImage, 1)
-        spriteFrames = StaticFrames(animationFrames)
+        spriteFrames = StaticFrames(animationFrames, 160)
         OtherSprite.__init__(self, spriteFrames, (-10, 1))
         self.upright = False
         self.ticks = 0
@@ -215,15 +215,6 @@ class Boat(OtherSprite):
     def calculateZ(self):
         return 0
         
-    def combineFrames(self, topImage, wakeFrames):
-        animationFrames = []
-        for frame in wakeFrames:
-            img = view.createRectangle((topImage.get_width(), topImage.get_height() + frame.get_height()))
-            img.blit(topImage, (0, 0))
-            img.blit(frame, (0, topImage.get_height()))
-            animationFrames.append(img)
-        return animationFrames
-
     def initMovement(self, level, tilePoints):
         OtherSprite.initMovement(self, level, tilePoints)
         self.tilePoints = tilePoints
@@ -240,6 +231,7 @@ class Boat(OtherSprite):
         if trigger and not self.moving:
             self.moving = True
             self.currentPathPoint = self.toPathPoint(self.tilePoints[1])
+            self.playSound(0)
         currentPosition = self.mapRect.topleft
         x = self.currentPathPoint[0] - currentPosition[0]
         self.handleBoatStopped(x)
@@ -259,4 +251,9 @@ class Boat(OtherSprite):
     def toPathPoint(self, tilePoint):
         return (tilePoint[0] * TILE_SIZE + self.position[0],
                 tilePoint[1] * TILE_SIZE + self.position[1])
+        
+    def playSound(self, frameIndex):
+        if self.moving and frameIndex == 0:
+            self.eventBus.dispatchBoatMovingEvent(BoatMovingEvent())
+
     

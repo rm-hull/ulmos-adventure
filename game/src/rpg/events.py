@@ -28,10 +28,15 @@ class PlayerFallingEvent(Event):
 class BladesStabbingEvent(Event):
     pass
 
+class BoatMovingEvent(Event):
+    pass
+
+class TitleShownEvent(Event):
+    pass
+
 """
 Defines an event that occurs when the player loses a life and is also used to
-indicate game over. Note that although a LifeLostTransition does exist, this
-event does NOT contain it.
+indicate game over.
 """
 class LifeLostEvent(Event):
     def __init__(self, gameOver = False):

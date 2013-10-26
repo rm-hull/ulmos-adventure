@@ -28,8 +28,9 @@ def playMain():
             if event.type == QUIT or (event.type == KEYDOWN and event.key == K_ESCAPE):
                 return
             if event.type == KEYDOWN and event.key == K_x:
-                # mute sound handler
+                # toggle sound
                 rpg.states.soundHandler.toggleSound()
+                rpg.states.musicHandler.toggleMusic()
         # detect key presses    
         keyPresses = pygame.key.get_pressed()
         # delegate key presses to the current state

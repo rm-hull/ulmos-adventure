@@ -280,3 +280,4 @@ sprite chest 1 11,11
 
 event boundary down 7 : transition forest 7,3 3 down
 
+music cave

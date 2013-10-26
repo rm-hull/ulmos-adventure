@@ -22,8 +22,11 @@ VERTICAL_MASK = "V"
 COLON = ":"
 COMMA = ","
 SPRITE = "sprite"
-TRIGGER = "event"
+EVENT = "event"
+MUSIC = "music"
 DASH = "-"
+
+DEFAULT_MUSIC = "main"
 
 BOUNDARIES = {"up": UP, "down": DOWN, "left": LEFT, "right": RIGHT}
 
@@ -46,6 +49,7 @@ def loadRpgMap(name):
     tileData = {}
     spriteData = []
     eventData = []
+    music = None
     # parse map file - each line represents one map tile        
     mapPath = os.path.join(MAPS_FOLDER, name + ".map")
     print "loading: %s" % mapPath
@@ -61,9 +65,12 @@ def loadRpgMap(name):
                         if bits[0] == SPRITE:
                             if len(bits) > 1:
                                 spriteData.append(bits[1:])
-                        elif bits[0] == TRIGGER:
+                        elif bits[0] == EVENT:
                             if len(bits) > 1:
                                 eventData.append(bits[1:])
+                        elif bits[0] == MUSIC:
+                            if len(bits) > 1:
+                                music = bits[1]
                         else:                          
                             tilePoint = bits[0]
                             #print "%s -> %s" % (tileRef, tileName)
@@ -73,12 +80,13 @@ def loadRpgMap(name):
                                 tileData[(x, y)] = bits[1:]
             except ValueError:
                 pass
-    # create map tiles
+    # create map tiles, sprites, events + music
     mapTiles = createMapTiles(maxX + 1, maxY + 1, tileData)
     mapSprites = createMapSprites(spriteData, name)
     mapEvents = createMapEvents(eventData)
+    music = music if music else DEFAULT_MUSIC
     # create map and return
-    myMap = map.RpgMap(name, mapTiles, mapSprites, mapEvents)
+    myMap = map.RpgMap(name, music, mapTiles, mapSprites, mapEvents)
     mapCache[name] = myMap
     return myMap
 

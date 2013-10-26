@@ -284,3 +284,4 @@ sprite coin 1 12,3
 event boundary down 5 : transition start 8,24 1 down
 event boundary down 12 : transition start 14,26 2 down
 
+music cave

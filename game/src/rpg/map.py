@@ -18,8 +18,9 @@ and mapEvents will be populated from the named map file.
 """
 class RpgMap:
     
-    def __init__(self, name, mapTiles, mapSprites, mapEvents):
+    def __init__(self, name, music, mapTiles, mapSprites, mapEvents):
         self.name = name
+        self.music = music
         self.mapTiles = mapTiles
         self.cols = len(mapTiles)
         self.rows = len(mapTiles[0])

@@ -26,6 +26,8 @@ waspSound = getSound("wasp.wav", 0.8)
 beetleSound = getSound("beetle.wav", 0.2)
 fallingSound = getSound("falling.wav", 0.2)
 bladesSound = getSound("blades.wav", 0.4)
+titleSound = getSound("title.wav", 0.8)
+boatSound = getSound("waves.wav", 0.3)
 
 """
 Listens for specific events and builds up a set of sounds that are played back
@@ -73,7 +75,13 @@ class SoundHandler:
     
     def bladesStabbing(self, bladesStabbingEvent):
         self.sounds.add(bladesSound)
+
+    def titleShown(self, titleShownEvent):
+        self.sounds.add(titleSound)
     
+    def boatMoving(self, boatMovingEvent):
+        self.sounds.add(boatSound)
+        
     """
     Additional logic here to prevent a 'log jam' of beetle crawling sounds
     """    
