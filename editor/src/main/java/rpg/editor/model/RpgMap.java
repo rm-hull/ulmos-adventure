@@ -42,6 +42,7 @@ public class RpgMap {
 	
 	private static final String SPRITE_MARKER = "sprite";
 	private static final String EVENT_MARKER = "event";
+	private static final String MUSIC_MARKER = "music";
 	
 	private static final int TILE_SIZE = ViewSize.MEDIUM.getTileSize();
 	
@@ -59,6 +60,7 @@ public class RpgMap {
     
     private List<String> sprites = new ArrayList<String>();
     private List<String> events = new ArrayList<String>();
+    private String music = null;
 
 	private Point size;
     private String path;
@@ -134,6 +136,9 @@ public class RpgMap {
 						}
 						else if (bits[0].equals(EVENT_MARKER)) {
 							events.add(lot);
+						}
+						else if (bits[0].equals(MUSIC_MARKER)) {
+							music = lot;
 						}
 						else {
 					    	String[] xny = bits[0].split(Constants.COMMA);
@@ -336,6 +341,10 @@ public class RpgMap {
             		writer.newLine();
         		}    			
         		writer.newLine();
+    		}
+    		if (music != null) {
+        		writer.write(music);
+            	writer.newLine();
     		}
         	writer.flush();
     	}
