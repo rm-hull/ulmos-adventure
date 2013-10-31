@@ -166,21 +166,3 @@ class Checkpoint(OtherSprite):
         player.checkpointReached()
         self.toRemove = True
         
-class Shadow(OtherSprite):
-    
-    framesImage = None
-    
-    def __init__(self):
-        if Shadow.framesImage is None:    
-            imagePath = os.path.join(SPRITES_FOLDER, "shadow.png")
-            Shadow.framesImage = view.loadScaledImage(imagePath, None)        
-        animationFrames = view.processStaticFrames(Shadow.framesImage, 1)
-        spriteFrames = StaticFrames(animationFrames)
-        OtherSprite.__init__(self, spriteFrames, (4, 2))
-        self.upright = False
-        
-    def setupFromPlayer(self, player, downLevel):
-        self.setup("shadow", player.rpgMap, player.eventBus)
-        px = player.mapRect.topleft[0]
-        py = player.mapRect.topleft[1] + downLevel * TILE_SIZE + player.image.get_height() - self.image.get_height()
-        self.setPixelPosition(px, py, player.level - downLevel)

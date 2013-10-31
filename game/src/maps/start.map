@@ -1081,3 +1081,4 @@ event boundary left 22 : boundary drops left 0
 event boundary right 5 : boundary forest right 0
 event boundary right 27-29 : boundary forest right 0
 
+music main

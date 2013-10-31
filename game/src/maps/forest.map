@@ -558,3 +558,4 @@ event tile 7,3 3 : transition skullcave 7,15 1 up up
 event boundary left 5 : boundary start left 0
 event boundary left 27-29 : boundary start left 0
 
+music main

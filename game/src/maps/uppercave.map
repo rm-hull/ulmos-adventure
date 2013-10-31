@@ -539,5 +539,3 @@ sprite checkpoint 1 10,6
 
 event boundary down 7 : transition start 19,8 2 down
 event boundary up 24 : end
-
-music cave

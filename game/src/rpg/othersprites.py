@@ -28,6 +28,7 @@ ZOOM_MOVEMENT = {UP: (0, -2 * MOVE_UNIT, UP_METADATA),
 BEETLE_FRAME_SKIP = 12 // VELOCITY
 WASP_FRAME_SKIP = 4 // VELOCITY
 BLADES_FRAME_SKIP = 6 // VELOCITY
+BOAT_FRAME_SKIP = 160 // VELOCITY # only used for boat sound effect
 
 WASP_COUNTDOWN = 12 // VELOCITY
 BLADES_COUNTDOWN = 24 // VELOCITY
@@ -206,7 +207,7 @@ class Boat(OtherSprite):
             imagePath = os.path.join(SPRITES_FOLDER, "boat.png")
             Boat.framesImage = view.loadScaledImage(imagePath, None)        
         animationFrames = view.processStaticFrames(Boat.framesImage, 1)
-        spriteFrames = StaticFrames(animationFrames, 160)
+        spriteFrames = StaticFrames(animationFrames, BOAT_FRAME_SKIP)
         OtherSprite.__init__(self, spriteFrames, (-10, 1))
         self.upright = False
         self.ticks = 0

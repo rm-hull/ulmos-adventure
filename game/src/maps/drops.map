@@ -557,3 +557,4 @@ sprite rock 3 1,23
 event boundary right 8-10 : boundary start right 0
 event boundary right 22 : boundary start right 0
 
+music main

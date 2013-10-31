@@ -19,7 +19,7 @@ from eventbus import EventBus
 from registry import RegistryHandler, Registry
 from player import Ulmo
 from sounds import SoundHandler
-from music import MusicHandler
+from music import MusicPlayer
 from fixedsprites import FixedCoin, CoinCount, KeyCount, Lives, CheckpointIcon
 
 FRAMES_PER_SEC = 60 // VELOCITY
@@ -57,11 +57,11 @@ titleFont = font.TitleFont()
 eventBus = None
 soundHandler = None
 registryHandler = None
-musicHandler = None
+musicPlayer = None
 fixedSprites = None
 player = None
 
-def showTitle():
+def setup():
     global eventBus
     eventBus = EventBus()
 
@@ -89,10 +89,13 @@ def showTitle():
     eventBus.addDoorOpenedListener(registryHandler)
     eventBus.addBoatStoppedListener(registryHandler)
     eventBus.addCheckpointReachedListener(registryHandler)
-    
-    global musicHandler
-    musicHandler = MusicHandler()
-    
+
+    global musicPlayer
+    musicPlayer = MusicPlayer()
+
+def showTitle(newGame = False):
+    if newGame:
+        setup()
     # return the title state
     return TitleState()
 
@@ -197,7 +200,7 @@ class TitleState:
     def execute(self, keyPresses):
         if self.ticks < self.titleTicks:
             if self.ticks == 40:
-                musicHandler.playTrack("title")
+                musicPlayer.playTrack("title")
             x, y = 0, self.ticks * MOVE_UNIT // 2
             screen.blit(self.backgroundImage, ORIGIN, Rect(x, y, VIEW_WIDTH, VIEW_HEIGHT))        
             pygame.display.flip()
@@ -233,7 +236,7 @@ class StartState:
         self.viewRect = player.viewRect.copy()
         self.viewRect.top = 0
         self.ticks = 0
-        musicHandler.longFadeoutCurrentTrack()
+        musicPlayer.longFadeoutCurrentTrack()
         
     def execute(self, keyPresses):
         if self.ticks < VIEW_HEIGHT // MOVE_UNIT:
@@ -312,7 +315,7 @@ class PlayState:
         eventBus.addMapTransitionListener(self)
         eventBus.addLifeLostListener(self)
         eventBus.addEndGameListener(self)
-        musicHandler.playTrack(player.rpgMap.music)
+        musicPlayer.playTrack(player.rpgMap.music)
         return self
                              
     def execute(self, keyPresses):
@@ -533,7 +536,7 @@ class GameOverState:
         self.countdown = None
         self.countdownTopleft = None
         self.ticks = 0
-        musicHandler.fadeoutCurrentTrack()
+        musicPlayer.fadeoutCurrentTrack()
              
     def execute(self, keyPresses):
         if self.countdown:
@@ -587,7 +590,7 @@ class EndGameState:
         self.topLine3 = gameFont.getTextImage("YOU FOUND " + str(player.getCoinCount()) + "/10 COINS");
         self.lowLine1 = gameFont.getTextImage("PRESS SPACE")
         self.ticks = 0
-        musicHandler.fadeoutCurrentTrack()
+        musicPlayer.fadeoutCurrentTrack()
              
     def execute(self, keyPresses):
         if self.ticks < THIRTY_TWO:

@@ -19,7 +19,7 @@ import rpg.states
 
 def playMain():
     # get the first state
-    currentState = rpg.states.showTitle()
+    currentState = rpg.states.showTitle(True)
     # start the main loop
     clock = pygame.time.Clock()    
     while True:
@@ -30,7 +30,7 @@ def playMain():
             if event.type == KEYDOWN and event.key == K_x:
                 # toggle sound
                 rpg.states.soundHandler.toggleSound()
-                rpg.states.musicHandler.toggleMusic()
+                rpg.states.musicPlayer.toggleMusic()
         # detect key presses    
         keyPresses = pygame.key.get_pressed()
         # delegate key presses to the current state

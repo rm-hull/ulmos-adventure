@@ -7,7 +7,6 @@ from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT, K_SPACE
 from sprites import *
 from events import PlayerFootstepEvent, PlayerFallingEvent, LifeLostEvent, EndGameEvent
 from spriteframes import DirectionalFrames, StaticFrames
-from staticsprites import Shadow
 from view import NONE, UP, DOWN, LEFT, RIGHT
 
 PLAYER_FOOTSTEP_EVENT = PlayerFootstepEvent()
@@ -55,8 +54,8 @@ class Player(RpgSprite):
         # movement
         self.movement = None
         self.deferredMovement = None
-        # sprites
-        self.shadow = None
+        # pre-load shadow
+        self.shadow = Shadow()
         # fixed sprites
         self.coinCount = None
         self.keyCount = None
@@ -418,7 +417,7 @@ class Player(RpgSprite):
     
     def checkpointReached(self):
         self.checkpointIcon.activate()
-        
+
 """
 Extends the player sprite by defining a set of frame images.
 """    
@@ -439,4 +438,27 @@ class Ulmo(Player):
         animationFrames = view.processStaticFrames(Ulmo.fallingFramesImage)
         fallingFrames = StaticFrames(animationFrames)
         Player.__init__(self, movingFrames, fallingFrames, (1, -12))
+
+"""
+Shadow is really a static sprite, but is used when the player drops off a ledge.
+For this reason it lives with the player class.
+"""        
+class Shadow(OtherSprite):
+    
+    framesImage = None
+    
+    def __init__(self):
+        if Shadow.framesImage is None:    
+            imagePath = os.path.join(SPRITES_FOLDER, "shadow.png")
+            Shadow.framesImage = view.loadScaledImage(imagePath, None)        
+        animationFrames = view.processStaticFrames(Shadow.framesImage, 1)
+        spriteFrames = StaticFrames(animationFrames)
+        OtherSprite.__init__(self, spriteFrames, (4, 2))
+        self.upright = False
+        
+    def setupFromPlayer(self, player, downLevel):
+        self.setup("shadow", player.rpgMap, player.eventBus)
+        px = player.mapRect.topleft[0]
+        py = player.mapRect.topleft[1] + downLevel * TILE_SIZE + player.image.get_height() - self.image.get_height()
+        self.setPixelPosition(px, py, player.level - downLevel)
         

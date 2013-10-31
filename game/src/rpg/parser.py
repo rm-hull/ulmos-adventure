@@ -26,8 +26,6 @@ EVENT = "event"
 MUSIC = "music"
 DASH = "-"
 
-DEFAULT_MUSIC = "main"
-
 BOUNDARIES = {"up": UP, "down": DOWN, "left": LEFT, "right": RIGHT}
 
 mapCache = {}
@@ -84,7 +82,6 @@ def loadRpgMap(name):
     mapTiles = createMapTiles(maxX + 1, maxY + 1, tileData)
     mapSprites = createMapSprites(spriteData, name)
     mapEvents = createMapEvents(eventData)
-    music = music if music else DEFAULT_MUSIC
     # create map and return
     myMap = map.RpgMap(name, music, mapTiles, mapSprites, mapEvents)
     mapCache[name] = myMap
