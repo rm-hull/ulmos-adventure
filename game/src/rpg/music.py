@@ -10,12 +10,15 @@ VOLUME_OFF = 0
 DEFAULT_FADEOUT_MILLIS = 1000
 LONG_FADEOUT_MILLIS = 6000
 
-tracks = {"title": ("ulmo-title.ogg", 0.6),
+MUSIC_ON, MUSIC_OFF = True, False 
+STATES = [MUSIC_ON, MUSIC_OFF, MUSIC_OFF]
+
+TRACKS = {"title": ("ulmo-title.ogg", 0.6),
           "main": ("ulmo-main.ogg", 0.4)}
 
 def getTrackAndVolume(name):
-    if name in tracks:
-        filename, volume = tracks[name]
+    if name in TRACKS:
+        filename, volume = TRACKS[name]
         return os.path.join(MUSIC_FOLDER, filename), volume
     return None, None
 
@@ -26,10 +29,10 @@ different areas, but this proved quite tricky due to the way that fadeout blocks
 class MusicPlayer:
     
     def __init__(self):
-        self.trackName = None
-        self.musicOn = True
         self.musicEnabled = True if pygame.mixer.get_init() else False
+        self.trackName = None
         self.volume = VOLUME_OFF
+        self.state = 0
         
     def playTrack(self, name):
         if self.musicEnabled:
@@ -39,7 +42,7 @@ class MusicPlayer:
             track, volume = getTrackAndVolume(name)
             if track:
                 self.volume = volume
-                if self.musicOn:
+                if STATES[self.state]:
                     pygame.mixer.music.set_volume(self.volume)
                 try:
                     pygame.mixer.music.load(track)
@@ -58,12 +61,13 @@ class MusicPlayer:
             
     def toggleMusic(self):
         if self.musicEnabled:
-            if self.musicOn:
-                self.musicOn = False
-                pygame.mixer.music.set_volume(0)
+            musicOn = STATES[self.state]
+            self.state = (self.state + 1) % len(STATES)        
+            if musicOn and not STATES[self.state]:
+                pygame.mixer.music.set_volume(VOLUME_OFF)
                 return
-            self.musicOn = True
-            pygame.mixer.music.set_volume(self.volume)
-            print pygame.mixer.music.get_volume()
+            if STATES[self.state] and not musicOn:
+                pygame.mixer.music.set_volume(self.volume)
+                return
  
 

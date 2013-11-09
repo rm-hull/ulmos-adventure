@@ -7,6 +7,9 @@ SOUNDS_FOLDER = "sounds"
 
 BEETLE_SOUND_TICKS = 15
 
+SOUNDS_ON, SOUNDS_OFF = True, False
+STATES = [SOUNDS_ON, SOUNDS_ON, SOUNDS_OFF]
+
 def getSound(name, volume):
     if pygame.mixer.get_init():
         soundPath = os.path.join(SOUNDS_FOLDER, name)
@@ -39,8 +42,8 @@ class SoundHandler:
         self.sounds = set()
         # properties required for 
         self.nextSound = None
-        self.soundOn = True
         self.ready = True
+        self.state = 0
         self.count = 0
             
     def coinCollected(self, coinCollectedEvent):
@@ -111,10 +114,10 @@ class SoundHandler:
         self.handleNextSound()
         # play sounds
         for sound in self.sounds:
-            if sound and self.soundOn:
+            if sound and STATES[self.state]:
                 sound.play()
         self.sounds.clear()
         
     def toggleSound(self):
-        self.soundOn = not self.soundOn
+        self.state = (self.state + 1) % len(STATES)
         

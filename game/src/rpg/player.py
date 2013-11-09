@@ -7,7 +7,7 @@ from pygame.locals import K_UP, K_DOWN, K_LEFT, K_RIGHT, K_SPACE
 from sprites import *
 from events import PlayerFootstepEvent, PlayerFallingEvent, LifeLostEvent, EndGameEvent
 from spriteframes import DirectionalFrames, StaticFrames
-from view import NONE, UP, DOWN, LEFT, RIGHT
+from view import NONE, UP, DOWN, LEFT, RIGHT, VIEW_WIDTH, VIEW_HEIGHT
 
 PLAYER_FOOTSTEP_EVENT = PlayerFootstepEvent()
 PLAYER_FALLING_EVENT = PlayerFallingEvent()
@@ -50,7 +50,7 @@ class Player(RpgSprite):
         self.fallingFrames = fallingFrames
         self.movingFrames = movingFrames
         # view rect is the scrolling window onto the map
-        self.viewRect = Rect((0, 0), pygame.display.get_surface().get_size())
+        self.viewRect = Rect((0, 0), (VIEW_WIDTH, VIEW_HEIGHT))
         # movement
         self.movement = None
         self.deferredMovement = None
