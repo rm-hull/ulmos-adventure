@@ -34,6 +34,9 @@ class BoatMovingEvent(Event):
 class TitleShownEvent(Event):
     pass
 
+class GameStartedEvent(Event):
+    pass
+
 """
 Defines an event that occurs when the player loses a life and is also used to
 indicate game over.

@@ -14,7 +14,7 @@ from pygame.locals import K_SPACE, Rect
 from sprites import VELOCITY, MOVE_UNIT
 from view import UP, DOWN, LEFT, RIGHT, SCALAR, VIEW_WIDTH, VIEW_HEIGHT
 
-from events import TitleShownEvent
+from events import TitleShownEvent, GameStartedEvent
 from eventbus import EventBus
 from registry import RegistryHandler, Registry
 from player import Ulmo
@@ -81,6 +81,7 @@ def setup():
     eventBus.addBladesStabbingListener(soundHandler)
     eventBus.addBoatMovingListener(soundHandler)
     eventBus.addTitleShownListener(soundHandler)
+    eventBus.addGameStartedListener(soundHandler)
 
     global registryHandler
     registryHandler = RegistryHandler()
@@ -191,14 +192,20 @@ class TitleState:
         self.playLine = titleFont.getTextImage("PRESS SPACE TO PLAY")
         self.titleTicks = self.getTitleTicks()
         self.startRegistry = Registry("start", PLAYER_OFF_SCREEN_START, 1)
+        self.screenImage = None
         self.playState = None
+        self.started = False
         self.ticks = 0
         
     def getTitleTicks(self):
         return (self.backgroundImage.get_height() - VIEW_HEIGHT) * 2 // SCALAR // VELOCITY
              
     def execute(self, keyPresses):
-        if self.ticks < self.titleTicks:
+        if self.started:
+            nextState = self.gameStarted()
+            if nextState:
+                return nextState
+        elif self.ticks < self.titleTicks:
             if self.ticks == 40:
                 musicPlayer.playTrack("title")
             x, y = 0, self.ticks * MOVE_UNIT // 2
@@ -210,17 +217,36 @@ class TitleState:
             pygame.display.flip()
             eventBus.dispatchTitleShownEvent(TitleShownEvent());
         elif self.ticks == self.titleTicks + SIXTY_FOUR:
+            self.screenImage = screen.copy()
             self.playState = startGame(False, self.startRegistry)
             #self.playState = startGame() # SKIP START
-            x, y = (VIEW_WIDTH - self.playLine.get_width()) // 2, 88 * SCALAR
-            screen.blit(self.playLine, (x, y))
-            pygame.display.flip()
-            eventBus.dispatchTitleShownEvent(TitleShownEvent());
+            self.showPlayLine(self.playLine)
+            eventBus.dispatchTitleShownEvent(TitleShownEvent());            
         elif self.ticks > self.titleTicks + SIXTY_FOUR:
             if keyPresses[K_SPACE]:
-                return StartState(self.playState)
-                #return self.playState.start() # SKIP START
+                self.ticks, self.started = 0, True
+                eventBus.dispatchGameStartedEvent(GameStartedEvent());            
+                return
         self.ticks += 1
+    
+    def gameStarted(self):
+        if self.ticks % 3 == 0:
+            if self.ticks // 3 % 2:
+                self.showPlayLine(self.playLine)
+            else:
+                self.showPlayLine()
+        if self.ticks > 18:
+            return StartState(self.playState)
+            #return self.playState.start() # SKIP START
+            
+    def showPlayLine(self, playLine = None):
+        if playLine:
+            x, y = (VIEW_WIDTH - playLine.get_width()) // 2, 88 * SCALAR
+            screen.blit(playLine, (x, y))
+        else:
+            screen.blit(self.screenImage, ORIGIN)
+        pygame.display.flip()
+        
 
 """
 The start state vertically scrolls the first map into view and initiates the

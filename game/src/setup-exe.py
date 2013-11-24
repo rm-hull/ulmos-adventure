@@ -7,7 +7,7 @@ import py2exe
 setup(windows = ["play.py"],
       # console = ["play.py"],
       name = "rpg-world",
-      version = "1.0.b",
+      version = "1.0",
       packages=["rpg"],
       author="Sam Eldred",
       author_email="samuel.eldred@gmail.com",

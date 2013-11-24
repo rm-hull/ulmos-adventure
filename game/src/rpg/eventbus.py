@@ -20,6 +20,7 @@ class EventBus:
         self.boatStoppedListeners = []
         self.boatMovingListeners = []
         self.titleShownListeners = []
+        self.gameStartedListeners = []
         
     def addCoinCollectedListener(self, coinCollectedListener):
         self.coinCollectedListeners.append(coinCollectedListener)
@@ -132,3 +133,10 @@ class EventBus:
     def dispatchTitleShownEvent(self, titleShownEvent):
         for listener in self.titleShownListeners:
             listener.titleShown(titleShownEvent)
+
+    def addGameStartedListener(self, gameStartedListener):
+        self.gameStartedListeners.append(gameStartedListener)
+
+    def dispatchGameStartedEvent(self, gameStartedEvent):
+        for listener in self.gameStartedListeners:
+            listener.gameStarted(gameStartedEvent)

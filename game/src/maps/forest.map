@@ -305,7 +305,7 @@
 15,17 earth:t1
 
 0,18 water:w2
-1,18 water:dark grass:tl1
+1,18 [3] water:dark grass:tl1
 2,18 [2,3] grass:n1 grass:t2:3
 3,18 [3] grass:n1
 4,18 [3] grass:n1

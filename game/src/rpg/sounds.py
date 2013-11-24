@@ -82,6 +82,9 @@ class SoundHandler:
     def titleShown(self, titleShownEvent):
         self.sounds.add(titleSound)
     
+    def gameStarted(self, gameStartedEvent):
+        self.sounds.add(checkpointSound)
+    
     def boatMoving(self, boatMovingEvent):
         self.sounds.add(boatSound)
         
