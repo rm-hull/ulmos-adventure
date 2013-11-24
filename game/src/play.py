@@ -41,5 +41,5 @@ def playMain():
         if newState:
             currentState = newState
 
-# this calls the testMain function when this script is executed
+# this calls the playMain function when this script is executed
 if __name__ == '__main__': playMain()
